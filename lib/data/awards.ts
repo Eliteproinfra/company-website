@@ -1,0 +1,16 @@
+export const awardImages: string[] = [
+  "/images/awards/1.png",
+  "/images/awards/2.png",
+  "/images/awards/3.png",
+  "/images/awards/4.png",
+  "/images/awards/5.png",
+  "/images/awards/6.png",
+  "/images/awards/10.png",
+  "/images/awards/11.png",
+  "/images/awards/12.png",
+  "/images/awards/13.jpg",
+  "/images/awards/14.jpg",
+  "/images/awards/15.jpg",
+  "/images/awards/16.jpg",
+  "/images/awards/20.png",
+];

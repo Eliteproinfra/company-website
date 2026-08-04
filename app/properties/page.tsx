@@ -1,0 +1,113 @@
+import type { Metadata } from "next";
+import CategoryCard from "@/components/properties/CategoryCard";
+import LocalityCard from "@/components/properties/LocalityCard";
+import PropertyBrowser from "@/components/properties/PropertyBrowser";
+import PageHero from "@/components/ui/PageHero";
+import Reveal from "@/components/ui/Reveal";
+import Separator from "@/components/ui/Separator";
+import { categories } from "@/lib/data/categories";
+import { localities } from "@/lib/data/localities";
+import { featuredProperties } from "@/lib/data/properties";
+
+export const metadata: Metadata = {
+  title: "Properties",
+  description:
+    "Explore premium residential and commercial properties for sale in Gurgaon and Delhi NCR — new launches, ready-to-move homes, and SCO plots.",
+};
+
+const delaySequence = [0, 100, 200, 300, 400, 500] as const;
+
+export default function PropertiesPage() {
+  return (
+    <>
+      <PageHero
+        image="/images/heroes/properties.jpg"
+        title="Premium Properties"
+        breadcrumbCurrent="Properties"
+        height="75vh"
+      />
+
+      <section className="bg-white py-20">
+        <div className="container">
+          <div className="mb-10 text-center">
+            <h2 className="text-2xl font-bold text-dark-black sm:text-3xl">
+              Top Localities to Invest
+            </h2>
+            <Separator className="mt-4" />
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {localities.map((locality, index) => (
+              <Reveal key={locality.name} delay={delaySequence[index % delaySequence.length]}>
+                <LocalityCard {...locality} />
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white pb-20">
+        <div className="container">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {categories.map((category, index) => (
+              <Reveal key={category.title} delay={delaySequence[index % delaySequence.length]}>
+                <CategoryCard {...category} />
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <PropertyBrowser
+        properties={featuredProperties}
+        locations={["All Locations", "Delhi", "Dubai", "Faridabad", "Gurgaon", "Manesar", "Noida"]}
+        types={["All Types", "Commercial", "Industrial Plots", "Residential", "SCO Plots"]}
+      />
+
+      <section className="bg-neutral-50 py-20">
+        <div className="container">
+          <div className="mx-auto max-w-4xl text-neutral-600">
+            <h2 className="text-center text-3xl font-bold text-dark-black">
+              Real Estate Market in Gurgaon &amp; Delhi NCR
+            </h2>
+            <p className="mt-6">
+              Gurgaon has emerged as one of the leading real estate destinations in India,
+              offering a mix of premium residential projects, high-end commercial spaces, and
+              lucrative investment opportunities. With excellent connectivity via the
+              Delhi-Gurgaon Expressway, Dwarka Expressway, and the Rapid Metro, the city has
+              become a hub for multinational corporations and luxury living.
+            </p>
+            <h3 className="mt-8 text-xl font-bold text-dark-black">Why Invest in Gurgaon?</h3>
+            <p className="mt-4">
+              Investing in Gurgaon real estate offers high returns due to rapid infrastructure
+              development. Areas like Golf Course Road, Sohna Road, and New Gurgaon are witnessing
+              significant appreciation. Whether you are looking for ready-to-move apartments,
+              under-construction projects, or SCO plots, Gurgaon offers a diverse portfolio for
+              every investor.
+            </p>
+            <h3 className="mt-8 text-xl font-bold text-dark-black">
+              Types of Properties We Offer
+            </h3>
+            <ul className="mt-4 list-disc space-y-2 pl-5">
+              <li>
+                <strong className="text-dark-black">Luxury Apartments:</strong> High-rise
+                condominiums with world-class amenities.
+              </li>
+              <li>
+                <strong className="text-dark-black">Independent Floors:</strong> Low-rise living
+                with privacy and security.
+              </li>
+              <li>
+                <strong className="text-dark-black">Commercial Spaces:</strong> Grade A office
+                spaces and retail shops in prime locations.
+              </li>
+              <li>
+                <strong className="text-dark-black">SCO Plots:</strong> Shop-cum-office plots
+                ideal for businesses and investors.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
