@@ -1,0 +1,22 @@
+# Netlify build configuration.
+#
+# Declared explicitly rather than relying on Netlify's framework auto-detection,
+# so the Next.js runtime and publish directory are unambiguous.
+#
+# publish = ".next" is what the Next.js runtime v5 (@netlify/plugin-nextjs)
+# expects — it reads the standard `next build` output and wires up the
+# server handler for SSR routes and the /api/* route handlers. Pointing this
+# at "out" or "public" would serve static assets only and drop every route
+# through to Netlify's built-in 404 page.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Next.js 16 requires Node >= 20.9 (see next/package.json engines).
+  NODE_VERSION = "22"
+
+[[plugins]]
+  # Unpinned so Netlify installs the current runtime; 5.15.13 at time of writing.
+  package = "@netlify/plugin-nextjs"
