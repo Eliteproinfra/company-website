@@ -2,9 +2,9 @@ import type { Stat } from "@/lib/types";
 
 // Homepage "Why Choose Elite Pro?"
 export const whyChooseStats: Stat[] = [
-  { icon: "fas fa-users", value: "32,000+", label: "Trusted Investors & Buyers" },
+  { icon: "fas fa-users", value: "32000+", label: "Trusted Investors & Buyers" },
   { icon: "fas fa-user-tie", value: "350+", label: "Professionals" },
-  { icon: "fas fa-sitemap", value: "15,000+", label: "Brokers | Global Network" },
+  { icon: "fas fa-sitemap", value: "15000+", label: "Brokers | Global Network" },
   { icon: "fas fa-map-marked-alt", value: "20+", label: "States Covered" },
   { icon: "fas fa-headset", value: "Dedicated", label: "CRM Team" },
   { icon: "fas fa-handshake", value: "100+", label: "A Grade Developer Partners" },

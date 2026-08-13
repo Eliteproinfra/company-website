@@ -22,18 +22,17 @@ export default function LeasingPortfolioManagementPage() {
       <PageHero
         image="/images/heroes/leasing-portfolio.jpg"
         title="Leasing Experts"
+        description="Maximizing Value for Occupiers &amp; Owners"
         breadcrumbCurrent="Leasing Portfolio Management"
       />
 
       <section className="bg-white py-20">
         <div className="container">
           <div className="mx-auto mb-12 max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-[2px] text-primary-gold">
-              Maximizing Value for Occupiers &amp; Owners
+            <h2 className="text-3xl font-bold text-dark-black sm:text-4xl">The Leasing Team</h2>
+            <p className="mt-3 text-neutral-500">
+              Experts in commercial &amp; retail leasing strategies.
             </p>
-            <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
-              Experts in Commercial &amp; Retail Leasing Strategies
-            </h2>
           </div>
 
           <div className="mx-auto grid max-w-md grid-cols-1">

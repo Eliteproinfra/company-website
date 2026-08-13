@@ -5,21 +5,21 @@ export const nriServices: IconTextItem[] = [
   {
     icon: "fas fa-house-flag",
     title: "Curated Properties",
-    description: "Hand-picked residential and commercial listings vetted for NRI investors.",
+    description: "Access to pre-approved, high-yield residential and commercial assets.",
   },
   {
     icon: "fas fa-file-signature",
     title: "Legal Peace of Mind",
-    description: "FEMA-compliant documentation and Power of Attorney support at every step.",
+    description: "Comprehensive due diligence and documentation support.",
   },
   {
     icon: "fas fa-hand-holding-dollar",
     title: "Financial Assistance",
-    description: "Home loan facilitation and repatriation guidance for cross-border buyers.",
+    description: "Seamless home loan facilitation and banking coordination.",
   },
   {
     icon: "fas fa-key",
     title: "End-to-End Management",
-    description: "From acquisition to rental management, we handle it all remotely.",
+    description: "From possession to rental management and resale services.",
   },
 ];

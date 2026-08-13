@@ -25,7 +25,7 @@ export default function AwardsPage() {
           <SectionHeading
             eyebrow="Recognized For Excellence"
             title="Honoring Our Commitment to Excellence"
-            description="Celebrating the awards and recognitions that reflect our dedication to innovation in real estate."
+            description="Honoring our commitment to excellence and innovation in real estate."
           />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {awardImages.map((image) => (
@@ -48,7 +48,10 @@ export default function AwardsPage() {
 
       <section className="bg-neutral-50 py-20">
         <div className="container">
-          <SectionHeading eyebrow="Common Questions" title="Frequently Asked Questions" />
+          <SectionHeading
+            title="Frequently Asked Questions"
+            description="Common queries about real estate investment"
+          />
           <Faq items={awardsFaqs} />
         </div>
       </section>

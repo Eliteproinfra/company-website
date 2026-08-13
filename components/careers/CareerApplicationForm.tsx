@@ -5,10 +5,11 @@ import { useState } from "react";
 const inputClass =
   "w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-dark-black placeholder:text-neutral-400 focus:border-primary-gold focus:outline-none focus:ring-1 focus:ring-primary-gold";
 
-type Status = "idle" | "submitting" | "success";
+type Status = "idle" | "submitting" | "success" | "error";
 
 export default function CareerApplicationForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (status === "success") {
     return (
@@ -34,25 +35,40 @@ export default function CareerApplicationForm() {
 
   return (
     <form
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         setStatus("submitting");
-        window.setTimeout(() => setStatus("success"), 600);
+        setErrorMessage("");
+        const form = event.currentTarget;
+        const data = new FormData(form);
+        try {
+          const res = await fetch("/api/career-application", { method: "POST", body: data });
+          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
+          setStatus("success");
+        } catch (error) {
+          setStatus("error");
+          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+        }
       }}
       className="rounded-2xl bg-neutral-50 p-8 shadow-[0_10px_40px_rgba(0,0,0,0.05)] sm:p-12"
     >
+      <div className="honeypot-field" aria-hidden="true">
+        <label htmlFor="career-company-website">Leave this field empty</label>
+        <input id="career-company-website" name="company-website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="career-name" className="sr-only">
             Full Name
           </label>
-          <input id="career-name" type="text" placeholder="Full Name *" required className={inputClass} />
+          <input id="career-name" name="name" type="text" placeholder="Full Name *" required className={inputClass} />
         </div>
         <div>
           <label htmlFor="career-phone" className="sr-only">
             Phone Number
           </label>
-          <input id="career-phone" type="tel" placeholder="Phone Number *" required className={inputClass} />
+          <input id="career-phone" name="phone" type="tel" placeholder="Phone Number *" required className={inputClass} />
         </div>
       </div>
 
@@ -60,7 +76,7 @@ export default function CareerApplicationForm() {
         <label htmlFor="career-email" className="sr-only">
           Email Address
         </label>
-        <input id="career-email" type="email" placeholder="Email Address *" required className={inputClass} />
+        <input id="career-email" name="email" type="email" placeholder="Email Address *" required className={inputClass} />
       </div>
 
       <div className="mt-5">
@@ -69,6 +85,7 @@ export default function CareerApplicationForm() {
         </label>
         <input
           id="career-resume"
+          name="resume"
           type="file"
           accept=".pdf,.doc,.docx"
           required
@@ -82,11 +99,18 @@ export default function CareerApplicationForm() {
         </label>
         <textarea
           id="career-cover-letter"
+          name="coverLetter"
           rows={4}
           placeholder="Cover Letter (Optional)"
           className={inputClass}
         />
       </div>
+
+      {status === "error" ? (
+        <p role="alert" className="mt-4 text-sm font-semibold text-red-600">
+          {errorMessage}
+        </p>
+      ) : null}
 
       <button
         type="submit"

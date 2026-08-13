@@ -46,7 +46,7 @@ export default function SalesPortfolioManagementPage() {
               Our experts are just a call away to guide you through your investment journey.
             </p>
             <div className="mt-6">
-              <Button href="/contact">Get in Touch</Button>
+              <Button href="/contact">Talk to an Expert</Button>
             </div>
           </div>
         </div>

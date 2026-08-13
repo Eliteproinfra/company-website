@@ -10,7 +10,7 @@ export const investNowReasons: Stat[] = [
 export const investmentGuide: IconTextItem[] = [
   {
     icon: "fas fa-list-check",
-    title: "Buying Process",
+    title: "Step-by-Step Buying Guide",
     description:
       "Property identification, financing through NRE/FCNR accounts, Power of Attorney execution, and registration procedures.",
   },

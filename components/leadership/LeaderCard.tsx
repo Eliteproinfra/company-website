@@ -2,7 +2,14 @@ import Image from "next/image";
 import clsx from "clsx";
 import type { Leader } from "@/lib/data/leadership";
 
-export default function LeaderCard({ photo, name, title, bio, reverse = false }: Leader & { reverse?: boolean }) {
+export default function LeaderCard({
+  photo,
+  name,
+  title,
+  leadershipTitle,
+  bio,
+  reverse = false,
+}: Leader & { reverse?: boolean }) {
   return (
     <div
       className={clsx(
@@ -16,7 +23,7 @@ export default function LeaderCard({ photo, name, title, bio, reverse = false }:
       <div className="flex flex-col justify-center p-8 md:p-12">
         <h3 className="text-3xl font-bold text-dark-black">{name}</h3>
         <p className="mt-2 text-sm font-bold uppercase tracking-[1.5px] text-primary-gold">
-          {title}
+          {leadershipTitle ?? title}
         </p>
         <div className="mt-2 h-[3px] w-16 bg-primary-gold" />
         <p className="mt-5 leading-relaxed text-neutral-500">{bio}</p>

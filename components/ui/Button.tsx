@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type Variant = "solid" | "outline" | "outline-light";
+type Variant = "solid" | "outline" | "outline-light" | "dark";
 type Size = "md" | "sm";
 
 type CommonProps = {
@@ -36,6 +36,7 @@ const variantClasses: Record<Variant, string> = {
     "border-2 border-primary-gold/85 bg-primary-gold/10 text-primary-gold hover:-translate-y-0.5 hover:border-transparent hover:bg-gradient-to-br hover:from-primary-gold hover:to-secondary-gold hover:text-[#111827] hover:shadow-[0_12px_22px_rgba(212,175,55,0.22),0_10px_18px_rgba(0,0,0,0.10)]",
   "outline-light":
     "border-2 border-white/80 bg-white/10 text-white hover:-translate-y-0.5 hover:bg-white hover:text-dark-black",
+  dark: "border border-black/10 bg-dark-black text-white hover:-translate-y-0.5 hover:bg-light-black",
 };
 
 export default function Button({

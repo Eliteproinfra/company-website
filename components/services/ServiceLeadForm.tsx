@@ -7,16 +7,19 @@ type Field = { id: string; label: string; type: string; placeholder: string };
 const inputClass =
   "w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-dark-black placeholder:text-neutral-400 focus:border-primary-gold focus:outline-none focus:ring-1 focus:ring-primary-gold";
 
-type Status = "idle" | "submitting" | "success";
+type Status = "idle" | "submitting" | "success" | "error";
 
 export default function ServiceLeadForm({
   fields,
   submitLabel,
+  source = "Service Enquiry",
 }: {
   fields: Field[];
   submitLabel: string;
+  source?: string;
 }) {
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (status === "success") {
     return (
@@ -41,10 +44,27 @@ export default function ServiceLeadForm({
 
   return (
     <form
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         setStatus("submitting");
-        window.setTimeout(() => setStatus("success"), 600);
+        setErrorMessage("");
+        const data = new FormData(event.currentTarget);
+        const values: Record<string, string> = {};
+        fields.forEach((field) => {
+          values[field.label] = String(data.get(field.id) ?? "");
+        });
+        try {
+          const res = await fetch("/api/enquiry", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ source, fields: values }),
+          });
+          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
+          setStatus("success");
+        } catch (error) {
+          setStatus("error");
+          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+        }
       }}
       className="grid grid-cols-1 gap-4 rounded-2xl bg-neutral-50 p-8 shadow-[0_10px_40px_rgba(0,0,0,0.05)] sm:grid-cols-3 sm:items-end sm:p-10"
     >
@@ -55,6 +75,7 @@ export default function ServiceLeadForm({
           </label>
           <input
             id={field.id}
+            name={field.id}
             type={field.type}
             placeholder={field.placeholder}
             required
@@ -62,6 +83,11 @@ export default function ServiceLeadForm({
           />
         </div>
       ))}
+      {status === "error" ? (
+        <p role="alert" className="text-sm font-semibold text-red-600 sm:col-span-3">
+          {errorMessage}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={status === "submitting"}

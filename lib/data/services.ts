@@ -5,31 +5,31 @@ export const services: IconTextItem[] = [
   {
     icon: "fas fa-home",
     title: "Residential Sales",
-    description: "Premium apartments, villas, and independent floors from top developers.",
+    description: "Premium homes matching your lifestyle and legacy.",
   },
   {
     icon: "fas fa-building",
     title: "Commercial Leasing",
-    description: "Grade A office spaces, retail shops, and commercial properties.",
+    description: "Strategic spaces for business growth and retail.",
   },
   {
     icon: "fas fa-chart-line",
     title: "Investment Advisory",
-    description: "Data-driven investment strategies for maximum returns.",
+    description: "Data-backed insights to maximize your ROI.",
   },
   {
     icon: "fas fa-earth-asia",
     title: "NRI Services",
-    description: "Dedicated desk for NRI clients with end-to-end support.",
+    description: "End-to-end support from search to documentation.",
   },
   {
     icon: "fas fa-user-tie",
     title: "Tenant Representation",
-    description: "Expert negotiation and site selection on behalf of occupiers.",
+    description: "Negotiating best terms with cost-efficiency.",
   },
   {
     icon: "fas fa-bullhorn",
     title: "Project Marketing",
-    description: "Strategic marketing and sales enablement for developer projects.",
+    description: "Exclusive mandates for top-tier developers.",
   },
 ];

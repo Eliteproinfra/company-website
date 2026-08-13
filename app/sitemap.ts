@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+import { articleHref, articles } from "@/lib/data/articles";
+import { propertyDetails } from "@/lib/data/propertyDetails";
 
 const baseUrl = "https://eliteproinfra.com";
 
@@ -30,10 +32,24 @@ const routes: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["ch
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
-  return routes.map(({ path, changeFrequency, priority }) => ({
-    url: `${baseUrl}${path}`,
-    lastModified,
-    changeFrequency,
-    priority,
-  }));
+  return [
+    ...routes.map(({ path, changeFrequency, priority }) => ({
+      url: `${baseUrl}${path}`,
+      lastModified,
+      changeFrequency,
+      priority,
+    })),
+    ...propertyDetails.map((property) => ({
+      url: `${baseUrl}/properties/${property.slug}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
+    ...articles.map((article) => ({
+      url: `${baseUrl}${articleHref(article)}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
+  ];
 }

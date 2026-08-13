@@ -5,10 +5,11 @@ import { useState } from "react";
 const inputClass =
   "w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-dark-black placeholder:text-neutral-400 focus:border-primary-gold focus:outline-none focus:ring-1 focus:ring-primary-gold";
 
-type Status = "idle" | "submitting" | "success";
+type Status = "idle" | "submitting" | "success" | "error";
 
 export default function EnquiryForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (status === "success") {
     return (
@@ -33,13 +34,43 @@ export default function EnquiryForm() {
 
   return (
     <form
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         setStatus("submitting");
-        window.setTimeout(() => setStatus("success"), 600);
+        setErrorMessage("");
+        const form = event.currentTarget;
+        const data = new FormData(form);
+        try {
+          const res = await fetch("/api/enquiry", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source: "Contact Page",
+              honeypot: data.get("company-website"),
+              fields: {
+                Name: `${data.get("first-name")} ${data.get("last-name")}`.trim(),
+                Email: data.get("email"),
+                Phone: data.get("mobile"),
+                "Enquiry Type": data.get("enquiry-type"),
+                Subject: data.get("subject"),
+                Message: data.get("message"),
+              },
+            }),
+          });
+          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
+          setStatus("success");
+        } catch (error) {
+          setStatus("error");
+          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+        }
       }}
       className="rounded-2xl bg-neutral-50 p-8 shadow-[0_10px_40px_rgba(0,0,0,0.05)] sm:p-12"
     >
+      <div className="honeypot-field" aria-hidden="true">
+        <label htmlFor="company-website">Leave this field empty</label>
+        <input id="company-website" name="company-website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       <div className="mb-5">
         <label
           htmlFor="enquiry-type"
@@ -47,7 +78,7 @@ export default function EnquiryForm() {
         >
           I am interested in:
         </label>
-        <select id="enquiry-type" defaultValue="general" className={inputClass}>
+        <select id="enquiry-type" name="enquiry-type" defaultValue="general" className={inputClass}>
           <option value="general">General Enquiry</option>
           <option value="buy">Buying / Investing</option>
           <option value="sell">Selling Property</option>
@@ -62,13 +93,13 @@ export default function EnquiryForm() {
           <label htmlFor="first-name" className="sr-only">
             First Name
           </label>
-          <input id="first-name" type="text" placeholder="First Name *" required className={inputClass} />
+          <input id="first-name" name="first-name" type="text" placeholder="First Name *" required className={inputClass} />
         </div>
         <div>
           <label htmlFor="last-name" className="sr-only">
             Last Name
           </label>
-          <input id="last-name" type="text" placeholder="Last Name *" required className={inputClass} />
+          <input id="last-name" name="last-name" type="text" placeholder="Last Name *" required className={inputClass} />
         </div>
       </div>
 
@@ -77,13 +108,13 @@ export default function EnquiryForm() {
           <label htmlFor="mobile" className="sr-only">
             Mobile Number
           </label>
-          <input id="mobile" type="tel" placeholder="Mobile Number *" required className={inputClass} />
+          <input id="mobile" name="mobile" type="tel" placeholder="Mobile Number *" required className={inputClass} />
         </div>
         <div>
           <label htmlFor="email" className="sr-only">
             Email Address
           </label>
-          <input id="email" type="email" placeholder="Email Address *" required className={inputClass} />
+          <input id="email" name="email" type="email" placeholder="Email Address *" required className={inputClass} />
         </div>
       </div>
 
@@ -91,7 +122,7 @@ export default function EnquiryForm() {
         <label htmlFor="subject" className="sr-only">
           Subject
         </label>
-        <input id="subject" type="text" placeholder="Subject" className={inputClass} />
+        <input id="subject" name="subject" type="text" placeholder="Subject" className={inputClass} />
       </div>
 
       <div className="mb-5">
@@ -100,6 +131,7 @@ export default function EnquiryForm() {
         </label>
         <textarea
           id="message"
+          name="message"
           rows={4}
           placeholder="Your Message / Additional Details"
           className={inputClass}
@@ -117,6 +149,12 @@ export default function EnquiryForm() {
           I authorize Elite Pro Infra to contact me via Email, SMS, or Call.
         </label>
       </div>
+
+      {status === "error" ? (
+        <p role="alert" className="mb-4 text-sm font-semibold text-red-600">
+          {errorMessage}
+        </p>
+      ) : null}
 
       <button
         type="submit"

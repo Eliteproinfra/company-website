@@ -1,6 +1,10 @@
+import { articleHref, getArticleById, type ArticleKind } from "@/lib/data/articles";
+
 export type InsightHubItem = {
   image: string;
   title: string;
+  excerpt: string;
+  href: string;
 };
 
 export type InsightHubCategory = {
@@ -11,62 +15,55 @@ export type InsightHubCategory = {
   items: InsightHubItem[];
 };
 
-export const insightsHub: InsightHubCategory[] = [
+// The exact sets the live homepage shows under each tab, newest first.
+const featured: {
+  key: string;
+  kind: ArticleKind;
+  label: string;
+  hubHref: string;
+  hubLabel: string;
+  ids: number[];
+}[] = [
   {
     key: "media",
+    kind: "press",
     label: "PR & Media",
     hubHref: "/media-press",
     hubLabel: "View All Press",
-    items: [
-      { image: "/images/insights/pr-hindustan-times.png", title: "Hry simplifies building code, eases FAR norms" },
-      {
-        image: "/images/insights/pr-abp.png",
-        title: "Dubai's Golden Visa: What the New Residency Route Really Means For Indians",
-      },
-      {
-        image: "/images/insights/pr-business-standard.png",
-        title: "Homebuyers should reject possession without OC, seek legal recourse",
-      },
-      {
-        image: "/images/insights/pr-news18.png",
-        title: "Budget 2025: Real Estate Seeks Industry Status, Duty Cuts, Tax Sops",
-      },
-      {
-        image: "/images/insights/pr-moneycontrol.png",
-        title: "Closing Smarter: AI helps developers lift home sales by 20%",
-      },
-    ],
+    ids: [132, 130, 129, 128, 127],
   },
   {
     key: "blog",
-    label: "Insights & Blogs",
+    kind: "blog",
+    label: "Blog",
     hubHref: "/insights-blog",
     hubLabel: "Read More Insights",
-    items: [
-      {
-        image: "/images/insights/blog-gurgaon-luxury.png",
-        title: "Gurgaon Luxury Real Estate: India's Safest Long-Term Investment",
-      },
-      {
-        image: "/images/insights/blog-elan-imperial-mall.jpg",
-        title: "Is Elan Imperial Mall The Next Big Thing in Gurgaon?",
-      },
-      {
-        image: "/images/insights/blog-m3m-golf-hills.jpg",
-        title: "Why Invest In the M3M Golf Hills Project In Sector 79 Gurgaon?",
-      },
-    ],
+    ids: [169, 162, 161, 157, 156, 152, 148, 144, 93, 91],
   },
   {
     key: "news",
-    label: "News & Updates",
+    kind: "news",
+    label: "News",
     hubHref: "/news-updates",
     hubLabel: "See All Updates",
-    items: [
-      {
-        image: "/images/skyline.webp",
-        title: "Delhi-NCR tops housing market, sales rise 8 per cent; Gurugram drives growth",
-      },
-    ],
+    ids: [171, 170, 168, 165, 164, 163, 159, 158],
   },
 ];
+
+export const insightsHub: InsightHubCategory[] = featured.map(
+  ({ key, kind, label, hubHref, hubLabel, ids }) => ({
+    key,
+    label,
+    hubHref,
+    hubLabel,
+    items: ids
+      .map((id) => getArticleById(kind, id))
+      .filter((article) => article !== undefined)
+      .map((article) => ({
+        image: article.image,
+        title: article.title,
+        excerpt: article.excerpt,
+        href: articleHref(article),
+      })),
+  })
+);

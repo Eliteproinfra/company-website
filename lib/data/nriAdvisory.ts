@@ -5,23 +5,25 @@ export const nriMarketInsights: Stat[] = [
   { value: "4th", label: "Largest Economy by 2025" },
   { value: "$138B", label: "NRI Remittances (2024-25)" },
   { value: "12-15%", label: "Average CRE Returns" },
+  { value: "1,400+", label: "Happy Families" },
 ];
 
 export const eliteAdvantage: IconTextItem[] = [
   {
     icon: "fas fa-laptop",
     title: "Digital Onboarding",
-    description: "Complete the entire investment process remotely — no travel required.",
+    description:
+      "No need to travel. Complete KYC and documentation digitally from anywhere in the world.",
   },
   {
     icon: "fas fa-scale-balanced",
     title: "FEMA & Tax Compliance",
-    description: "Full guidance on FEMA regulations, TDS, and repatriation rules.",
+    description: "Expert guidance on NRE/NRO accounts, capital gains, and repatriation rules.",
   },
   {
     icon: "fas fa-hand-holding-heart",
     title: "Post-Investment Care",
-    description: "Ongoing property, tenant, and portfolio management after purchase.",
+    description: "From property management to rental collection and resale support.",
   },
 ];
 

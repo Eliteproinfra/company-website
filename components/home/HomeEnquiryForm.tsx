@@ -6,10 +6,11 @@ import Button from "@/components/ui/Button";
 const inputClass =
   "rounded-lg border border-neutral-200 px-4 py-3 focus:border-primary-gold focus:outline-none focus:ring-1 focus:ring-primary-gold";
 
-type Status = "idle" | "submitting" | "success";
+type Status = "idle" | "submitting" | "success" | "error";
 
 export default function HomeEnquiryForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (status === "success") {
     return (
@@ -34,30 +35,101 @@ export default function HomeEnquiryForm() {
 
   return (
     <form
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         setStatus("submitting");
-        window.setTimeout(() => setStatus("success"), 600);
+        setErrorMessage("");
+        const data = new FormData(event.currentTarget);
+        try {
+          const res = await fetch("/api/enquiry", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source: "Homepage",
+              fields: {
+                Name: data.get("name"),
+                Email: data.get("email"),
+                Phone: data.get("phone"),
+                Interest: data.get("interest"),
+                Message: data.get("message"),
+              },
+            }),
+          });
+          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
+          setStatus("success");
+        } catch (error) {
+          setStatus("error");
+          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+        }
       }}
       className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2"
     >
-      <input type="text" placeholder="Your Name" required className={inputClass} />
-      <input type="email" placeholder="Your Email" required className={inputClass} />
-      <input type="tel" placeholder="Phone Number" required className={inputClass} />
-      <select defaultValue="" required className={`${inputClass} text-neutral-500`}>
+      <label htmlFor="home-name" className="sr-only">
+        Your Name
+      </label>
+      <input
+        id="home-name"
+        name="name"
+        type="text"
+        placeholder="Your Name"
+        required
+        className={inputClass}
+      />
+      <label htmlFor="home-email" className="sr-only">
+        Your Email
+      </label>
+      <input
+        id="home-email"
+        name="email"
+        type="email"
+        placeholder="Your Email"
+        required
+        className={inputClass}
+      />
+      <label htmlFor="home-phone" className="sr-only">
+        Phone Number
+      </label>
+      <input
+        id="home-phone"
+        name="phone"
+        type="tel"
+        placeholder="Phone Number"
+        required
+        className={inputClass}
+      />
+      <label htmlFor="home-interest" className="sr-only">
+        Interested In
+      </label>
+      <select
+        id="home-interest"
+        name="interest"
+        defaultValue=""
+        required
+        className={`${inputClass} text-neutral-500`}
+      >
         <option value="" disabled>
           Select Interest
         </option>
-        <option value="buy">Buying / Investing</option>
-        <option value="nri">NRI Services</option>
-        <option value="commercial">Commercial Leasing</option>
-        <option value="management">Property Management</option>
+        <option value="residential">Residential</option>
+        <option value="commercial">Commercial</option>
+        <option value="investment">Investment</option>
+        <option value="consulting">Consulting</option>
       </select>
+      <label htmlFor="home-message" className="sr-only">
+        Your Message
+      </label>
       <textarea
-        placeholder="Your Message"
+        id="home-message"
+        name="message"
+        placeholder="Leave a message here"
         rows={4}
         className={`sm:col-span-2 ${inputClass}`}
       />
+      {status === "error" ? (
+        <p role="alert" className="sm:col-span-2 text-sm font-semibold text-red-600">
+          {errorMessage}
+        </p>
+      ) : null}
       <Button
         type="submit"
         iconRight="fas fa-paper-plane"

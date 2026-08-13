@@ -5,10 +5,11 @@ import { useState } from "react";
 const inputClasses =
   "h-[58px] rounded-xl border border-white/20 bg-white/10 px-4 text-white placeholder:text-white/60 focus:border-primary-gold focus:outline-none";
 
-type Status = "idle" | "submitting" | "success";
+type Status = "idle" | "submitting" | "success" | "error";
 
 export default function PMLeadForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (status === "success") {
     return (
@@ -20,10 +21,26 @@ export default function PMLeadForm() {
 
   return (
     <form
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         setStatus("submitting");
-        window.setTimeout(() => setStatus("success"), 600);
+        setErrorMessage("");
+        const data = new FormData(event.currentTarget);
+        try {
+          const res = await fetch("/api/enquiry", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source: "Property Management",
+              fields: { Name: data.get("name"), Phone: data.get("phone") },
+            }),
+          });
+          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
+          setStatus("success");
+        } catch (error) {
+          setStatus("error");
+          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+        }
       }}
       className="grid grid-cols-1 gap-4 md:grid-cols-3"
     >
@@ -33,6 +50,7 @@ export default function PMLeadForm() {
         </label>
         <input
           id="pm-cta-name"
+          name="name"
           type="text"
           placeholder="Name"
           required
@@ -45,12 +63,18 @@ export default function PMLeadForm() {
         </label>
         <input
           id="pm-cta-phone"
+          name="phone"
           type="tel"
           placeholder="Phone Number"
           required
           className={`w-full ${inputClasses}`}
         />
       </div>
+      {status === "error" ? (
+        <p role="alert" className="text-sm font-semibold text-red-400 md:col-span-3">
+          {errorMessage}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={status === "submitting"}

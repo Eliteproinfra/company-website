@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
 import ArticleCard from "@/components/media/ArticleCard";
-import { newsItems } from "@/lib/data/newsItems";
+import { articleHref, articlesByKind } from "@/lib/data/articles";
 
 export const metadata: Metadata = {
   title: "News & Updates",
@@ -10,6 +10,14 @@ export const metadata: Metadata = {
 };
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
+
+const newsItems = articlesByKind("news").map((article) => ({
+  title: article.title,
+  date: article.date,
+  excerpt: article.excerpt,
+  image: article.image,
+  href: articleHref(article),
+}));
 
 export default function NewsUpdatesPage() {
   return (

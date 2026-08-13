@@ -72,7 +72,7 @@ export default function PropertyManagementPage() {
                 Why Choose Us
               </p>
               <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
-                Your Property, Our Priority
+                Why Owners Trust Us?
               </h2>
               <p className="mt-5 text-neutral-500">
                 We bring institutional-grade management to every property, ensuring maximum
@@ -116,7 +116,7 @@ export default function PropertyManagementPage() {
             <div>
               <Reveal direction="right">
                 <p className="text-sm font-bold uppercase tracking-[2px] text-primary-gold">
-                  How It Works
+                  How We Work
                 </p>
                 <h2 className="mt-2 mb-10 text-3xl font-bold text-white sm:text-4xl">
                   Simple 4-Step Process
@@ -141,7 +141,7 @@ export default function PropertyManagementPage() {
 
       <section className="bg-neutral-50 py-20">
         <div className="container">
-          <SectionHeading eyebrow="Client Stories" title="What Our Clients Say" />
+          <SectionHeading eyebrow="Client Stories" title="What Owners Say" />
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {propertyManagementTestimonials.map((testimonial, index) => (
               <Reveal key={testimonial.name} delay={((index + 1) * 100) as 100 | 200 | 300}>

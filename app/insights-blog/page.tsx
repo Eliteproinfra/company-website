@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
 import ArticleCard from "@/components/media/ArticleCard";
-import { blogPosts } from "@/lib/data/blogPosts";
+import { articleHref, articlesByKind } from "@/lib/data/articles";
 
 export const metadata: Metadata = {
   title: "Insights & Blogs",
@@ -10,6 +10,14 @@ export const metadata: Metadata = {
 };
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
+
+const blogPosts = articlesByKind("blog").map((article) => ({
+  title: article.title,
+  date: article.date,
+  excerpt: article.excerpt,
+  image: article.image,
+  href: articleHref(article),
+}));
 
 export default function InsightsBlogPage() {
   return (

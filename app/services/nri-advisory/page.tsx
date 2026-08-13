@@ -39,7 +39,7 @@ export default function NriAdvisoryPage() {
 
       <section className="bg-white py-20">
         <div className="container">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
             {nriMarketInsights.map((stat) => (
               <div
                 key={stat.label}
@@ -108,6 +108,7 @@ export default function NriAdvisoryPage() {
           <SectionHeading eyebrow="Get Started" title="Start Your Investment Journey" />
           <div className="mx-auto max-w-3xl">
             <ServiceLeadForm
+              source="NRI Advisory"
               fields={[
                 { id: "nri-name", label: "Full Name", type: "text", placeholder: "Full Name" },
                 { id: "nri-email", label: "Email Address", type: "email", placeholder: "Email Address" },

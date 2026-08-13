@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import Image from "next/image";
+import Link from "next/link";
 import Button from "@/components/ui/Button";
 import type { PropertyItem } from "@/lib/types";
 
@@ -19,10 +20,14 @@ export default function PropertyCard({
   beds,
   area,
   price,
-}: PropertyItem) {
+  href,
+  detailsLabel = "View Details",
+}: PropertyItem & { detailsLabel?: string }) {
+  const target = href ?? "/contact";
+
   return (
     <div className="group h-full overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.1)]">
-      <div className="relative h-[250px] overflow-hidden">
+      <Link href={target} className="relative block h-[250px] overflow-hidden" tabIndex={-1}>
         <Image
           src={image}
           alt={title}
@@ -38,10 +43,10 @@ export default function PropertyCard({
         >
           {badgeText}
         </span>
-      </div>
+      </Link>
       <div className="p-6">
         <h3 className="text-lg font-bold text-dark-black transition-colors group-hover:text-primary-gold">
-          {title}
+          <Link href={target}>{title}</Link>
         </h3>
         <p className="mt-3 flex items-center gap-2 border-b border-neutral-100 pb-4 text-sm text-neutral-500">
           <i className="fas fa-map-marker-alt" aria-hidden="true" /> {location}
@@ -62,8 +67,8 @@ export default function PropertyCard({
         ) : null}
         <div className="mt-4 flex items-center justify-between gap-3">
           <span className="text-lg font-bold text-primary-gold">{price}</span>
-          <Button href="/contact" variant="outline" size="sm">
-            View Details
+          <Button href={target} variant="dark" size="sm">
+            {detailsLabel}
           </Button>
         </div>
       </div>

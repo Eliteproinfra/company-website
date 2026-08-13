@@ -1,13 +1,13 @@
 import type { IconTextItem, ProcessStepItem } from "@/lib/types";
 
 export const whyChooseUsFeatures: IconTextItem[] = [
-  { icon: "fas fa-shield-alt", title: "Secure", description: "End-to-end security protocols" },
-  { icon: "fas fa-chart-line", title: "Growth", description: "Consistent value appreciation" },
-  { icon: "fas fa-headset", title: "24/7 Support", description: "Round the clock assistance" },
+  { icon: "fas fa-shield-alt", title: "Safety First", description: "End-to-end security protocols" },
+  { icon: "fas fa-chart-line", title: "Max ROI", description: "Consistent value appreciation" },
+  { icon: "fas fa-broom", title: "Upkeep", description: "Proactive upkeep and maintenance" },
   {
     icon: "fas fa-file-contract",
-    title: "Transparent",
-    description: "Real-time reporting & updates",
+    title: "Compliance",
+    description: "Full regulatory and legal compliance",
   },
 ];
 

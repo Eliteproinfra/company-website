@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
 import ArticleCard from "@/components/media/ArticleCard";
-import { pressItems } from "@/lib/data/pressItems";
+import { articleHref, articlesByKind } from "@/lib/data/articles";
 
 export const metadata: Metadata = {
   title: "Media & Press",
@@ -10,6 +10,14 @@ export const metadata: Metadata = {
 };
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
+
+const pressItems = articlesByKind("press").map((article) => ({
+  title: article.title,
+  date: article.date,
+  excerpt: article.excerpt,
+  image: article.image,
+  href: articleHref(article),
+}));
 
 export default function MediaPressPage() {
   return (

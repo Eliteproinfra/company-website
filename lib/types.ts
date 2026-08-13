@@ -14,6 +14,7 @@ export type IconTextItem = {
   title: string;
   description: string;
   href?: string;
+  highlight?: boolean;
 };
 
 export type Testimonial = {
@@ -26,6 +27,7 @@ export type Stat = {
   value: string;
   label: string;
   icon?: string;
+  highlight?: boolean;
 };
 
 export type OfficeInfo = {
@@ -60,6 +62,8 @@ export type PropertyItem = {
   beds?: string;
   area?: string;
   price: string;
+  /** Detail-page path; falls back to /contact when the listing has no page yet. */
+  href?: string;
 };
 
 export type ProcessStepItem = {
@@ -73,4 +77,5 @@ export type ArticleItem = {
   date: string;
   excerpt: string;
   href: string;
+  image: string;
 };

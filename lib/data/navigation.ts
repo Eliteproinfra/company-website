@@ -1,4 +1,4 @@
-export type NavLeaf = { label: string; href: string };
+export type NavLeaf = { label: string; href: string; children?: NavLeaf[] };
 export type NavItem = { label: string; href?: string; children?: NavLeaf[] };
 
 export const navItems: NavItem[] = [
@@ -9,10 +9,16 @@ export const navItems: NavItem[] = [
     children: [
       { label: "Our Story & Journey", href: "/about" },
       { label: "Leadership", href: "/leadership" },
-      { label: "Social Commitment", href: "/social-commitment" },
-      { label: "Sales Portfolio Management", href: "/about/sales-portfolio-management" },
-      { label: "Leasing Portfolio Management", href: "/about/leasing-portfolio-management" },
-      { label: "CRM & Marketing", href: "/about/crm-marketing" },
+      { label: "Social Commitment (CSR)", href: "/social-commitment" },
+      {
+        label: "Our Management",
+        href: "/about/sales-portfolio-management",
+        children: [
+          { label: "Sales Portfolio management", href: "/about/sales-portfolio-management" },
+          { label: "Leasing Portfolio management", href: "/about/leasing-portfolio-management" },
+          { label: "CRM & Marketing", href: "/about/crm-marketing" },
+        ],
+      },
     ],
   },
   {

@@ -1,59 +1,37 @@
+import { getPropertyById, type PropertyDetail } from "@/lib/data/propertyDetails";
+import type { PropertyBadgeVariant } from "@/lib/types";
+
 export type SignatureProject = {
   image: string;
   title: string;
   city: string;
+  location: string;
   price: string;
+  badgeText: string;
+  badgeVariant: PropertyBadgeVariant;
+  href: string;
 };
 
-// Homepage "Signature Projects" — a cross-city highlight reel (distinct from the
-// Gurgaon-focused /properties listing grid).
-export const signatureProjects: SignatureProject[] = [
-  {
-    image: "/images/properties/banner_1773918255_69bbd82fbdbd5.jpg",
-    title: "Oberoi 360 North Gurgaon",
-    city: "Gurgaon",
-    price: "₹ 18.75 Cr*",
-  },
-  {
-    image: "/images/properties/banner_1774083419_69be5d5bd3591.webp",
-    title: "Emaar India Business Centre",
-    city: "Gurgaon",
-    price: "₹ 4 Cr Onwards*",
-  },
-  {
-    image: "/images/properties/banner_1774082320_69be59106d5be.png",
-    title: "Westin Residences",
-    city: "Gurgaon",
-    price: "₹ 7 Cr Onwards*",
-  },
-  {
-    image: "/images/properties/banner_1774080090_69be505a86691.jpeg",
-    title: "DLF The Grove",
-    city: "Gurgaon",
-    price: "₹ 8.24 - 15.38 Cr*",
-  },
-  {
-    image: "/images/properties/banner_1774079432_69be4dc832da7.jpg",
-    title: "DLF Express Greens",
-    city: "Manesar",
-    price: "₹ 1.25 - 2 Cr*",
-  },
-  {
-    image: "/images/properties/banner_1774078591_69be4a7fe313b.jpg",
-    title: "TARC Tripundra",
-    city: "Delhi",
-    price: "₹ 7 - 11 Cr*",
-  },
-  {
-    image: "/images/property-categories/cat_1773828639_69ba7a1f2c5ab.jpg",
-    title: "Godrej Connaught One",
-    city: "Delhi",
-    price: "₹ 15.2 Cr*",
-  },
-  {
-    image: "/images/property-categories/cat_1773829073_69ba7bd16f4e4.jpg",
-    title: "M3M X Jacob & Co. Residences",
-    city: "Noida",
-    price: "Price on Request",
-  },
+// The exact per-city sets the live homepage's "Signature Projects" tabs show.
+const cityListings: { city: string; ids: number[] }[] = [
+  { city: "Gurgaon", ids: [142, 141, 140, 139, 138, 137, 136, 135] },
+  { city: "Manesar", ids: [117, 16, 7] },
+  { city: "Delhi", ids: [80, 53, 52, 38, 22, 21, 20, 19] },
+  { city: "Noida", ids: [8] },
 ];
+
+export const signatureProjects: SignatureProject[] = cityListings.flatMap(({ city, ids }) =>
+  ids
+    .map((id) => getPropertyById(id))
+    .filter((property): property is PropertyDetail => property !== undefined)
+    .map((property) => ({
+      image: property.images[0],
+      title: property.title,
+      city,
+      location: property.location,
+      price: property.price,
+      badgeText: property.category,
+      badgeVariant: property.badgeVariant,
+      href: `/properties/${property.slug}`,
+    }))
+);

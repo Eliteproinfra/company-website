@@ -83,14 +83,26 @@ export default function MobileNavMenu({ open, onClose }: MobileNavMenuProps) {
               >
                 <div className="min-h-0">
                   {item.children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      onClick={onClose}
-                      className="block rounded-md py-2.5 pl-6 text-sm text-white/70 hover:bg-white/10 hover:text-primary-gold"
-                    >
-                      {child.label}
-                    </Link>
+                    <div key={child.href}>
+                      <Link
+                        href={child.href}
+                        onClick={onClose}
+                        className="block rounded-md py-2.5 pl-6 text-sm text-white/70 hover:bg-white/10 hover:text-primary-gold"
+                      >
+                        {child.label}
+                      </Link>
+                      {/* Nested group (About → Our Management) stays expanded on mobile. */}
+                      {child.children?.map((leaf) => (
+                        <Link
+                          key={leaf.href}
+                          href={leaf.href}
+                          onClick={onClose}
+                          className="block rounded-md py-2 pl-10 text-sm text-white/60 hover:bg-white/10 hover:text-primary-gold"
+                        >
+                          {leaf.label}
+                        </Link>
+                      ))}
+                    </div>
                   ))}
                 </div>
               </div>

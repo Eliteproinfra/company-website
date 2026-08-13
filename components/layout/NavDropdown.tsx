@@ -1,13 +1,16 @@
+import clsx from "clsx";
 import Link from "next/link";
 import type { NavItem } from "@/lib/data/navigation";
 
-export default function NavDropdown({ item }: { item: NavItem }) {
+export default function NavDropdown({ item, solid = false }: { item: NavItem; solid?: boolean }) {
+  const triggerClasses = clsx(
+    "relative rounded-md px-3 py-2 text-sm font-medium uppercase tracking-wide transition-colors",
+    solid ? "text-dark-black hover:bg-black/5" : "text-white hover:bg-white/10"
+  );
+
   if (!item.children) {
     return (
-      <Link
-        href={item.href!}
-        className="group relative inline-block rounded-md px-3 py-2 text-sm font-medium uppercase tracking-wide text-white transition-colors hover:bg-white/10"
-      >
+      <Link href={item.href!} className={clsx("group inline-block", triggerClasses)}>
         {item.label}
         <span className="absolute bottom-1 left-1/2 h-[2px] w-0 -translate-x-1/2 bg-primary-gold transition-all duration-300 group-hover:w-4/5" />
       </Link>
@@ -16,10 +19,7 @@ export default function NavDropdown({ item }: { item: NavItem }) {
 
   return (
     <div className="group relative">
-      <Link
-        href={item.href ?? "#"}
-        className="relative inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium uppercase tracking-wide text-white transition-colors hover:bg-white/10"
-      >
+      <Link href={item.href ?? "#"} className={clsx("inline-flex items-center gap-1.5", triggerClasses)}>
         {item.label}
         <i
           className="fas fa-chevron-down text-[10px] transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
@@ -28,15 +28,38 @@ export default function NavDropdown({ item }: { item: NavItem }) {
         <span className="absolute bottom-1 left-1/2 h-[2px] w-0 -translate-x-1/2 bg-primary-gold transition-all duration-300 group-hover:w-4/5" />
       </Link>
       <div className="invisible absolute left-0 top-full z-20 w-72 translate-y-2 rounded-xl border border-white/10 bg-dark-black/95 p-2 opacity-0 shadow-2xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-        {item.children.map((child) => (
-          <Link
-            key={child.href}
-            href={child.href}
-            className="block rounded-lg px-4 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-primary-gold"
-          >
-            {child.label}
-          </Link>
-        ))}
+        {item.children.map((child) =>
+          child.children ? (
+            <div key={child.href} className="group/sub relative">
+              <Link
+                href={child.href}
+                className="flex items-center justify-between gap-2 rounded-lg px-4 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-primary-gold"
+              >
+                {child.label}
+                <i className="fas fa-chevron-right text-[10px]" aria-hidden="true" />
+              </Link>
+              <div className="invisible absolute left-full top-0 z-30 ml-1 w-64 rounded-xl border border-white/10 bg-dark-black/95 p-2 opacity-0 shadow-2xl transition-all duration-200 group-hover/sub:visible group-hover/sub:opacity-100 group-focus-within/sub:visible group-focus-within/sub:opacity-100">
+                {child.children.map((leaf) => (
+                  <Link
+                    key={leaf.href}
+                    href={leaf.href}
+                    className="block rounded-lg px-4 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-primary-gold"
+                  >
+                    {leaf.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Link
+              key={child.href}
+              href={child.href}
+              className="block rounded-lg px-4 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-primary-gold"
+            >
+              {child.label}
+            </Link>
+          )
+        )}
       </div>
     </div>
   );

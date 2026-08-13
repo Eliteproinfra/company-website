@@ -7,11 +7,13 @@ import HeroCarousel from "@/components/home/HeroCarousel";
 import CompactFeatureCard from "@/components/home/CompactFeatureCard";
 import StatIconCard from "@/components/home/StatIconCard";
 import SignatureProjectsGrid from "@/components/home/SignatureProjectsGrid";
+import AwardsCarousel from "@/components/home/AwardsCarousel";
+import PartnersMarquee from "@/components/home/PartnersMarquee";
 import InsightsHubTabs from "@/components/home/InsightsHubTabs";
 import HomeEnquiryForm from "@/components/home/HomeEnquiryForm";
-import ReviewCard from "@/components/home/ReviewCard";
+import ReviewsCarousel from "@/components/home/ReviewsCarousel";
 import Faq from "@/components/home/Faq";
-import { heroSlides } from "@/lib/data/heroSlides";
+import { heroSlides, heroSlidesMobile } from "@/lib/data/heroSlides";
 import { services } from "@/lib/data/services";
 import { nriServices } from "@/lib/data/nri";
 import { signatureProjects } from "@/lib/data/signatureProjects";
@@ -19,6 +21,7 @@ import { insightsHub } from "@/lib/data/insightsHub";
 import { partners } from "@/lib/data/partners";
 import { awardImages } from "@/lib/data/awards";
 import { reviews, googleRating } from "@/lib/data/reviews";
+import { socialLinks } from "@/lib/data/social";
 import { homeFaqs } from "@/lib/data/faq";
 import { whyChooseStats, transactionStats } from "@/lib/data/stats";
 
@@ -27,7 +30,7 @@ const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 export default function Home() {
   return (
     <>
-      <HeroCarousel slides={heroSlides} />
+      <HeroCarousel slides={heroSlides} mobileSlides={heroSlidesMobile} />
 
       {/* Who We Are */}
       <section className="bg-white py-20">
@@ -49,13 +52,12 @@ export default function Home() {
                 Who We Are
               </p>
               <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
-                Advisory Beyond Property. We Build Legacies.
+                Advisory Beyond Property We Build Legacies
               </h2>
               <div className="mt-5 space-y-4 text-neutral-500">
                 <p>
-                  At ElitePro Infra, we believe real estate is more than just a transaction
-                  &mdash; it&apos;s about building wealth, elevating lifestyles, and creating
-                  enduring value.
+                  At ElitePro Infra, we believe real estate is more than just transaction it’s
+                  about building wealth, elevating lifestyles, and creating enduring value.
                 </p>
                 <p>
                   Since our inception in 2012, we have evolved into one of India&apos;s leading
@@ -81,13 +83,12 @@ export default function Home() {
       <section className="bg-neutral-50 py-20">
         <div className="container">
           <SectionHeading
-            eyebrow="Marquee Developments"
             title="Signature Projects"
             description="Explore marquee projects across major cities."
           />
           <SignatureProjectsGrid projects={signatureProjects} />
           <div className="mt-12 text-center">
-            <Button href="/properties">View All Properties</Button>
+            <Button href="/properties">View More</Button>
           </div>
         </div>
       </section>
@@ -96,9 +97,8 @@ export default function Home() {
       <section className="bg-white py-20">
         <div className="container">
           <SectionHeading
-            eyebrow="Stay Informed"
             title="Insights Hub"
-            description="Press coverage, market insights, and the latest real estate news"
+            description="Stay informed with updates, stories, and recognitions."
           />
           <InsightsHubTabs categories={insightsHub} />
         </div>
@@ -126,17 +126,15 @@ export default function Home() {
         <div className="container">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
             <Reveal direction="right" className="lg:col-span-4">
-              <p className="text-sm font-bold uppercase tracking-[2px] text-primary-gold">
-                What We Do
+              <h2 className="text-3xl font-bold text-dark-black sm:text-4xl">Our Expertise</h2>
+              <p className="mt-5 font-semibold text-dark-black">
+                Comprehensive Real Estate Solutions Tailored for You.
               </p>
-              <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
-                Our Expertise
-              </h2>
-              <p className="mt-5 text-neutral-500">
-                Comprehensive Real Estate Solutions Tailored for You. We provide a full spectrum
-                of services from residential sales to commercial leasing, ensuring every aspect of
-                your real estate journey is covered with professionalism, transparency, and
-                integrity.
+              <p className="mt-3 text-neutral-500">
+                We provide a full spectrum of services from residential sales to commercial
+                leasing, ensuring every aspect of your real estate journey is covered with
+                professionalism, transparency, and integrity. Partner with us for a seamless
+                experience.
               </p>
               <Button href="/contact" variant="outline" className="mt-6">
                 Get Consultation
@@ -232,11 +230,10 @@ export default function Home() {
             description="Invest in the world's finest destinations"
             dark
           />
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {[
               { name: "India", image: "/images/global-india.jpg", href: "/properties" },
               { name: "Dubai", image: "/images/global-dubai.png", href: "/nri-corner" },
-              { name: "Singapore", image: "/images/global-singapore.png", href: "/nri-corner" },
             ].map((place, index) => (
               <Reveal key={place.name} delay={delaySequence[index % delaySequence.length]}>
                 <Link
@@ -259,7 +256,7 @@ export default function Home() {
           </div>
           <div className="mt-12 text-center">
             <Button href="/nri-corner" variant="outline-light">
-              Explore International Opportunities
+              Explore International
             </Button>
           </div>
         </div>
@@ -272,22 +269,7 @@ export default function Home() {
             title="Elite Developer Partners"
             description="Collaborating with the industry's finest A+ developers"
           />
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {partners.map((partner) => (
-              <div
-                key={partner.name}
-                className="flex h-24 items-center justify-center rounded-xl border border-neutral-100 bg-white p-4 grayscale transition-all hover:grayscale-0"
-              >
-                <Image
-                  src={partner.image}
-                  alt={partner.name}
-                  width={140}
-                  height={70}
-                  className="h-auto max-h-14 w-auto max-w-full object-contain"
-                />
-              </div>
-            ))}
-          </div>
+          <PartnersMarquee partners={partners} />
         </div>
       </section>
 
@@ -298,22 +280,7 @@ export default function Home() {
             eyebrow="Our Awards"
             title="Recognized Excellence in Real Estate"
           />
-          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-7">
-            {awardImages.map((image) => (
-              <div
-                key={image}
-                className="flex aspect-square items-center justify-center rounded-xl border border-neutral-100 bg-white p-3"
-              >
-                <Image
-                  src={image}
-                  alt="Elite Pro Infraventure award recognition"
-                  width={100}
-                  height={100}
-                  className="h-auto max-h-full w-auto max-w-full object-contain"
-                />
-              </div>
-            ))}
-          </div>
+          <AwardsCarousel images={awardImages} />
           <div className="mt-10 text-center">
             <Link
               href="/awards"
@@ -397,12 +364,8 @@ export default function Home() {
       <section className="bg-white py-20">
         <div className="container">
           <div className="mb-12 text-center">
-            <p className="text-sm font-bold uppercase tracking-[2px] text-primary-gold">
-              Google Reviews
-            </p>
-            <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
-              What Our Clients Say
-            </h2>
+            <h2 className="text-3xl font-bold text-dark-black sm:text-4xl">Google Reviews</h2>
+            <p className="mt-2 text-neutral-500">What our clients say about us</p>
           </div>
           <div className="mb-10 flex flex-col items-center justify-between gap-6 rounded-2xl border border-neutral-100 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] sm:flex-row">
             <div className="flex items-center gap-3">
@@ -428,13 +391,7 @@ export default function Home() {
               Review us on Google
             </a>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {reviews.map((review, index) => (
-              <Reveal key={review.name} delay={delaySequence[index % delaySequence.length]}>
-                <ReviewCard {...review} />
-              </Reveal>
-            ))}
-          </div>
+          <ReviewsCarousel reviews={reviews} />
         </div>
       </section>
 
@@ -478,6 +435,23 @@ export default function Home() {
                   </div>
                 </li>
               </ul>
+              <div className="mt-10 border-t border-[#1a1200]/20 pt-6">
+                <h3 className="mb-3 text-sm font-bold uppercase tracking-[2px]">Follow Us</h3>
+                <div className="flex gap-4">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.label}
+                      className="text-lg transition-transform hover:scale-110"
+                    >
+                      <i className={social.icon} aria-hidden="true" />
+                    </a>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="bg-white p-10 lg:col-span-7 lg:p-12">
               <h3 className="text-2xl font-bold text-dark-black">Send us a Message</h3>

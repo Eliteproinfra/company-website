@@ -44,11 +44,18 @@ export default function InvestmentSalesAdvisoryPage() {
               Strategic Advisory
             </p>
             <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
-              Beyond Traditional Brokerage
+              Unlock the Full Potential of Your Real Estate Portfolio
             </h2>
             <p className="mt-5 text-neutral-500">
-              We act as your strategic partners, leveraging deep market intelligence and a global
-              network to deliver customized investment solutions.
+              At Elite Pro Infra, we go beyond traditional brokerage. We act as your strategic
+              partners, leveraging deep market intelligence and a global network to deliver
+              customized investment solutions.
+            </p>
+            <p className="mt-4 text-neutral-500">
+              Whether you are an institutional investor, a private equity firm, or a
+              high-net-worth individual, our team provides end-to-end support&mdash;from
+              identifying high-yield assets to executing seamless dispositions. We focus on
+              creating long-term value through rigorous analysis and innovative strategies.
             </p>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -96,6 +103,9 @@ export default function InvestmentSalesAdvisoryPage() {
           <h2 className="text-2xl font-bold text-dark-black sm:text-3xl">
             Ready to optimize your real estate strategy?
           </h2>
+          <p className="mx-auto mt-4 max-w-xl text-neutral-500">
+            Partner with Elite Pro Infra for world-class investment advisory.
+          </p>
           <div className="mt-8">
             <Button href="/contact">Get in Touch</Button>
           </div>

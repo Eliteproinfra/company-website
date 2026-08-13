@@ -95,6 +95,7 @@ export default function NriCornerPage() {
           </div>
           <div className="mx-auto max-w-3xl">
             <ServiceLeadForm
+              source="NRI Corner"
               fields={[
                 { id: "corner-name", label: "Full Name", type: "text", placeholder: "Full Name" },
                 { id: "corner-email", label: "Email Address", type: "email", placeholder: "Email Address" },

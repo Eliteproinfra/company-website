@@ -15,9 +15,43 @@ export const metadata: Metadata = {
 
 const delaySequence = [0, 100, 200, 300] as const;
 
+function jobPostingSchema(job: (typeof jobListings)[number]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: job.title,
+    description: `${job.title} in the ${job.department} team at Elite Pro Infraventure. ${job.experience} of experience required. Full job details available on application.`,
+    datePosted: new Date().toISOString().slice(0, 10),
+    employmentType: job.type.toUpperCase().replace(" ", "_"),
+    hiringOrganization: {
+      "@type": "Organization",
+      name: "Elite Pro Infraventure",
+      sameAs: "https://eliteproinfra.com",
+      logo: "https://eliteproinfra.com/images/Elite-pro-logo.png",
+    },
+    jobLocation: {
+      "@type": "Place",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: job.location,
+        addressRegion: "Haryana",
+        addressCountry: "IN",
+      },
+    },
+    experienceRequirements: job.experience,
+  };
+}
+
 export default function CareersPage() {
   return (
     <>
+      {jobListings.map((job) => (
+        <script
+          key={job.title}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingSchema(job)) }}
+        />
+      ))}
       <ServiceHero
         image="/images/heroes/careers.jpg"
         eyebrow="Careers"

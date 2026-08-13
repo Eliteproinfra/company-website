@@ -21,23 +21,23 @@ export const jobListings: JobListing[] = [
 
 export const cultureHighlights = [
   {
-    icon: "fas fa-bolt",
-    title: "Dynamic Culture",
-    description: "Collaborative environment that values innovation and initiative.",
-  },
-  {
     icon: "fas fa-gem",
     title: "Luxury Exposure",
-    description: "Work on high-value projects with HNIs, NRIs, and global investors.",
+    description: "Premium projects with HNIs & investors.",
   },
   {
-    icon: "fas fa-medal",
-    title: "Recognition",
-    description: "Competitive compensation, performance incentives, and awards.",
+    icon: "fas fa-bolt",
+    title: "Dynamic Culture",
+    description: "Collaborative culture & mentorship.",
   },
   {
     icon: "fas fa-arrow-up-right-dots",
     title: "Growth & Learning",
-    description: "Ongoing mentorship and market insights to sharpen your edge.",
+    description: "Growth-focused performance rewards.",
+  },
+  {
+    icon: "fas fa-medal",
+    title: "Recognition",
+    description: "Transparent process & quick updates.",
   },
 ];

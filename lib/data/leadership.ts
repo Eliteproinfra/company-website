@@ -2,6 +2,11 @@ export type Leader = {
   photo: string;
   name: string;
   title: string;
+  /**
+   * The live site spells Viren's title differently on /leadership than on
+   * /our-story; this keeps both pages matching their reference.
+   */
+  leadershipTitle?: string;
   bio: string;
 };
 
@@ -10,12 +15,13 @@ export const leaders: Leader[] = [
     photo: "/images/leadership/viren-mehta.png",
     name: "Mr. Viren Mehta",
     title: "Founder & Director - Sales",
+    leadershipTitle: "Founder & Director-Sales",
     bio: "Mr. Viren Mehta is the visionary Founder and Director – Sales, leading the company with a strong focus on strategic growth and revenue excellence. With a deep understanding of market dynamics and customer needs, he oversees sales strategy, business development, and key client relationships. His leadership ensures sustainable expansion, high-performance sales execution, and long-term value creation for clients and stakeholders.",
   },
   {
     photo: "/images/leadership/robin-pahuja.png",
     name: "Mr. Robin Pahuja",
-    title: "Co-Founder & Managing Director",
+    title: "Co-Founder & Managing - Director",
     bio: "Mr. Robin Pahuja brings strategic foresight and operational excellence to the table. Believing that “Excellence is built on trust and deep market understanding,” he aligns the company's sales strategies with evolving client expectations. His expertise lies in identifying high-growth opportunities and ensuring seamless execution. He plays a pivotal role in mentoring the team and fostering a culture of high performance and ethical practices.",
   },
   {

@@ -4,16 +4,25 @@ import clsx from "clsx";
 import { useState } from "react";
 import type { FaqItem } from "@/lib/data/faq";
 
-export default function Faq({ items, dark = false }: { items: FaqItem[]; dark?: boolean }) {
+export default function Faq({
+  items,
+  dark = false,
+  className = "mx-auto max-w-3xl",
+}: {
+  items: FaqItem[];
+  dark?: boolean;
+  className?: string;
+}) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
     <div
       className={clsx(
-        "mx-auto max-w-3xl divide-y rounded-2xl border",
+        "divide-y rounded-2xl border",
         dark
           ? "divide-white/15 border-white/15 bg-white/5 backdrop-blur-sm"
-          : "divide-neutral-200 border-neutral-200 bg-white"
+          : "divide-neutral-200 border-neutral-200 bg-white",
+        className
       )}
     >
       {items.map((item, index) => {

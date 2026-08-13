@@ -6,6 +6,7 @@ import Separator from "@/components/ui/Separator";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertySearchFilter from "@/components/properties/PropertySearchFilter";
 import Pagination from "@/components/properties/Pagination";
+import { propertyHref } from "@/lib/data/propertyDetails";
 import type { PropertyItem } from "@/lib/types";
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
@@ -103,7 +104,7 @@ export default function PropertyBrowser({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {pageItems.map((property, index) => (
                 <Reveal key={property.title} delay={delaySequence[index % delaySequence.length]}>
-                  <PropertyCard {...property} />
+                  <PropertyCard {...property} href={property.href ?? propertyHref(property.title)} />
                 </Reveal>
               ))}
             </div>

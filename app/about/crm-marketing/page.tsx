@@ -47,7 +47,7 @@ export default function CrmMarketingPage() {
               Our support team is here to help you with any queries.
             </p>
             <div className="mt-6">
-              <Button href="/contact">Contact Support</Button>
+              <Button href="/contact">Get Support</Button>
             </div>
           </div>
         </div>
