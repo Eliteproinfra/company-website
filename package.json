@@ -14,7 +14,7 @@
     "instagram:token": "node scripts/refresh-instagram-token.mjs",
     "audit:sql": "node scripts/audit-sql-dump.mjs",
     "db:setup": "node scripts/db-setup.mjs",
-    "db:seed": "node --experimental-transform-types scripts/db-seed.mjs",
+    "db:seed": "node --experimental-transform-types --import ./scripts/alias-register.mjs scripts/db-seed.mjs",
     "db:passwd": "node scripts/db-passwd.mjs"
   },
   "dependencies": {

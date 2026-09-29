@@ -10,9 +10,13 @@
  * same content, but the admin can now edit it. Idempotent by default, so it is
  * safe to re-run after adding more static entries.
  *
- * The lib/data modules only ever use `import type`, which Node's type stripping
- * removes, so they can be imported directly here without any path-alias setup.
- * Run under `node --experimental-transform-types` (the npm script does this).
+ * Most lib/data modules only use `import type`, which Node's type stripping
+ * removes — but properties.ts, insightsHub.ts and signatureProjects.ts import
+ * real values through the `@/` alias, and plain node does not read tsconfig
+ * paths. So this runs with scripts/alias-register.mjs, which teaches the
+ * loader that alias. Run via `npm run db:seed`, which wires up both that and
+ * `--experimental-transform-types`; invoking this file with bare `node` fails
+ * with "Cannot find package '@/lib'".
  */
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
