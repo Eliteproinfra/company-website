@@ -10,7 +10,7 @@ import { propertyHref } from "@/lib/data/propertyDetails";
 import type { PropertyItem } from "@/lib/types";
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 9;
 
 const typeToVariant: Record<string, PropertyItem["badgeVariant"]> = {
   Residential: "residential",
@@ -29,10 +29,13 @@ export default function PropertyBrowser({
   properties,
   locations,
   types,
+  between,
 }: {
   properties: PropertyItem[];
   locations: string[];
   types: string[];
+  /** Sections rendered between the search filter and the listing (live: localities + categories). */
+  between?: React.ReactNode;
 }) {
   const [location, setLocation] = useState(locations[0]);
   const [type, setType] = useState(types[0]);
@@ -78,6 +81,8 @@ export default function PropertyBrowser({
         </div>
       </section>
 
+      {between}
+
       <section className="bg-white py-20">
         <div className="container">
           <div className="mb-10 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
@@ -92,7 +97,7 @@ export default function PropertyBrowser({
                 setPage(1);
               }}
               aria-label="Sort properties"
-              className="rounded-md border border-neutral-300 px-4 py-2 text-sm text-dark-black focus:border-primary-gold focus:outline-none"
+              className="rounded-md border border-bs-border px-4 py-2 text-sm text-dark-black focus:border-primary-gold focus:outline-none"
             >
               <option value="recommended">Sort by: Recommended</option>
               <option value="low-high">Price: Low to High</option>
@@ -109,7 +114,7 @@ export default function PropertyBrowser({
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-neutral-200 py-16 text-center text-neutral-500">
+            <div className="rounded-2xl border border-dashed border-border-card py-16 text-center text-muted">
               No properties match your filters right now — try a different location or type, or{" "}
               <a href="/contact" className="font-semibold text-primary-gold">
                 get in touch

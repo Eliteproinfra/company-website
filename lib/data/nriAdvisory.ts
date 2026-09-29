@@ -1,11 +1,28 @@
 import type { FaqItem } from "@/lib/data/faq";
 import type { IconTextItem, Stat } from "@/lib/types";
 
-export const nriMarketInsights: Stat[] = [
-  { value: "4th", label: "Largest Economy by 2025" },
-  { value: "$138B", label: "NRI Remittances (2024-25)" },
-  { value: "12-15%", label: "Average CRE Returns" },
-  { value: "1,400+", label: "Happy Families" },
+/**
+ * Live's "Why Invest in India Now?" boxes. Each carries a supporting sentence under the
+ * label, so this is a Stat plus a `detail` line rather than a bare Stat.
+ */
+export const nriMarketInsights: (Stat & { detail: string })[] = [
+  {
+    value: "4th",
+    label: "Largest Economy by 2025",
+    detail:
+      "India is on track to become a global economic powerhouse, driving real estate demand.",
+  },
+  {
+    value: "138B",
+    label: "NRI Remittances (2024-25)",
+    detail: "Record-breaking inflows indicate growing global trust in Indian assets.",
+  },
+  {
+    value: "12-15%",
+    label: "Average CRE Returns",
+    detail:
+      "Commercial Real Estate in India offers significantly higher yields than global averages.",
+  },
 ];
 
 export const eliteAdvantage: IconTextItem[] = [
@@ -27,53 +44,57 @@ export const eliteAdvantage: IconTextItem[] = [
   },
 ];
 
+/** Live's "Tailored NRI Services" cards — copy matches nri-advisory.php verbatim. */
 export const nriExpertise: IconTextItem[] = [
   {
     icon: "fas fa-house-circle-check",
     title: "Property Acquisition",
-    description: "End-to-end support finding and securing the right property.",
+    description:
+      "Access to pre-launch offers and Grade-A commercial assets across India's top metros.",
   },
   {
     icon: "fas fa-briefcase",
     title: "Portfolio Management",
-    description: "Ongoing oversight across multiple properties and asset classes.",
+    description: "Active monitoring and rebalancing of your real estate portfolio to maximize ROI.",
   },
   {
     icon: "fas fa-gavel",
     title: "Legal & Tax Advisory",
-    description: "FEMA-compliant documentation and taxation guidance.",
+    description:
+      "Seamless coordination with chartered accountants and lawyers for full compliance.",
   },
   {
     icon: "fas fa-key",
     title: "Property Management",
-    description: "Tenant management, maintenance, and rent collection, handled remotely.",
+    description: "Tenant screening, rent collection, and property maintenance services.",
   },
   {
     icon: "fas fa-hand-holding-dollar",
     title: "Loan Assistance",
-    description: "Facilitation of NRI home loans with partner banks.",
+    description:
+      "Facilitating home loans for NRIs with leading Indian banks at competitive rates.",
   },
   {
     icon: "fas fa-arrows-rotate",
     title: "Resale & Liquidation",
-    description: "Strategic exit support when it's time to sell.",
+    description: "Strategic exit planning to help you liquidate assets at the right time.",
   },
 ];
 
 export const nriFaqs: FaqItem[] = [
   {
-    question: "Can NRIs buy residential and commercial property in India?",
+    question: "Can NRIs buy property in India?",
     answer:
-      "Yes. NRIs and PIOs can freely purchase residential and commercial property in India without special RBI permission, except for agricultural land, farmhouses, and plantation property.",
+      "Yes, NRIs are allowed to purchase both residential and commercial properties in India under FEMA guidelines. However, they cannot purchase agricultural land, plantation property, or farmhouses without specific RBI approval.",
   },
   {
-    question: "Do I need an NRE or NRO account to invest?",
+    question: "Do I need an NRE/NRO account?",
     answer:
-      "Property payments must be made through an NRE, NRO, or FCNR account via normal banking channels — cash transactions are not permitted.",
+      "Yes, all financial transactions regarding property purchase must be routed through NRE (Non-Resident External) or NRO (Non-Resident Ordinary) accounts.",
   },
   {
-    question: "Can NRIs avail home loans in India?",
+    question: "Can I avail a home loan in India?",
     answer:
-      "Yes, most leading Indian banks offer home loans to NRIs, typically financing 75-80% of the property value, subject to income and eligibility checks.",
+      "Most leading Indian banks offer home loans to NRIs, subject to eligibility criteria such as income, credit history, and country of residence.",
   },
 ];

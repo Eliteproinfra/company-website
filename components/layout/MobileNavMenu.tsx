@@ -11,6 +11,19 @@ type MobileNavMenuProps = {
   onClose: () => void;
 };
 
+/**
+ * Live mobile `.navbar-collapse` (<= 991.98px): slides in from the LEFT, width
+ * min(86vw, 380px), background linear-gradient(180deg, #0b1220, #070c16), shadow
+ * 0 18px 50px rgba(0,0,0,.45); links rgba(255,255,255,.92) -> white on rgba(255,255,255,.08);
+ * nested dropdowns rgba(255,255,255,.06) with rgba(255,255,255,.10) border, 14px radius;
+ * backdrop rgba(0,0,0,.55).
+ */
+const linkClasses =
+  "rounded-xl px-3 py-3 text-sm font-bold uppercase tracking-wide text-white/[0.92] transition-colors hover:bg-white/[0.08] hover:text-white";
+
+const itemClasses =
+  "block rounded-xl px-3 py-2.5 text-sm font-semibold text-white/90 transition-colors hover:bg-white/[0.08] hover:text-white";
+
 export default function MobileNavMenu({ open, onClose }: MobileNavMenuProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
@@ -30,27 +43,28 @@ export default function MobileNavMenu({ open, onClose }: MobileNavMenuProps) {
         aria-modal="true"
         aria-label="Mobile navigation"
         className={clsx(
-          "fixed inset-y-0 right-0 z-50 flex w-80 max-w-[85vw] flex-col gap-1 overflow-y-auto bg-dark-black p-6 shadow-2xl transition-transform duration-300 xl:hidden",
-          open ? "translate-x-0" : "translate-x-full"
+          "fixed inset-y-0 left-0 z-50 flex w-[min(86vw,380px)] flex-col gap-1 overflow-y-auto bg-linear-to-b from-drawer-start to-drawer-end px-4 pb-[22px] pt-4 shadow-drawer transition-transform duration-300 xl:hidden",
+          open ? "translate-x-0" : "-translate-x-[105%]"
         )}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close navigation menu"
-          className="mb-4 ml-auto flex h-10 w-10 items-center justify-center rounded-md text-white"
-        >
-          <i className="fas fa-xmark text-xl" aria-hidden="true" />
-        </button>
+        <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3.5">
+          <div className="min-w-0">
+            <p className="truncate text-base font-black leading-tight text-white">Elite Pro Infra</p>
+            <p className="truncate text-[0.82rem] font-semibold text-white/65">Premium Real Estate</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close navigation menu"
+            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl border border-white/[0.12] bg-white/[0.06] text-white/[0.92]"
+          >
+            <i className="fas fa-xmark text-xl" aria-hidden="true" />
+          </button>
+        </div>
         {navItems.map((item) => {
           if (!item.children) {
             return (
-              <Link
-                key={item.label}
-                href={item.href!}
-                onClick={onClose}
-                className="rounded-md px-3 py-3 text-sm font-medium uppercase tracking-wide text-white hover:bg-white/10"
-              >
+              <Link key={item.label} href={item.href!} onClick={onClose} className={linkClasses}>
                 {item.label}
               </Link>
             );
@@ -64,7 +78,7 @@ export default function MobileNavMenu({ open, onClose }: MobileNavMenuProps) {
                 type="button"
                 onClick={() => setExpanded(isExpanded ? null : item.label)}
                 aria-expanded={isExpanded}
-                className="flex w-full items-center justify-between rounded-md px-3 py-3 text-sm font-medium uppercase tracking-wide text-white hover:bg-white/10"
+                className={clsx(linkClasses, "flex w-full items-center justify-between")}
               >
                 {item.label}
                 <i
@@ -82,34 +96,36 @@ export default function MobileNavMenu({ open, onClose }: MobileNavMenuProps) {
                 )}
               >
                 <div className="min-h-0">
-                  {item.children.map((child) => (
-                    <div key={child.href}>
-                      <Link
-                        href={child.href}
-                        onClick={onClose}
-                        className="block rounded-md py-2.5 pl-6 text-sm text-white/70 hover:bg-white/10 hover:text-primary-gold"
-                      >
-                        {child.label}
-                      </Link>
-                      {/* Nested group (About → Our Management) stays expanded on mobile. */}
-                      {child.children?.map((leaf) => (
-                        <Link
-                          key={leaf.href}
-                          href={leaf.href}
-                          onClick={onClose}
-                          className="block rounded-md py-2 pl-10 text-sm text-white/60 hover:bg-white/10 hover:text-primary-gold"
-                        >
-                          {leaf.label}
+                  <div className="mt-1.5 rounded-[14px] border border-white/10 bg-white/[0.06] p-2">
+                    {item.children.map((child) => (
+                      <div key={child.href}>
+                        <Link href={child.href} onClick={onClose} className={itemClasses}>
+                          {child.label}
                         </Link>
-                      ))}
-                    </div>
-                  ))}
+                        {/* Nested group (About -> Our Management) stays expanded on mobile. */}
+                        {child.children ? (
+                          <div className="ml-2.5 mt-2 rounded-[14px] border border-white/[0.12] bg-white/[0.06] p-2">
+                            {child.children.map((leaf) => (
+                              <Link
+                                key={leaf.href}
+                                href={leaf.href}
+                                onClick={onClose}
+                                className={itemClasses}
+                              >
+                                {leaf.label}
+                              </Link>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           );
         })}
-        <Button href="/contact" onClick={onClose} className="mt-4 justify-center">
+        <Button href="/contact" onClick={onClose} className="mt-4 w-full rounded-[14px]">
           Contact Us
         </Button>
       </div>

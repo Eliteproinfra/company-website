@@ -6,18 +6,26 @@ type PaginationProps = {
   onPageChange: (page: number) => void;
 };
 
+/** Live properties.php pagination is Bootstrap's `.page-link` (#0d6efd on white, #dee2e6
+ *  border, #e9ecef hover fill) with the active page overridden to `.bg-gold.border-gold`. */
+const linkBase =
+  "border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:shadow-btn-focus";
+
 export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <nav aria-label="Pagination" className="mt-12 flex items-center justify-center gap-2">
+    <nav aria-label="Pagination" className="mt-12 flex items-center justify-center">
       <button
         type="button"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
-        className="rounded-lg px-4 py-2 text-sm text-dark-black transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:text-neutral-300 disabled:hover:bg-transparent"
+        className={clsx(
+          linkBase,
+          "rounded-l-md border-bs-border bg-white text-bs-link hover:bg-bs-dropdown-hover hover:text-bs-link-hover disabled:cursor-not-allowed disabled:text-bs-muted disabled:hover:bg-white"
+        )}
       >
         Previous
       </button>
@@ -28,10 +36,11 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
           onClick={() => onPageChange(page)}
           aria-current={page === currentPage ? "page" : undefined}
           className={clsx(
-            "rounded-lg px-4 py-2 text-sm transition-colors",
+            linkBase,
+            "-ml-px",
             page === currentPage
-              ? "bg-gradient-to-br from-primary-gold to-secondary-gold font-bold text-[#111827]"
-              : "text-dark-black hover:bg-neutral-100"
+              ? "z-[1] border-primary-gold bg-primary-gold text-white"
+              : "border-bs-border bg-white text-bs-link hover:bg-bs-dropdown-hover hover:text-bs-link-hover"
           )}
         >
           {page}
@@ -41,7 +50,10 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         type="button"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
-        className="rounded-lg px-4 py-2 text-sm text-dark-black transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:text-neutral-300 disabled:hover:bg-transparent"
+        className={clsx(
+          linkBase,
+          "-ml-px rounded-r-md border-bs-border bg-white text-bs-link hover:bg-bs-dropdown-hover hover:text-bs-link-hover disabled:cursor-not-allowed disabled:text-bs-muted disabled:hover:bg-white"
+        )}
       >
         Next
       </button>

@@ -1,58 +1,53 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import AwardsGrid from "@/components/awards/AwardsGrid";
 import PageHero from "@/components/ui/PageHero";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Faq from "@/components/home/Faq";
 import { awardImages } from "@/lib/data/awards";
-import { awardsFaqs } from "@/lib/data/awardsFaq";
+import { homeFaqs } from "@/lib/data/faq";
 
 export const metadata: Metadata = {
   title: "Awards & Recognitions",
   description: "Honoring our commitment to excellence and innovation in real estate.",
 };
 
+/*
+ * awards.php: .awards-hero (.6 -> .7 over the trophy photo, 40vh, uppercase title, breadcrumb
+ * "Awards"), .awards-gallery-section ("Our Achievements", gold radial to white with the
+ * repeating trophy line-art at 18%), then the same skyline #faq block and FAQs as the home page.
+ */
 export default function AwardsPage() {
   return (
     <>
       <PageHero
-        image="/images/heroes/awards.jpg"
+        image="/images/bg/awards-trophy.jpg"
         title="Awards & Recognitions"
-        breadcrumbCurrent="Awards & Recognitions"
+        breadcrumbCurrent="Awards"
+        height="40vh"
+        overlay="bg-linear-to-b from-black/60 to-black/70"
+        uppercase
       />
 
-      <section className="bg-white py-20">
-        <div className="container">
+      <section className="relative overflow-hidden bg-awards-gallery py-20">
+        <div className="absolute inset-0 bg-trophy-pattern opacity-[0.18]" aria-hidden="true" />
+        <div className="container relative z-[1]">
           <SectionHeading
-            eyebrow="Recognized For Excellence"
-            title="Honoring Our Commitment to Excellence"
+            title="Our Achievements"
             description="Honoring our commitment to excellence and innovation in real estate."
           />
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {awardImages.map((image) => (
-              <div
-                key={image}
-                className="flex aspect-square items-center justify-center rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm"
-              >
-                <Image
-                  src={image}
-                  alt="Elite Pro Infraventure award recognition"
-                  width={140}
-                  height={140}
-                  className="h-auto max-h-full w-auto max-w-full object-contain"
-                />
-              </div>
-            ))}
-          </div>
+          <AwardsGrid images={awardImages} />
         </div>
       </section>
 
-      <section className="bg-neutral-50 py-20">
-        <div className="container">
+      <section className="relative bg-faq-section py-20 text-white">
+        <div className="absolute inset-0 bg-overlay-dark" aria-hidden="true" />
+        <div className="container relative z-[1]">
           <SectionHeading
             title="Frequently Asked Questions"
             description="Common queries about real estate investment"
+            dark
           />
-          <Faq items={awardsFaqs} />
+          <Faq items={homeFaqs} dark />
         </div>
       </section>
     </>

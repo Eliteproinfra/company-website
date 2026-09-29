@@ -1,77 +1,18 @@
 import type { PropertyItem } from "@/lib/types";
+import { propertyDetails } from "@/lib/data/propertyDetails";
 
-// Real "Featured Property Cards" from the live /properties page
-export const featuredProperties: PropertyItem[] = [
-  {
-    image: "/images/properties/banner_1773918255_69bbd82fbdbd5.jpg",
-    badgeText: "Residential",
-    badgeVariant: "residential",
-    title: "Oberoi 360 North Gurgaon",
-    location: "Gurgaon",
-    price: "₹ 18.75 Cr*",
-  },
-  {
-    image: "/images/properties/banner_1774078591_69be4a7fe313b.jpg",
-    badgeText: "Commercial",
-    badgeVariant: "commercial",
-    title: "M3M Paragon Office Space",
-    location: "Gurgaon",
-    price: "₹ 3.50 Cr*",
-  },
-  {
-    image: "/images/properties/banner_1774083419_69be5d5bd3591.webp",
-    badgeText: "Commercial",
-    badgeVariant: "commercial",
-    title: "Emaar India Business Centre",
-    location: "Gurgaon",
-    price: "₹ 4 Cr Onwards*",
-  },
-  {
-    image: "/images/properties/banner_1774079432_69be4dc832da7.jpg",
-    badgeText: "SCO Plots",
-    badgeVariant: "sco",
-    title: "India WorldMart",
-    location: "Gurgaon",
-    price: "₹ 4 Cr Onwards*",
-  },
-  {
-    image: "/images/properties/banner_1774082320_69be59106d5be.png",
-    badgeText: "Residential",
-    badgeVariant: "residential",
-    title: "Westin Residences",
-    location: "Gurgaon",
-    price: "₹ 7 Cr Onwards*",
-  },
-  {
-    image: "/images/properties/banner_1774080090_69be505a86691.jpeg",
-    badgeText: "Residential",
-    badgeVariant: "residential",
-    title: "Mahindra Luminare",
-    location: "Gurgaon",
-    price: "On Request*",
-  },
-  {
-    image: "/images/property-categories/cat_1773828639_69ba7a1f2c5ab.jpg",
-    badgeText: "Residential",
-    badgeVariant: "residential",
-    title: "DLF The Grove",
-    location: "Gurgaon",
-    price: "₹ 8.24 - 15.38 Cr*",
-  },
-  {
-    image: "/images/property-categories/cat_1773829073_69ba7bd16f4e4.jpg",
-    badgeText: "Residential",
-    badgeVariant: "residential",
-    title: "Godrej Vrikshya",
-    location: "Gurgaon",
-    price: "₹ 3.81 - 5.66 Cr*",
-  },
-  {
-    image: "/images/property-categories/cat_1773829112_69ba7bf8e0155.jpg",
-    badgeText: "Residential",
-    badgeVariant: "residential",
-    title: "Tulip Crimson",
-    location: "Gurgaon",
-    price: "₹ 5.56 Cr*",
-  },
-];
+/**
+ * The live /properties "Featured Collection" is every listing, newest first, nine per page.
+ * Derived from the detail records so titles, prices, badges and hero images stay in sync.
+ */
+export const featuredProperties: PropertyItem[] = propertyDetails
+  .filter((property) => property.id >= 112)
+  .map((property) => ({
+    image: property.images[0],
+    badgeText: property.category,
+    badgeVariant: property.badgeVariant,
+    title: property.title,
+    location: property.location,
+    price: property.price,
+    href: `/properties/${property.slug}`,
+  }));

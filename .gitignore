@@ -40,3 +40,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# infected snapshot of a hacked webroot - never commit, never re-upload
+/_public_html/
+
+# Admin uploads (generated at runtime, not source)
+/public/uploads/
+
+# Local Windows shortcut to out/, not source
+/out - Shortcut.lnk

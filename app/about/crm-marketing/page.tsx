@@ -14,21 +14,23 @@ export default function CrmMarketingPage() {
   return (
     <>
       <PageHero
-        image="/images/heroes/crm-marketing.jpg"
+        image="/images/bg/crm-desk.jpg"
         title="CRM & Accounts"
+        description="Ensuring Seamless Operations &amp; Client Satisfaction"
         breadcrumbCurrent="CRM & Marketing"
+        hideBreadcrumb
+        height="75vh"
+        overlay="bg-black/60"
       />
 
       <section className="bg-white py-20">
         <div className="container">
           <div className="mx-auto mb-12 max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-[2px] text-primary-gold">
-              Ensuring Seamless Operations &amp; Client Satisfaction
-            </p>
-            <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
+            <h2 className="text-3xl font-bold uppercase tracking-[2px] text-dark-black sm:text-4xl">
               Client Support &amp; Finance
             </h2>
-            <p className="mt-5 text-neutral-500">
+            <div className="mx-auto mt-4 h-[3px] w-[60px] bg-primary-gold" />
+            <p className="mt-5 text-muted">
               The backbone of our customer relationships and financial integrity.
             </p>
           </div>
@@ -39,17 +41,19 @@ export default function CrmMarketingPage() {
             ))}
           </div>
 
-          <div className="mt-14 text-center">
-            <h3 className="text-xl font-bold text-dark-black">
+        </div>
+      </section>
+
+      {/* Live `section.py-5.bg-dark-black.text-white` closing CTA */}
+      <section className="bg-dark-radial py-16 text-white">
+        <div className="container flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <div>
+            <h3 className="text-2xl font-bold text-white">
               Need assistance with your account?
             </h3>
-            <p className="mt-2 text-neutral-500">
-              Our support team is here to help you with any queries.
-            </p>
-            <div className="mt-6">
-              <Button href="/contact">Get Support</Button>
-            </div>
+            <p className="mt-2 text-white/50">Our support team is here to help you with any queries.</p>
           </div>
+          <Button href="/contact">Get Support</Button>
         </div>
       </section>
     </>

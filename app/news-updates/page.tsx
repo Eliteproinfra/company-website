@@ -22,9 +22,9 @@ const newsItems = articlesByKind("news").map((article) => ({
 export default function NewsUpdatesPage() {
   return (
     <>
-      <PageHero image="/images/heroes/news-updates.jpg" title="News & Updates" breadcrumbCurrent="News & Updates" />
+      <PageHero image="/images/heroes/news-updates.jpg" title="News & Updates" breadcrumbCurrent="News & Updates" uppercase overlay="bg-linear-to-b from-black/70 to-black/80" />
 
-      <section className="bg-white py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {newsItems.map((item, index) => (

@@ -13,6 +13,12 @@ type HeroCarouselProps = {
   intervalMs?: number;
 };
 
+/**
+ * Live `.hero-carousel`: the slide image is shown at full opacity with a transparent
+ * `.overlay` (no dimming). Caption: h5 `.text-gold`, h1 white, p `.text-white-50`.
+ * Bootstrap controls are plain white glyphs at 50% opacity (90% on hover); indicators
+ * are 40x4 white bars at 50% opacity, 100% when active.
+ */
 function Carousel({
   slides,
   intervalMs,
@@ -65,15 +71,8 @@ function Carousel({
               preload={priority && slideIndex === 0}
               sizes="100vw"
               style={{ objectPosition: slide.imagePosition ?? "center" }}
-              className={clsx(
-                "object-cover",
-                isActive && "animate-kenburns",
-                slide.heading && "opacity-70"
-              )}
+              className={clsx("object-cover", isActive && "animate-kenburns")}
             />
-            {slide.heading ? (
-              <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
-            ) : null}
 
             {slide.heading ? (
               <div
@@ -84,14 +83,14 @@ function Carousel({
               >
                 <div className={clsx("container", isActive && "animate-fade-in-up")}>
                   {slide.eyebrow ? (
-                    <p className="mb-3 text-sm font-bold uppercase tracking-[2px] text-primary-gold">
+                    <p className="mb-3 text-[0.95rem] uppercase tracking-[2px] text-primary-gold">
                       {slide.eyebrow}
                     </p>
                   ) : null}
-                  <p className="text-3xl font-bold [text-shadow:2px_2px_10px_rgba(0,0,0,0.5)] sm:text-4xl lg:text-5xl">
+                  <p className="text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
                     {slide.heading}
                   </p>
-                  <p className="mt-5 max-w-3xl text-lg font-light text-white/70 sm:text-xl">
+                  <p className="mt-5 max-w-3xl text-lg font-light text-white/50 sm:text-xl">
                     {slide.subheading}
                   </p>
                   {slide.showCta ? (
@@ -118,20 +117,20 @@ function Carousel({
         type="button"
         onClick={prev}
         aria-label="Previous slide"
-        className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/25 sm:left-6"
+        className="absolute left-2 top-1/2 z-10 -translate-y-1/2 p-3 text-white opacity-50 transition-opacity hover:opacity-90 sm:left-6"
       >
-        <i className="fas fa-chevron-left" aria-hidden="true" />
+        <i className="fas fa-chevron-left text-xl" aria-hidden="true" />
       </button>
       <button
         type="button"
         onClick={next}
         aria-label="Next slide"
-        className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/25 sm:right-6"
+        className="absolute right-2 top-1/2 z-10 -translate-y-1/2 p-3 text-white opacity-50 transition-opacity hover:opacity-90 sm:right-6"
       >
-        <i className="fas fa-chevron-right" aria-hidden="true" />
+        <i className="fas fa-chevron-right text-xl" aria-hidden="true" />
       </button>
 
-      <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+      <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-[3px]">
         {slides.map((_, i) => (
           <button
             key={i}
@@ -140,8 +139,8 @@ function Carousel({
             aria-label={`Go to slide ${i + 1}`}
             aria-current={i === index}
             className={clsx(
-              "h-2 rounded-full transition-all",
-              i === index ? "w-6 bg-primary-gold" : "w-2 bg-white/50 hover:bg-white/80"
+              "h-1 w-10 rounded-[2px] bg-white transition-opacity",
+              i === index ? "opacity-100" : "opacity-50"
             )}
           />
         ))}

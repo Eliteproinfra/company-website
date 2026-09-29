@@ -4,7 +4,7 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 
 const inputClass =
-  "rounded-lg border border-neutral-200 px-4 py-3 focus:border-primary-gold focus:outline-none focus:ring-1 focus:ring-primary-gold";
+  "rounded-md border-0 bg-bs-light px-3 py-3.5 text-bs-dark placeholder:text-bs-muted focus:outline-none";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -19,7 +19,7 @@ export default function HomeEnquiryForm() {
           <i className="fas fa-check" aria-hidden="true" />
         </div>
         <h4 className="mt-4 font-bold text-dark-black">Thank you for reaching out</h4>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-muted">
           We&apos;ve received your enquiry and will get back to you shortly.
         </p>
         <button
@@ -105,7 +105,7 @@ export default function HomeEnquiryForm() {
         name="interest"
         defaultValue=""
         required
-        className={`${inputClass} text-neutral-500`}
+        className={`${inputClass} text-bs-muted`}
       >
         <option value="" disabled>
           Select Interest

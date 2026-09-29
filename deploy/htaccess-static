@@ -1,0 +1,34 @@
+# Apache/LiteSpeed rules for the static export in out/.
+# scripts/export.sh copies this file into out/.htaccess.
+#
+# Only needed for file-based hosting (Hostinger shared/Cloud hPanel). The VPS
+# deployment runs the real Node server and ignores this file entirely.
+
+# The redirect that next.config.ts serves in server mode. Static exports cannot
+# express redirects, so it is restated here.
+Redirect 301 /property-management /services/property-management
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Build assets carry a content hash in the filename, so they can be cached
+    # indefinitely — a changed file gets a changed URL.
+    <FilesMatch "\.(js|css|woff2)$">
+        ExpiresDefault "access plus 1 year"
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|svg|ico)$">
+        ExpiresDefault "access plus 30 days"
+    </FilesMatch>
+    # HTML must revalidate, otherwise a content update stays invisible to anyone
+    # who already visited.
+    <FilesMatch "\.html$">
+        ExpiresDefault "access plus 0 seconds"
+        Header set Cache-Control "public, max-age=0, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
+ErrorDocument 404 /404.html

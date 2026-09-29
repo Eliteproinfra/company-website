@@ -4,7 +4,6 @@ import LocalityCard from "@/components/properties/LocalityCard";
 import PropertyBrowser from "@/components/properties/PropertyBrowser";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
-import Separator from "@/components/ui/Separator";
 import { categories } from "@/lib/data/categories";
 import { localities } from "@/lib/data/localities";
 import { featuredProperties } from "@/lib/data/properties";
@@ -17,6 +16,11 @@ export const metadata: Metadata = {
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 
+/*
+ * Live properties.php order: .properties-hero (.6 flat), .search-filter-section overlapping the
+ * hero, "Top Localities to Invest" (h3, left), the four .category-cards, "Featured Collection"
+ * on white with 9 cards per page, then the .bg-light market copy.
+ */
 export default function PropertiesPage() {
   return (
     <>
@@ -25,47 +29,46 @@ export default function PropertiesPage() {
         title="Premium Properties"
         breadcrumbCurrent="Properties"
         height="75vh"
+        overlay="bg-black/60"
       />
-
-      <section className="bg-white py-20">
-        <div className="container">
-          <div className="mb-10 text-center">
-            <h2 className="text-2xl font-bold text-dark-black sm:text-3xl">
-              Top Localities to Invest
-            </h2>
-            <Separator className="mt-4" />
-          </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {localities.map((locality, index) => (
-              <Reveal key={locality.name} delay={delaySequence[index % delaySequence.length]}>
-                <LocalityCard {...locality} />
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white pb-20">
-        <div className="container">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {categories.map((category, index) => (
-              <Reveal key={category.title} delay={delaySequence[index % delaySequence.length]}>
-                <CategoryCard {...category} />
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <PropertyBrowser
         properties={featuredProperties}
         locations={["All Locations", "Delhi", "Dubai", "Faridabad", "Gurgaon", "Manesar", "Noida"]}
         types={["All Types", "Commercial", "Industrial Plots", "Residential", "SCO Plots"]}
+        between={
+          <>
+            <section className="bg-white py-12">
+              <div className="container">
+                <h3 className="mb-2 text-2xl font-bold text-dark-black">Top Localities to Invest</h3>
+                <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {localities.map((locality, index) => (
+                    <Reveal key={locality.name} delay={delaySequence[index % delaySequence.length]}>
+                      <LocalityCard {...locality} />
+                    </Reveal>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-white pb-12">
+              <div className="container">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {categories.map((category, index) => (
+                    <Reveal key={category.title} delay={delaySequence[index % delaySequence.length]}>
+                      <CategoryCard {...category} />
+                    </Reveal>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        }
       />
 
-      <section className="bg-neutral-50 py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
-          <div className="mx-auto max-w-4xl text-neutral-600">
+          <div className="mx-auto max-w-4xl text-muted-2">
             <h2 className="text-center text-3xl font-bold text-dark-black">
               Real Estate Market in Gurgaon &amp; Delhi NCR
             </h2>

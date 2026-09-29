@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Snapshot of a hacked webroot kept only as evidence — an older static export of
+    // this site plus injected malware. Not project source; its minified bundles are
+    // the only thing in the repo that trips the linter.
+    "_public_html/**",
   ]),
 ]);
 

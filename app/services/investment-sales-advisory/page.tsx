@@ -29,12 +29,16 @@ export default function InvestmentSalesAdvisoryPage() {
         eyebrow="Investment Sales Advisory"
         heading={
           <>
-            Maximizing Value. <span className="text-primary-gold">Minimizing Risk.</span>
+            Maximizing Value.
+            <br />
+            Minimizing Risk.
           </>
         }
         description="Data-driven strategies and expert guidance to help you navigate complex real estate transactions with confidence."
-        primaryCta={{ label: "Schedule Consultation", href: "/contact" }}
+        primaryCta={{ label: "Schedule Consultation", href: "#consultation" }}
         secondaryCta={{ label: "Explore Services", href: "#services" }}
+        overlay="bg-linear-to-r from-black/80 to-black/40"
+        minHeight="min-h-[85vh]"
       />
 
       <section className="bg-white py-20">
@@ -46,12 +50,12 @@ export default function InvestmentSalesAdvisoryPage() {
             <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
               Unlock the Full Potential of Your Real Estate Portfolio
             </h2>
-            <p className="mt-5 text-neutral-500">
+            <p className="mt-5 text-muted">
               At Elite Pro Infra, we go beyond traditional brokerage. We act as your strategic
               partners, leveraging deep market intelligence and a global network to deliver
               customized investment solutions.
             </p>
-            <p className="mt-4 text-neutral-500">
+            <p className="mt-4 text-muted">
               Whether you are an institutional investor, a private equity firm, or a
               high-net-worth individual, our team provides end-to-end support&mdash;from
               identifying high-yield assets to executing seamless dispositions. We focus on
@@ -62,7 +66,7 @@ export default function InvestmentSalesAdvisoryPage() {
             {investmentFocusAreas.map((area) => (
               <div
                 key={area}
-                className="flex items-center gap-3 rounded-xl border border-neutral-100 bg-neutral-50 p-5"
+                className="flex items-center gap-3 rounded-xl border border-border-card bg-bs-light p-5"
               >
                 <i className="fas fa-check-circle text-primary-gold" aria-hidden="true" />
                 <span className="font-medium text-dark-black">{area}</span>
@@ -74,40 +78,42 @@ export default function InvestmentSalesAdvisoryPage() {
 
       <StatsRow stats={investmentStats} />
 
-      <section id="services" className="bg-white py-20">
+      <section id="services" className="bg-dark-modern py-20 text-white lg:py-[100px]">
         <div className="container">
-          <SectionHeading eyebrow="What We Offer" title="Investment Sales Services" />
+          <SectionHeading eyebrow="What We Offer" title="Investment Sales Services" dark />
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {investmentServices.map((service, index) => (
               <Reveal key={service.title} delay={serviceDelays[index % serviceDelays.length]}>
-                <ServiceCard {...service} href="/contact" />
+                <ServiceCard {...service} href="/contact" variant="dark" />
               </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-neutral-50 py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
           <SectionHeading eyebrow="Our Process" title="How We Work" />
-          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-x-10 gap-y-2 rounded-3xl bg-dark-black p-8 sm:grid-cols-2 sm:p-12">
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-x-10 py-[50px] sm:grid-cols-2">
             {investmentProcess.map((step) => (
-              <ProcessStep key={step.number} {...step} />
+              <ProcessStep key={step.number} {...step} tone="light" />
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-20">
-        <div className="container text-center">
-          <h2 className="text-2xl font-bold text-dark-black sm:text-3xl">
+      <section id="consultation" className="bg-primary-gold py-20 text-center text-white">
+        <div className="container">
+          <h2 className="text-2xl font-bold sm:text-3xl">
             Ready to optimize your real estate strategy?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-neutral-500">
+          <p className="mx-auto mt-4 max-w-xl text-lg">
             Partner with Elite Pro Infra for world-class investment advisory.
           </p>
           <div className="mt-8">
-            <Button href="/contact">Get in Touch</Button>
+            <Button href="/contact" variant="light">
+              Get in Touch
+            </Button>
           </div>
         </div>
       </section>

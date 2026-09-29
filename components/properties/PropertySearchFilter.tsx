@@ -11,8 +11,8 @@ type PropertySearchFilterProps = {
 };
 
 const selectClasses =
-  "w-full rounded-md border border-neutral-200 px-3 py-2.5 text-dark-black focus:border-primary-gold focus:outline-none";
-const labelClasses = "mb-2 block text-xs font-bold uppercase tracking-wide text-neutral-500";
+  "w-full rounded-md border border-bs-border px-3 py-2.5 text-bs-dark focus:border-primary-gold focus:outline-none";
+const labelClasses = "mb-2 block text-xs font-bold uppercase tracking-wide text-bs-muted";
 
 export default function PropertySearchFilter({
   locations,
@@ -24,7 +24,7 @@ export default function PropertySearchFilter({
   const [type, setType] = useState(types[0]);
 
   return (
-    <div className="relative z-10 -mt-14 rounded-xl border-t-4 border-primary-gold bg-white p-6 shadow-[0_5px_20px_rgba(0,0,0,0.08)] sm:p-8">
+    <div className="relative z-10 -mt-14 rounded-lg border-t-4 border-primary-gold bg-white p-6 shadow-card sm:p-8">
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -75,13 +75,13 @@ export default function PropertySearchFilter({
               type="text"
               placeholder="Any Budget"
               disabled
-              className={clsx(selectClasses, "cursor-not-allowed bg-neutral-50 text-neutral-400")}
+              className={clsx(selectClasses, "cursor-not-allowed bg-bs-light text-muted-4")}
             />
           </div>
         ) : null}
         <button
           type="submit"
-          className="rounded-xl bg-gradient-to-br from-primary-gold to-secondary-gold px-4 py-2.5 font-bold uppercase tracking-[0.8px] text-[#111827] transition-all hover:brightness-105"
+          className="rounded-xl border border-black/[0.08] bg-gold-gradient px-4 py-2.5 font-bold uppercase tracking-[0.8px] text-ink shadow-btn-gold transition-all hover:brightness-[1.03]"
         >
           Search Properties
         </button>

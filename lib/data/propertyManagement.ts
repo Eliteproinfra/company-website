@@ -1,80 +1,107 @@
 import type { IconTextItem, ProcessStepItem } from "@/lib/types";
 
-export const whyChooseUsFeatures: IconTextItem[] = [
-  { icon: "fas fa-shield-alt", title: "Safety First", description: "End-to-end security protocols" },
-  { icon: "fas fa-chart-line", title: "Max ROI", description: "Consistent value appreciation" },
-  { icon: "fas fa-broom", title: "Upkeep", description: "Proactive upkeep and maintenance" },
+/**
+ * Live's "Why Owners Trust Us?" check-list, sitting under the section copy. Rendered as a
+ * bold label plus sentence, so no per-item icon.
+ */
+export const pmTrustPoints: { title: string; description: string }[] = [
+  { title: "Verified Tenants", description: "Rigorous background checks and credit scoring." },
   {
-    icon: "fas fa-file-contract",
-    title: "Compliance",
-    description: "Full regulatory and legal compliance",
+    title: "Proactive Maintenance",
+    description: "Regular inspections to prevent costly repairs.",
+  },
+  { title: "Legal Safeguards", description: "Iron-clad rental agreements and dispute resolution." },
+  {
+    title: "Tech-Enabled",
+    description: "Real-time dashboard for owners to track rent and expenses.",
   },
 ];
 
-// Live site's "Full-Spectrum Management" — 8 core offerings
+export const whyChooseUsFeatures: IconTextItem[] = [
+  {
+    icon: "fas fa-user-shield",
+    title: "Safety First",
+    description: "Tenant verification & security audits.",
+  },
+  {
+    icon: "fas fa-wallet",
+    title: "Max ROI",
+    description: "Strategic pricing & minimal vacancy.",
+  },
+  { icon: "fas fa-tools", title: "Upkeep", description: "24/7 maintenance support." },
+  {
+    icon: "fas fa-file-contract",
+    title: "Compliance",
+    description: "Legal & tax assistance.",
+  },
+];
+
+/** Live's "Full-Spectrum Management" — 8 core offerings, copy and icons match the PHP page. */
 export const pmServices: IconTextItem[] = [
   {
-    icon: "fas fa-magnifying-glass",
+    icon: "fas fa-search-location",
     title: "Tenant Discovery",
-    description: "Proactive sourcing and screening of quality, verified tenants.",
+    description:
+      "Marketing your property on premium platforms, conducting viewings, and selecting high-quality tenants.",
   },
   {
     icon: "fas fa-file-signature",
     title: "Lease Management",
-    description: "End-to-end lease drafting, renewals, and compliance handling.",
+    description:
+      "Drafting legally sound agreements, handling renewals, and managing move-in/move-out formalities.",
   },
   {
-    icon: "fas fa-rupee-sign",
+    icon: "fas fa-hand-holding-usd",
     title: "Rent Collection",
-    description: "Reliable, on-time rent collection with zero default guarantee.",
+    description: "Automated invoicing and follow-ups to ensure rent is deposited on time.",
   },
   {
-    icon: "fas fa-tools",
+    icon: "fas fa-hard-hat",
     title: "Maintenance & Repairs",
-    description: "Proactive maintenance schedules and rapid repair response.",
+    description: "Coordinating with vetted vendors for all maintenance work.",
   },
   {
     icon: "fas fa-clipboard-check",
     title: "Regular Inspections",
-    description: "Scheduled property inspections to protect your asset's condition.",
+    description: "Periodic property visits with detailed reports.",
   },
   {
-    icon: "fas fa-chart-bar",
+    icon: "fas fa-file-invoice-dollar",
     title: "Financial Reporting",
-    description: "Monthly statements, tax documentation, and ROI analysis.",
+    description: "Quarterly statements of income and expenses.",
   },
   {
     icon: "fas fa-headset",
     title: "Tenant Support",
-    description: "Round-the-clock support to keep tenants satisfied and retained.",
+    description: "Responsive support for tenant queries and requests.",
   },
   {
-    icon: "fas fa-arrow-trend-up",
+    icon: "fas fa-chart-line",
     title: "Yield Optimization",
-    description: "Data-driven pricing strategies to maximize rental yield.",
+    description: "Data-backed recommendations to improve rental yield.",
   },
 ];
 
-// Live site's 4-stage workflow
+/** Live's 4-stage workflow. */
 export const processSteps: ProcessStepItem[] = [
   {
     number: "01",
     title: "Onboarding",
-    description: "Property audits and a customized management plan.",
+    description: "Initial audit and recommendations to make the property market-ready.",
   },
   {
     number: "02",
     title: "Marketing & Tenant Search",
-    description: "Professional listings and rigorous tenant screening.",
+    description: "Listings and screening to find the right tenant.",
   },
   {
     number: "03",
     title: "Agreement & Move-In",
-    description: "Lease agreements, documentation, and smooth move-in.",
+    description: "Paperwork, deposit collection, and move-in checks.",
   },
   {
     number: "04",
     title: "Ongoing Management",
-    description: "Rent collection, maintenance, and regular owner updates.",
+    description: "Rent collection, maintenance, and owner updates.",
   },
 ];

@@ -22,9 +22,9 @@ const blogPosts = articlesByKind("blog").map((article) => ({
 export default function InsightsBlogPage() {
   return (
     <>
-      <PageHero image="/images/heroes/insights-blog.webp" title="Insights & Blogs" breadcrumbCurrent="Insights & Blogs" />
+      <PageHero image="/images/heroes/insights-blog.webp" title="Insight & Blog" breadcrumbCurrent="Insight & Blog" uppercase overlay="bg-linear-to-b from-black/70 to-black/80" />
 
-      <section className="bg-white py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {blogPosts.map((item, index) => (

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
-import IconBadge from "@/components/ui/IconBadge";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import VisionMissionCard from "@/components/about/VisionMissionCard";
@@ -111,6 +110,11 @@ const coreValues = [
   },
 ];
 
+/*
+ * Section backgrounds follow live our-story.php: intro white, timeline .bg-light,
+ * mission .bg-dark-black (gold radial to #111827 + greyscale skyline + .8->.9 overlay),
+ * values white, closing CTA .bg-gold with a Bootstrap .btn-dark.
+ */
 export default function AboutPage() {
   return (
     <>
@@ -126,11 +130,11 @@ export default function AboutPage() {
             <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
               More Than Just Real Estate
             </h2>
-            <p className="mt-5 text-neutral-500">
+            <p className="mt-5 text-muted">
               We believe that every property transaction is the beginning of a new chapter. Our
               story is written in the satisfaction of our clients and the skylines we help shape.
             </p>
-            <p className="mt-4 text-neutral-500">
+            <p className="mt-4 text-muted">
               Elite Pro Infra stands as a beacon of trust in the Indian real estate market. With a
               deep understanding of property dynamics and a client-centric approach, we navigate
               the complexities of real estate to deliver seamless, profitable, and enduring
@@ -146,16 +150,28 @@ export default function AboutPage() {
       </section>
 
       {/* Journey Timeline */}
-      <section className="bg-neutral-50 py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
           <SectionHeading eyebrow="Our Path" title="The Journey of Excellence" />
           <JourneyTimeline steps={timeline} />
         </div>
       </section>
 
-      {/* Mission & Vision */}
-      <section className="bg-white py-20">
-        <div className="container">
+      {/* Mission & Vision — live `.story-mission.bg-dark-black` */}
+      <section className="relative overflow-hidden bg-dark-radial py-20 text-white">
+        <Image
+          src="/images/skyline.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          aria-hidden="true"
+          className="object-cover opacity-25 grayscale"
+        />
+        <div
+          className="absolute inset-0 bg-linear-to-b from-black/80 to-black/90"
+          aria-hidden="true"
+        />
+        <div className="container relative z-[1]">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {visionMission.map((item, index) => (
               <Reveal key={item.title} delay={index === 0 ? 0 : 100}>
@@ -167,7 +183,7 @@ export default function AboutPage() {
       </section>
 
       {/* Leadership */}
-      <section className="bg-white pb-20">
+      <section className="bg-white py-20">
         <div className="container">
           <SectionHeading eyebrow="Our Leadership" title="The Force Behind The Vision" />
           <div className="space-y-16">
@@ -178,7 +194,7 @@ export default function AboutPage() {
                 className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12"
               >
                 <div
-                  className={`relative h-[380px] overflow-hidden rounded-2xl bg-neutral-100 lg:col-span-5 ${
+                  className={`relative h-[380px] overflow-hidden rounded-[10px] bg-copyright-bg shadow-[0_10px_30px_rgba(0,0,0,0.1)] lg:col-span-5 ${
                     index % 2 === 1 ? "lg:order-2" : ""
                   }`}
                 >
@@ -191,9 +207,14 @@ export default function AboutPage() {
                   />
                 </div>
                 <div className="lg:col-span-7">
-                  <h3 className="text-2xl font-bold text-dark-black">{leader.name}</h3>
-                  <p className="mt-1 font-semibold text-primary-gold">{leader.title}</p>
-                  <p className="mt-4 leading-[1.9] text-neutral-500">{leader.bio}</p>
+                  <h3 className="text-3xl font-bold text-bs-dark sm:text-4xl lg:text-[3rem]">{leader.name}</h3>
+                  <div className="mb-3 mt-2 h-1 w-20 bg-primary-gold" />
+                  <p className="font-semibold text-dark-black">{leader.title}</p>
+                  {(leader.storyBio ?? [leader.bio]).map((paragraph) => (
+                    <p key={paragraph.slice(0, 40)} className="mt-4 text-dark-black">
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
               </Reveal>
             ))}
@@ -201,17 +222,17 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Core Values */}
-      <section className="bg-neutral-50 py-20">
+      {/* Core Values — live `.value-card.bg-light.rounded-3.shadow-sm.border.transition-hover` */}
+      <section className="bg-white py-20">
         <div className="container">
           <SectionHeading title="Our Core Values" description="The pillars that uphold our legacy" />
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {coreValues.map((item, index) => (
               <Reveal key={item.title} delay={index === 0 ? 0 : ((index * 100) as 100 | 200 | 300)}>
-                <div className="h-full rounded-2xl bg-white p-8 text-center shadow-sm">
-                  <IconBadge icon={item.icon} variant="tinted" className="mx-auto mb-4" />
+                <div className="h-full rounded-lg border border-bs-border bg-bs-light p-6 text-center shadow-bs-sm transition-all duration-300 hover:-translate-y-[5px] hover:bg-gold-tint hover:shadow-bs">
+                  <i className={`${item.icon} mb-3 text-[2.5rem] text-primary-gold`} aria-hidden="true" />
                   <p className="font-bold text-dark-black">{item.title}</p>
-                  <p className="mt-2 text-sm text-neutral-500">{item.description}</p>
+                  <p className="mt-2 text-sm text-muted">{item.description}</p>
                 </div>
               </Reveal>
             ))}
@@ -219,14 +240,14 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Closing CTA */}
-      <section className="bg-gradient-to-br from-primary-gold to-secondary-gold py-16 text-center text-[#1a1200]">
+      {/* Closing CTA — live `section.py-5.bg-gold.text-white` with `.btn-dark` */}
+      <section className="bg-primary-gold py-16 text-center text-white">
         <div className="container">
           <h2 className="text-3xl font-bold sm:text-4xl">Ready to Start Your Journey?</h2>
-          <p className="mt-3 text-[#1a1200]/80">
+          <p className="mt-3 text-white">
             Let us guide you to your dream property with expertise and care.
           </p>
-          <Button href="/contact" variant="dark" className="mt-8">
+          <Button href="/contact" variant="bs-dark" className="mt-8">
             Get in Touch
           </Button>
         </div>

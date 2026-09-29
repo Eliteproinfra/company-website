@@ -11,6 +11,7 @@ type SectionHeadingProps = {
   className?: string;
 };
 
+/** Live `.section-title`: h2 #0a0a0a (or `.text-white`), 80x3 gold separator, p #666 (or `.text-white-50`). */
 export default function SectionHeading({
   eyebrow,
   title,
@@ -33,12 +34,12 @@ export default function SectionHeading({
       >
         {title}
       </h2>
-      {separator ? <Separator align={align} className="mt-4" /> : null}
+      {separator ? <Separator align={align} width={80} className="mt-4" /> : null}
       {description ? (
         <p
           className={clsx(
-            "mt-4 text-text-gray",
-            dark ? "text-white/70" : "text-neutral-500",
+            "mt-4",
+            dark ? "text-white/50" : "text-muted",
             align === "center" && "mx-auto max-w-2xl"
           )}
         >

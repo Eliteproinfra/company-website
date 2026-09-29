@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import ContactInfoCard from "@/components/contact/ContactInfoCard";
 import EnquiryForm from "@/components/contact/EnquiryForm";
 import MapEmbed from "@/components/contact/MapEmbed";
@@ -42,10 +41,11 @@ export default function ContactPage() {
   return (
     <>
       <PageHero
-        image="/images/heroes/contact.jpg"
+        image="/images/bg/contact-city.jpg"
         title="Contact Us"
         breadcrumbCurrent="Contact Us"
         height="75vh"
+        overlay="bg-black/70"
       />
 
       <section className="relative z-10 bg-white pb-20">
@@ -60,7 +60,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="bg-neutral-50 py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
           <SectionHeading
             title="How Can We Help You?"
@@ -83,15 +83,6 @@ export default function ContactPage() {
             title="Our Presence"
             description="Serving clients across key global locations"
           />
-          <Reveal className="mb-10">
-            <Image
-              src="/images/2.png"
-              alt="Map of Elite Pro Infraventure's global office locations across Canada, Dubai, India, and Singapore"
-              width={920}
-              height={520}
-              className="mx-auto w-full max-w-3xl"
-            />
-          </Reveal>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {offices.map((office, index) => (
               <Reveal

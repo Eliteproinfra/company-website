@@ -65,7 +65,7 @@ export default function ReviewsCarousel({
           type="button"
           onClick={() => setIndex((current) => (current - 1 + total) % total)}
           aria-label="Previous reviews"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-dark-black transition-colors hover:border-primary-gold hover:text-primary-gold"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border-pill text-dark-black transition-colors hover:border-primary-gold hover:text-primary-gold"
         >
           <i className="fas fa-chevron-left text-sm" aria-hidden="true" />
         </button>
@@ -79,7 +79,7 @@ export default function ReviewsCarousel({
               aria-current={i === index}
               className={clsx(
                 "h-2 rounded-full transition-all",
-                i === index ? "w-6 bg-primary-gold" : "w-2 bg-neutral-300 hover:bg-neutral-400"
+                i === index ? "w-6 bg-primary-gold" : "w-2 bg-border-pill hover:bg-border-card-strong"
               )}
             />
           ))}
@@ -88,7 +88,7 @@ export default function ReviewsCarousel({
           type="button"
           onClick={() => setIndex((current) => (current + 1) % total)}
           aria-label="Next reviews"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-dark-black transition-colors hover:border-primary-gold hover:text-primary-gold"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border-pill text-dark-black transition-colors hover:border-primary-gold hover:text-primary-gold"
         >
           <i className="fas fa-chevron-right text-sm" aria-hidden="true" />
         </button>

@@ -1,75 +1,84 @@
-import type { IconTextItem } from "@/lib/types";
+import type { IconTextItem, ProcessStepItem } from "@/lib/types";
 
+/** Live's "Land Acquisition Strategies" cards — copy matches land-acquisition.php verbatim. */
 export const acquisitionStrategies: IconTextItem[] = [
   {
     icon: "fas fa-bullseye",
     title: "Goal Determination",
-    description: "Defining project purpose to prevent overspending.",
+    description:
+      "We start by defining the purpose—commercial, residential, or mixed-use. A clear vision prevents overspending and ensures the land serves future scalability.",
   },
   {
     icon: "fas fa-chart-line",
     title: "Market Dynamics",
-    description: "Analyzing demand patterns and infrastructure forecasts.",
+    description:
+      "We analyze demand patterns, price trajectories, and infrastructure forecasts. Identifying areas with upward momentum before they peak is our expertise.",
   },
   {
     icon: "fas fa-scale-balanced",
     title: "Legal & Zoning",
-    description: "Conducting title checks and zoning reviews for regulatory compliance.",
+    description:
+      "Our legal team conducts rigorous title checks and zoning reviews. We ensure no encumbrances, disputes, or environmental restrictions derail your project.",
   },
   {
     icon: "fas fa-road",
     title: "Accessibility Check",
-    description: "Evaluating connectivity to highways, logistics hubs, and transit.",
+    description:
+      "Connectivity drives value. We evaluate proximity to highways, logistics hubs, and future metro lines to ensure seamless access for end-users.",
   },
   {
     icon: "fas fa-people-group",
     title: "Local Relations",
-    description: "Leveraging broker and municipal connections for off-market opportunities.",
+    description:
+      "We leverage deep ties with local brokers, municipal officials, and community leaders to access off-market deals that never hit public listings.",
   },
   {
     icon: "fas fa-calculator",
     title: "ROI Assessment",
-    description: "Calculating returns factoring in development costs and resale value.",
+    description:
+      "We calculate potential returns by factoring in development costs, taxes, and resale value. We ensure the investment makes sense today and tomorrow.",
   },
 ];
 
-export const landRushDrivers: IconTextItem[] = [
+/**
+ * Live renders these as a check-circle list ("Infrastructure Boom:" in bold, then the
+ * sentence), so they carry no per-item icon.
+ */
+export const landRushDrivers: { title: string; description: string }[] = [
   {
-    icon: "fas fa-road-bridge",
     title: "Infrastructure Boom",
-    description: "Expressways and metro expansion unlocking new growth corridors.",
+    description: "New expressways and airports are unlocking value in peripheral regions.",
   },
   {
-    icon: "fas fa-city",
     title: "Urbanization",
-    description: "Rising township demand as cities expand outward.",
+    description: "Rapid migration to Tier-1 cities is driving demand for integrated townships.",
   },
   {
-    icon: "fas fa-file-contract",
     title: "Policy Support",
-    description: "RERA and regulatory reforms bringing greater transparency.",
+    description: "RERA and digital land records have increased transparency and confidence.",
   },
 ];
 
-export const valuePropositions: IconTextItem[] = [
+/** The numbered 01–04 boxes sitting beside "India's Land Rush" on live. */
+export const growthIndicators: ProcessStepItem[] = [
   {
-    icon: "fas fa-map-location-dot",
-    title: "Strategic Location Identification",
-    description: "Ground-level insight into emerging growth corridors.",
+    number: "01",
+    title: "Strategic Location",
+    description: "Identifying growth corridors before the boom.",
   },
   {
-    icon: "fas fa-magnifying-glass",
-    title: "Due Diligence Verification",
-    description: "Rigorous title, legal, and zoning verification.",
+    number: "02",
+    title: "Due Diligence",
+    description: "100% verified titles and clean paperwork.",
   },
   {
-    icon: "fas fa-seedling",
-    title: "Future-Ready Development Potential",
-    description: "Sites selected for long-term development viability.",
+    number: "03",
+    title: "Future Ready",
+    description: "Land parcels suitable for modern mixed-use projects.",
   },
   {
-    icon: "fas fa-arrow-trend-up",
-    title: "High ROI Maximization",
-    description: "Acquisition strategy engineered around maximum returns.",
+    number: "04",
+    title: "High ROI",
+    description: "Maximizing returns through timely acquisition.",
   },
 ];

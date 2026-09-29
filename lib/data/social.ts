@@ -5,7 +5,7 @@ export const socialLinks: SocialLink[] = [
   {
     icon: "fab fa-instagram",
     label: "Instagram",
-    href: "https://www.instagram.com/eliteproinfra?igsh=emwzMnpiZW8zejN4",
+    href: "https://www.instagram.com/eliteproinfra/",
   },
   {
     icon: "fab fa-linkedin-in",

@@ -2,8 +2,20 @@ import clsx from "clsx";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-type Variant = "solid" | "outline" | "outline-light" | "dark";
-type Size = "md" | "sm";
+/**
+ * Variants map 1:1 onto the live site's button classes (values copied from its
+ * style.css / Bootstrap 5.3.2):
+ * - `solid`         -> `.btn-gold`
+ * - `outline`       -> `.btn-outline-gold`
+ * - `outline-light` -> Bootstrap `.btn-outline-light`
+ * - `dark`          -> `.btn-outline-dark`
+ * - `bs-dark`       -> Bootstrap `.btn-dark`
+ * - `light`         -> Bootstrap `.btn-light.text-gold`
+ * - `details`       -> `.property-details .btn`
+ * - `apply`         -> `.apply-btn` (careers job cards)
+ */
+type Variant = "solid" | "outline" | "outline-light" | "dark" | "bs-dark" | "light" | "details" | "apply";
+type Size = "md" | "sm" | "xs";
 
 type CommonProps = {
   children: ReactNode;
@@ -22,21 +34,31 @@ type ButtonProps = CommonProps & {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-xl font-bold uppercase tracking-[0.8px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-gold focus-visible:ring-offset-2";
+  "inline-flex items-center justify-center gap-2 rounded-xl uppercase transition-all duration-200 focus-visible:outline-none focus-visible:shadow-btn-focus";
 
 const sizeClasses: Record<Size, string> = {
   md: "px-[22px] py-3 text-sm",
   sm: "px-4 py-2 text-xs",
+  xs: "px-[15px] py-1.5 text-xs",
 };
 
 const variantClasses: Record<Variant, string> = {
   solid:
-    "border border-black/10 bg-gradient-to-br from-primary-gold to-secondary-gold text-[#111827] shadow-[0_10px_22px_rgba(212,175,55,0.18),0_6px_16px_rgba(0,0,0,0.10)] hover:-translate-y-0.5 hover:brightness-[1.03] hover:shadow-[0_14px_28px_rgba(212,175,55,0.25),0_10px_20px_rgba(0,0,0,0.12)]",
+    "border border-black/[0.08] bg-gold-gradient font-bold tracking-[0.8px] text-ink shadow-btn-gold hover:-translate-y-0.5 hover:brightness-[1.03] hover:shadow-btn-gold-hover",
   outline:
-    "border-2 border-primary-gold/85 bg-primary-gold/10 text-primary-gold hover:-translate-y-0.5 hover:border-transparent hover:bg-gradient-to-br hover:from-primary-gold hover:to-secondary-gold hover:text-[#111827] hover:shadow-[0_12px_22px_rgba(212,175,55,0.22),0_10px_18px_rgba(0,0,0,0.10)]",
+    "border-2 border-primary-gold/85 bg-primary-gold/10 font-bold tracking-[0.8px] text-primary-gold hover:-translate-y-0.5 hover:border-black/[0.08] hover:bg-gold-gradient hover:text-ink hover:shadow-btn-outline-hover",
+  // Renders on live as a white-filled pill with dark text (Bootstrap .btn-outline-light in its hover/active state).
   "outline-light":
-    "border-2 border-white/80 bg-white/10 text-white hover:-translate-y-0.5 hover:bg-white hover:text-dark-black",
-  dark: "border border-black/10 bg-dark-black text-white hover:-translate-y-0.5 hover:bg-light-black",
+    "border border-bs-light bg-bs-light font-bold tracking-[0.8px] text-black hover:border-bs-light-hover-border hover:bg-bs-light-hover",
+  dark: "border-2 border-ink/65 bg-ink/[0.04] font-bold tracking-[0.8px] text-ink hover:-translate-y-0.5 hover:border-ink hover:bg-ink hover:text-white hover:shadow-btn-dark-hover",
+  "bs-dark":
+    "border border-bs-dark bg-bs-dark font-bold tracking-[0.3px] text-white hover:border-bs-dark-hover-border hover:bg-bs-dark-hover",
+  light:
+    "border border-bs-light bg-bs-light font-bold tracking-[0.3px] text-primary-gold hover:border-bs-light-hover-border hover:bg-bs-light-hover",
+  apply:
+    "rounded-full border-0 bg-dark-black font-semibold normal-case tracking-normal text-white hover:bg-primary-gold hover:text-white",
+  details:
+    "rounded-full border border-dark-black bg-dark-black font-semibold tracking-[1px] text-primary-gold hover:-translate-y-0.5 hover:border-primary-gold hover:bg-primary-gold hover:text-white hover:shadow-details-hover",
 };
 
 export default function Button({

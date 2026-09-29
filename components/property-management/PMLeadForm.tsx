@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const inputClasses =
-  "h-[58px] rounded-xl border border-white/20 bg-white/10 px-4 text-white placeholder:text-white/60 focus:border-primary-gold focus:outline-none";
+  "h-[58px] rounded-[10px] border border-white/[0.18] border-b-2 border-b-white/35 bg-white/[0.06] px-4 text-white placeholder:text-white/65 focus:border-primary-gold focus:outline-none";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -78,7 +78,7 @@ export default function PMLeadForm() {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="flex h-[58px] items-center justify-center rounded-xl bg-gradient-to-br from-primary-gold to-secondary-gold px-4 font-bold uppercase tracking-[0.8px] text-[#111827] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+        className="flex h-[58px] items-center justify-center rounded-[10px] border border-black/[0.08] bg-gold-gradient px-4 font-bold uppercase tracking-[0.8px] text-ink shadow-btn-gold transition-all hover:brightness-[1.03] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {status === "submitting" ? "Submitting…" : "Get Free Consultation"}
       </button>

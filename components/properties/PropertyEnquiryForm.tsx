@@ -118,7 +118,7 @@ export default function PropertyEnquiryForm({ propertyTitle }: { propertyTitle: 
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="w-full rounded-xl bg-gradient-to-br from-primary-gold to-secondary-gold px-4 py-2.5 text-sm font-bold uppercase tracking-[0.8px] text-[#111827] transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-gold-gradient px-4 py-2.5 text-sm font-bold uppercase tracking-[0.8px] text-ink transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {status === "submitting" ? "Sending…" : "Send Message"}
         </button>

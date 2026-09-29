@@ -1,30 +1,50 @@
-export type Pillar = { image: string; icon: string; title: string; description: string };
+export type Pillar = {
+  image: string;
+  icon: string;
+  /** Small gold uppercase tag, e.g. "Women Empowerment". */
+  tag: string;
+  title: string;
+  description: string;
+};
 
+/** Live social-commitment.php `.csr-pillars-card`s, verbatim. */
 export const pillars: Pillar[] = [
   {
     image: "/images/social-commitment/pillar_1_1774092712_69be81a8aa2b6.webp",
-    icon: "fas fa-venus",
-    title: "Women Empowerment",
+    icon: "fas fa-star",
+    tag: "Women Empowerment",
+    title: "Creating independent futures",
     description:
-      "Skill-building, financial literacy, and livelihood initiatives enabling financial independence.",
+      "Skill-building, financial literacy, and livelihood initiatives that help women lead financially independent and confident lives.",
   },
   {
     image: "/images/social-commitment/pillar_2_1774092712_69be81a8aa4df.webp",
-    icon: "fas fa-graduation-cap",
-    title: "Skill Development",
-    description: "Certified training for youth and workers to enhance employability and career growth.",
+    icon: "fas fa-star",
+    tag: "Skill Development",
+    title: "Building employable talent",
+    description:
+      "Certified training for youth and workers to improve employability, safety standards, and long-term career growth.",
   },
   {
     image: "/images/social-commitment/pillar_3_1774092712_69be81a8aa69c.webp",
-    icon: "fas fa-hand-holding-heart",
-    title: "Community Welfare",
-    description: "Health camps, relief efforts, education drives, and support for underserved neighborhoods.",
+    icon: "fas fa-star",
+    tag: "Community Welfare",
+    title: "Supporting every frontline",
+    description:
+      "Health camps, winter relief, education drives and on-ground support for labor colonies and underserved neighborhoods.",
   },
 ];
 
+/** Live `.csr-stats-strip` values (printed exactly as live formats them). */
 export const impactStats = [
-  { value: "5,000+", label: "Lives Touched" },
-  { value: "1,200+", label: "Women Trained" },
+  { value: "5000+", label: "Lives Touched" },
+  { value: "1200+", label: "Women Trained" },
   { value: "25+", label: "Skill Centers" },
-  { value: "10,000+", label: "Saplings Planted" },
+  { value: "10k+", label: "Saplings Planted" },
+];
+
+/** Live philosophy section's 2x2 photo grid (self-hosted copies of its Unsplash images). */
+export const philosophyImages = [
+  ["/images/bg/csr-skill.jpg", "/images/bg/csr-education.jpg"],
+  ["/images/bg/csr-community.jpg", "/images/bg/csr-hands-2.jpg"],
 ];

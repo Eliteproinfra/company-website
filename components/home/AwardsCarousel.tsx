@@ -1,16 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import AwardLightbox from "@/components/awards/AwardLightbox";
 
 export default function AwardsCarousel({ images }: { images: string[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const scrollByCard = (direction: 1 | -1) => {
     const track = trackRef.current;
     if (!track) return;
     const card = track.firstElementChild as HTMLElement | null;
-    const step = (card?.offsetWidth ?? 160) + 16;
+    const step = (card?.offsetWidth ?? 240) + 20;
     track.scrollBy({ left: direction * step, behavior: "smooth" });
   };
 
@@ -18,23 +20,27 @@ export default function AwardsCarousel({ images }: { images: string[] }) {
     <div className="relative">
       <div
         ref={trackRef}
-        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2"
+        className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-2"
         role="group"
         aria-label="Awards and recognitions"
       >
-        {images.map((image) => (
-          <div
+        {images.map((image, index) => (
+          <button
             key={image}
-            className="flex aspect-square w-[28%] shrink-0 snap-start items-center justify-center rounded-xl border border-neutral-100 bg-white p-3 sm:w-[22%] md:w-[17%] lg:w-[13.5%]"
+            type="button"
+            onClick={() => setActiveIndex(index)}
+            aria-label={`View award ${index + 1} of ${images.length} enlarged`}
+            className="flex aspect-square w-[50%] shrink-0 cursor-zoom-in snap-start items-center justify-center rounded-lg bg-white p-1 shadow-bs-sm sm:w-[36%] md:w-[25%] lg:w-[18%]"
           >
             <Image
               src={image}
               alt="Elite Pro Infraventure award recognition"
-              width={140}
-              height={140}
+              width={260}
+              height={260}
+              sizes="(min-width: 1024px) 18vw, (min-width: 768px) 25vw, (min-width: 640px) 36vw, 50vw"
               className="h-auto max-h-full w-auto max-w-full object-contain"
             />
-          </div>
+          </button>
         ))}
       </div>
 
@@ -42,7 +48,7 @@ export default function AwardsCarousel({ images }: { images: string[] }) {
         type="button"
         onClick={() => scrollByCard(-1)}
         aria-label="Scroll awards left"
-        className="absolute -left-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-neutral-200 bg-white p-3 text-dark-black shadow-md transition-colors hover:border-primary-gold hover:text-primary-gold sm:flex"
+        className="absolute -left-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border-pill bg-white p-3 text-dark-black shadow-bs-sm transition-colors hover:border-primary-gold hover:text-primary-gold sm:flex"
       >
         <i className="fas fa-chevron-left" aria-hidden="true" />
       </button>
@@ -50,10 +56,17 @@ export default function AwardsCarousel({ images }: { images: string[] }) {
         type="button"
         onClick={() => scrollByCard(1)}
         aria-label="Scroll awards right"
-        className="absolute -right-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-neutral-200 bg-white p-3 text-dark-black shadow-md transition-colors hover:border-primary-gold hover:text-primary-gold sm:flex"
+        className="absolute -right-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border-pill bg-white p-3 text-dark-black shadow-bs-sm transition-colors hover:border-primary-gold hover:text-primary-gold sm:flex"
       >
         <i className="fas fa-chevron-right" aria-hidden="true" />
       </button>
+
+      <AwardLightbox
+        images={images}
+        index={activeIndex}
+        onClose={() => setActiveIndex(null)}
+        onIndexChange={setActiveIndex}
+      />
     </div>
   );
 }

@@ -19,7 +19,10 @@ export function useInView<T extends HTMLElement = HTMLElement>(
     if (!node) return;
 
     if (typeof IntersectionObserver === "undefined") {
-      setIsVisible(true);
+      // Fallback for environments without the observer (very old browsers,
+      // JSDOM): reveal the element anyway. Deferred to a microtask because a
+      // synchronous setState in an effect body cascades an extra render.
+      queueMicrotask(() => setIsVisible(true));
       return;
     }
 

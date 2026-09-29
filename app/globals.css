@@ -15,6 +15,89 @@
   --color-light-black: #1a1a1a;
   --color-text-gray: #b0b0b0;
 
+  /* ---- Derived palette, taken verbatim from the live site's style.css and the
+     Bootstrap 5.3.2 utilities it relies on. Names mirror the live selectors. ---- */
+  --color-ink: #111827; /* text on gold buttons, .btn-outline-dark */
+  --color-slate-heading: #2c3e50; /* .service-card h4, .service-box-premium h5 */
+  --color-muted: #666; /* .section-title p, card paragraphs */
+  --color-muted-2: #555; /* .review-text, accordion body, leader bio */
+  --color-muted-3: #444; /* .job-detail-text, .expertise-list, newsletter small */
+  --color-muted-4: #888; /* .stat-label, .review-time */
+  --color-muted-5: #333; /* .rating-number, home copyright text */
+  --color-pill-text: #222; /* .nav-pills .nav-link, newsletter input */
+  --color-bs-muted: rgb(33 37 41 / 0.75); /* Bootstrap .text-muted */
+  --color-bs-light: #f8f9fa; /* Bootstrap .bg-light */
+  --color-bs-dark: #212529; /* Bootstrap .bg-dark / .text-dark */
+  --color-bs-dark-hover: #424649; /* Bootstrap .btn-dark:hover */
+  --color-bs-dark-hover-border: #373b3e;
+  --color-bs-light-hover: #d3d4d5; /* Bootstrap .btn-light:hover */
+  --color-bs-light-hover-border: #c6c7c8;
+  --color-bs-dropdown-hover: #e9ecef; /* Bootstrap .dropdown-item:hover */
+  --color-bs-link: #0d6efd; /* Bootstrap default link (live's unstyled .link-read-more) */
+  --color-bs-link-hover: #0a58ca;
+  --color-bs-warning: #ffc107; /* Bootstrap .border-warning (NRI floating badge) */
+  --color-bs-secondary: #6c757d; /* Bootstrap .text-secondary / .border-secondary */
+  --color-border-card: #eee; /* .service-card, .developer-card, .contact-card */
+  --color-border-card-strong: #d1d1d1; /* .service-box-premium, .metric-card, .testimonial-card */
+  --color-border-soft: #f0f0f0; /* .google-review-card */
+  --color-border-pill: #e5e5e5; /* .nav-pills .nav-link, selects */
+  --color-border-input: #ddd; /* home newsletter input */
+  --color-gold-tint: #fff8e1; /* .advantage-icon, .locality-icon, .transition-hover:hover */
+  --color-footer-hover: #ecb70c; /* a.footer-link:hover */
+  --color-copyright-bg: #f5f5f5; /* body.index-page .footer-copyright / .footer-newsletter */
+  --color-copyright-border: #e0e0e0;
+  --color-dark-modern: #0f0f0f; /* .section-dark-modern */
+  --color-nri-contact: #0b0b0b; /* .nri-contact-section */
+  --color-drawer-start: #0b1220; /* mobile .navbar-collapse gradient */
+  --color-drawer-end: #070c16;
+  --color-google-blue: #1a73e8;
+  --color-google-blue-hover: #1557b0;
+  --color-google-star: #fbbc04;
+  --color-leader-gold: #bfa881; /* leadership.php --elite-gold */
+  --color-leader-gray: #f4f4f4;
+  --color-leader-quote: #fdfbf7;
+  --color-leader-profile: #f9f9f9;
+  --color-badge-ready: #28a745;
+  --color-team-border: #bbb; /* .team-card-premium */
+  --color-bs-border: #dee2e6; /* Bootstrap .form-select / .form-check-input border */
+  --color-csr-bg: #050608; /* social-commitment .csr-pillars-section */
+  --color-csr-card: #101015; /* .csr-pillars-card */
+  --color-csr-label: #777; /* .csr-stats-label */
+  --color-land-dark: #121212; /* land-acquisition #strategies */
+  --color-leader-gold-light: #d4c2a3; /* life-at-elite --elite-gold-light */
+  --color-leader-text-gray: #888888; /* life-at-elite --elite-text-gray */
+
+  /* ---- Shadows, verbatim from live ---- */
+  --shadow-card: 0 5px 20px rgb(0 0 0 / 0.05); /* .service-card */
+  --shadow-card-4: 0 5px 20px rgb(0 0 0 / 0.04); /* .metric-card */
+  --shadow-card-3: 0 5px 20px rgb(0 0 0 / 0.03); /* .google-review-card */
+  --shadow-card-15: 0 5px 15px rgb(0 0 0 / 0.05); /* .property-card, .developer-card */
+  --shadow-card-lg: 0 10px 30px rgb(0 0 0 / 0.05); /* .property-card-lg */
+  --shadow-card-hover: 0 20px 40px rgb(0 0 0 / 0.1); /* .nri-card:hover, .contact-card:hover */
+  --shadow-card-gold: 0 15px 35px rgb(212 175 55 / 0.15); /* .service-card:hover */
+  --shadow-card-gold-12: 0 15px 35px rgb(212 175 55 / 0.12); /* .metric-card:hover */
+  --shadow-service-box: 0 5px 15px rgb(0 0 0 / 0.03); /* .service-box-premium */
+  --shadow-service-box-hover: 0 15px 30px rgb(212 175 55 / 0.12);
+  --shadow-developer-hover: 0 10px 25px rgb(212 175 55 / 0.15);
+  --shadow-metric-icon: 0 8px 20px rgb(212 175 55 / 0.25);
+  --shadow-details-hover: 0 5px 15px rgb(212 175 55 / 0.3); /* .property-details .btn:hover */
+  --shadow-contact-form: 0 20px 50px rgb(0 0 0 / 0.1); /* .contact-form-wrapper */
+  --shadow-leader-row: 0 20px 40px rgb(0 0 0 / 0.08);
+  --shadow-dark-card-hover: 0 20px 40px rgb(0 0 0 / 0.5);
+  --shadow-award-hover: 0 16px 30px rgb(10 10 10 / 0.12);
+  --shadow-nav: 0 4px 20px rgb(0 0 0 / 0.1); /* .navbar.scrolled */
+  --shadow-dropdown: 0 10px 30px rgb(0 0 0 / 0.15);
+  --shadow-drawer: 0 18px 50px rgb(0 0 0 / 0.45);
+  --shadow-btn-gold: 0 10px 22px rgb(212 175 55 / 0.18), 0 6px 16px rgb(0 0 0 / 0.1);
+  --shadow-btn-gold-hover: 0 14px 28px rgb(212 175 55 / 0.25), 0 10px 20px rgb(0 0 0 / 0.12);
+  --shadow-btn-outline-hover: 0 12px 22px rgb(212 175 55 / 0.22), 0 10px 18px rgb(0 0 0 / 0.1);
+  --shadow-btn-dark-hover: 0 12px 22px rgb(0 0 0 / 0.18);
+  --shadow-btn-focus: 0 0 0 0.22rem rgb(212 175 55 / 0.25), 0 10px 22px rgb(0 0 0 / 0.1);
+  --shadow-input-focus: 0 0 0 0.22rem rgb(212 175 55 / 0.18); /* .career-apply-input:focus */
+  --shadow-bs-sm: 0 0.125rem 0.25rem rgb(0 0 0 / 0.075); /* Bootstrap .shadow-sm */
+  --shadow-bs: 0 0.5rem 1rem rgb(0 0 0 / 0.15); /* Bootstrap .shadow */
+  --shadow-bs-lg: 0 1rem 3rem rgb(0 0 0 / 0.175); /* Bootstrap .shadow-lg */
+
   --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-playfair), ui-serif, Georgia, serif;
 
@@ -79,6 +162,19 @@
   overflow: hidden;
 }
 
+/* Softens both ends of an infinite marquee row so logos fade out instead of being
+   cut off hard against the container edge. */
+@utility marquee-fade {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+
 /* Hides the scrollbar on horizontally-scrollable rows (e.g. the awards carousel)
    while keeping native touch/wheel scroll and keyboard focus behavior intact. */
 @utility no-scrollbar {
@@ -114,10 +210,115 @@
   }
 }
 
+
+/* ---- Compound backgrounds copied verbatim from the live site ---- */
+
+/* .btn-gold, .hiring-box, hovered .sb-icon / .metric-icon */
+@utility bg-gold-gradient {
+  background-image: linear-gradient(135deg, #d4af37, #c5a028);
+}
+
+/* Footer, #contact, .bg-dark-gradient cards */
+@utility bg-dark-gradient {
+  background-image: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+}
+
+/* Live's .bg-dark-black (story mission, investment page, stats band) */
+@utility bg-dark-radial {
+  background-image: radial-gradient(circle at top left, rgb(212 175 55 / 0.16), #111827);
+}
+
+/* .why-choose section */
+@utility bg-why-choose {
+  background-color: #f7f7f9;
+  background-image:
+    radial-gradient(1200px 1200px at 10% 10%, rgb(212 175 55 / 0.08), transparent 40%),
+    radial-gradient(1000px 800px at 90% 20%, rgb(197 160 40 / 0.08), transparent 50%);
+}
+
+/* Overlay div over #global / #faq background images */
+@utility bg-overlay-dark {
+  background-color: rgb(10 10 10 / 0.85);
+}
+
+/* #nri dot pattern layer */
+@utility bg-gold-dots {
+  background-image: radial-gradient(#d4af37 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Footer's 2px decorative top line */
+@utility bg-gold-line {
+  background-image: linear-gradient(90deg, transparent, #d4af37, transparent);
+}
+
+/* #contact left panel */
+@utility bg-gold-panel {
+  background-image: linear-gradient(135deg, rgb(212 175 55 / 0.95), rgb(197 160 40 / 0.9));
+}
+
+/* Awards gallery section */
+@utility bg-awards-gallery {
+  background-image: radial-gradient(circle at top left, rgb(212 175 55 / 0.08), #ffffff);
+}
+
+/* Home `.stats-section`: 80% black over the Unsplash towers photo, fixed */
+@utility bg-stats-section {
+  background-image:
+    linear-gradient(rgb(0 0 0 / 0.8), rgb(0 0 0 / 0.8)),
+    url("/images/bg/skyline-towers.jpg");
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* Home `#global` inline background (the rgba(10,10,10,.85) overlay is a separate div) */
+@utility bg-global-section {
+  background-image: url("/images/bg/global-earth.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Home / awards `#faq` inline background */
+@utility bg-faq-section {
+  background-image: url("/images/skyline.webp");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+
+/* awards.php .awards-gallery-section::before - repeating gold trophy line-art */
+@utility bg-trophy-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520'%3E%3Cg fill='none' stroke='%23D4AF37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' opacity='0.9'%3E%3Cpath d='M205 120h110v55c0 45-25 80-55 96-30-16-55-51-55-96v-55z'/%3E%3Cpath d='M190 120h-35c0 55 20 95 60 112'/%3E%3Cpath d='M330 120h35c0 55-20 95-60 112'/%3E%3Cpath d='M245 271v48c0 20-15 36-35 36h100c-20 0-35-16-35-36v-48'/%3E%3Cpath d='M210 355h100v35H210z'/%3E%3Cpath d='M180 390h160'/%3E%3Cpath d='M360 160c30 0 55 25 55 55s-25 55-55 55'/%3E%3Cpath d='M390 165l15 15-15 15'/%3E%3Cpath d='M160 220c0-30 25-55 55-55'/%3E%3Cpath d='M130 235l-15-15 15-15'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 380px 380px;
+  background-repeat: repeat;
+  background-position: center;
+  filter: saturate(0.9);
+}
+
+/* land-acquisition .land-hero::before - faint rgba(212,175,55,.05) grid */
+@utility bg-land-grid {
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDQwaDQwVjBIMHY0MHptMjAgMjBWMjBIMjB2MjB6TTIwIDIwdjIwMDIwaDIwdi0yMHoiIGZpbGw9InJnYmEoMjEyLCAxNzUsIDU1LCAwLjA1KSIvPjwvZz48L3N2Zz4=");
+}
+
+/* life-at-elite .perks-section - office photo under a 95% white overlay */
+@utility bg-perks-section {
+  background-image: url("/images/bg/leasing-office.jpg");
+  background-size: cover;
+  background-position: center;
+}
+/* .metric-card h3 — slate-to-black text gradient */
+@utility text-gradient-slate {
+  background-image: linear-gradient(90deg, #2c3e50, #000);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 /* Typography for CMS-authored article bodies (PR, blog, news detail pages).
    The HTML is sanitised at build time and carries no classes of its own. */
 .article-body {
-  color: var(--color-neutral-600);
+  color: var(--color-muted);
   line-height: 1.9;
 }
 
@@ -197,13 +398,13 @@
 
 .article-body th,
 .article-body td {
-  border: 1px solid var(--color-neutral-200);
+  border: 1px solid var(--color-border-card);
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
 
 .article-body hr {
-  border-color: var(--color-neutral-200);
+  border-color: var(--color-border-card);
 }
 
 :root {

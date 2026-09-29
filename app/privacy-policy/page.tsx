@@ -9,11 +9,11 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <>
-      <PageHero image="/images/banner-1.jpg" title="Privacy Policy" breadcrumbCurrent="Privacy Policy" height="60vh" />
+      <PageHero image="/images/banner-1.jpg" title="Privacy Policy" breadcrumbCurrent="Privacy Policy" uppercase overlay="bg-linear-to-b from-black/70 to-black/80" height="60vh" />
 
-      <section className="bg-white py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
-          <div className="mx-auto max-w-3xl text-neutral-600">
+          <div className="mx-auto max-w-4xl rounded-md bg-white p-6 text-bs-muted shadow-bs-sm lg:p-12">
             <p>
               This Privacy Policy explains how Elite Pro Infraventure collects, uses, and protects
               information when you use our website and services.

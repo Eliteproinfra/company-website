@@ -12,6 +12,7 @@ import PartnersMarquee from "@/components/home/PartnersMarquee";
 import InsightsHubTabs from "@/components/home/InsightsHubTabs";
 import HomeEnquiryForm from "@/components/home/HomeEnquiryForm";
 import ReviewsCarousel from "@/components/home/ReviewsCarousel";
+import InstagramReels from "@/components/home/InstagramReels";
 import Faq from "@/components/home/Faq";
 import { heroSlides, heroSlidesMobile } from "@/lib/data/heroSlides";
 import { services } from "@/lib/data/services";
@@ -27,6 +28,37 @@ import { whyChooseStats, transactionStats } from "@/lib/data/stats";
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 
+// Rendered widths for `fill` images, derived from this project's Bootstrap-style
+// `.container` steps (540/720/960/1140/1320 with 24px side padding). Without a
+// `sizes` the browser assumes 100vw and pulls a needlessly large file.
+/** Half of a `.container` two-column `md:grid-cols-2` row with `gap-6` (24px). */
+const HALF_ROW_MD_SIZES =
+  "(max-width: 575px) 100vw, (max-width: 767px) 492px, (max-width: 991px) 324px, (max-width: 1199px) 444px, (max-width: 1399px) 534px, 624px";
+/** Half of a `.container` two-column `lg:grid-cols-2` row with `gap-12` (48px). */
+const HALF_ROW_LG_SIZES =
+  "(max-width: 575px) 100vw, (max-width: 767px) 492px, (max-width: 991px) 672px, (max-width: 1199px) 432px, (max-width: 1399px) 522px, 612px";
+
+const contactDetails = [
+  { icon: "fas fa-phone", title: "Call Us", value: "+91 9968686868", href: "tel:+919968686868" },
+  {
+    icon: "fas fa-envelope",
+    title: "Email Us",
+    value: "info@eliteproinfra.com",
+    href: "mailto:info@eliteproinfra.com",
+  },
+  {
+    icon: "fas fa-map-marker-alt",
+    title: "Visit Us",
+    value: "3rd Floor, Golf View Corporate Tower A, Golf Course Road, Sector 42, Gurgaon 122002",
+  },
+];
+
+/*
+ * Section backgrounds follow the live index.php top to bottom (values from its style.css
+ * and inline styles): white / white / .why-choose radial / white / .stats-section /
+ * white / #global image + rgba(10,10,10,.85) / white / white / .bg-light + gold dots /
+ * #faq skyline + rgba(10,10,10,.85) / white / #contact dark gradient.
+ */
 export default function Home() {
   return (
     <>
@@ -37,13 +69,14 @@ export default function Home() {
         <div className="container">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <Reveal direction="right">
-              <div className="overflow-hidden rounded-2xl border-2 border-primary-gold p-2">
+              {/* Live `.about-image-frame::before`: a 2px gold frame offset 12px outside the photo. */}
+              <div className="relative m-3 before:absolute before:-inset-3 before:border-2 before:border-primary-gold before:content-['']">
                 <Image
                   src="/images/team-image.jpeg"
                   alt="The ElitePro Infra team"
                   width={800}
                   height={550}
-                  className="h-auto w-full rounded-xl object-cover"
+                  className="relative h-auto w-full object-cover shadow-[0_10px_30px_rgba(0,0,0,0.1)]"
                 />
               </div>
             </Reveal>
@@ -54,9 +87,9 @@ export default function Home() {
               <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
                 Advisory Beyond Property We Build Legacies
               </h2>
-              <div className="mt-5 space-y-4 text-neutral-500">
+              <div className="mt-5 space-y-4 text-muted">
                 <p>
-                  At ElitePro Infra, we believe real estate is more than just transaction it’s
+                  At ElitePro Infra, we believe real estate is more than just transaction it&rsquo;s
                   about building wealth, elevating lifestyles, and creating enduring value.
                 </p>
                 <p>
@@ -79,8 +112,11 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Latest Instagram Reels (not on the live site; keeps the project's dark treatment) */}
+      <InstagramReels />
+
       {/* Signature Projects */}
-      <section className="bg-neutral-50 py-20">
+      <section className="bg-white py-20">
         <div className="container">
           <SectionHeading
             title="Signature Projects"
@@ -105,7 +141,7 @@ export default function Home() {
       </section>
 
       {/* Why Choose Elite Pro? */}
-      <section className="bg-neutral-50 py-16 md:py-20">
+      <section className="bg-why-choose py-16 md:py-20">
         <div className="container">
           <SectionHeading
             title="Why Choose Elite Pro?"
@@ -127,16 +163,16 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
             <Reveal direction="right" className="lg:col-span-4">
               <h2 className="text-3xl font-bold text-dark-black sm:text-4xl">Our Expertise</h2>
-              <p className="mt-5 font-semibold text-dark-black">
+              <p className="mt-5 text-muted">
                 Comprehensive Real Estate Solutions Tailored for You.
               </p>
-              <p className="mt-3 text-neutral-500">
+              <p className="mt-3 text-muted">
                 We provide a full spectrum of services from residential sales to commercial
                 leasing, ensuring every aspect of your real estate journey is covered with
                 professionalism, transparency, and integrity. Partner with us for a seamless
                 experience.
               </p>
-              <Button href="/contact" variant="outline" className="mt-6">
+              <Button href="/contact" variant="dark" iconRight="fas fa-arrow-right" className="mt-6">
                 Get Consultation
               </Button>
             </Reveal>
@@ -152,19 +188,12 @@ export default function Home() {
       </section>
 
       {/* Transaction Stats */}
-      <section className="relative overflow-hidden bg-dark-black py-14">
-        <Image
-          src="/images/skyline.webp"
-          alt=""
-          fill
-          aria-hidden="true"
-          className="object-cover opacity-30"
-        />
-        <div className="container relative grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
+      <section className="bg-stats-section py-14 text-white">
+        <div className="container grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
           {transactionStats.map((stat) => (
             <div key={stat.label}>
               <p className="text-3xl font-bold text-primary-gold sm:text-4xl">{stat.value}</p>
-              <p className="mt-2 text-sm text-white/70 sm:text-base">{stat.label}</p>
+              <p className="mt-2 text-sm text-white sm:text-base">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -180,19 +209,19 @@ export default function Home() {
           />
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Reveal direction="right">
-              <div className="overflow-hidden rounded-2xl bg-dark-black">
+              <div className="relative h-[340px] overflow-hidden rounded-2xl bg-black">
                 <Image
                   src="/images/2.png"
                   alt="Map of ElitePro Infra's presence across India"
-                  width={800}
-                  height={340}
+                  fill
+                  sizes={HALF_ROW_MD_SIZES}
                   style={{ objectPosition: "62% 45%" }}
-                  className="h-[340px] w-full scale-[2.6] object-cover"
+                  className="scale-[2.6] object-cover"
                 />
               </div>
               <div className="p-6 text-center">
                 <h3 className="text-xl font-bold text-dark-black">Pan-India Presence</h3>
-                <p className="mt-2 text-sm text-neutral-500">
+                <p className="mt-2 text-sm text-muted">
                   We actively operate across 20+ major cities in India, supported by a strong
                   regional partner and execution network to ensure seamless service delivery
                   nationwide.
@@ -200,19 +229,19 @@ export default function Home() {
               </div>
             </Reveal>
             <Reveal direction="left">
-              <div className="overflow-hidden rounded-2xl bg-dark-black">
+              <div className="relative h-[340px] overflow-hidden rounded-2xl bg-black">
                 <Image
                   src="/images/2.png"
                   alt="Map of ElitePro Infra's global office locations"
-                  width={800}
-                  height={340}
+                  fill
+                  sizes={HALF_ROW_MD_SIZES}
                   style={{ objectPosition: "50% 68%" }}
-                  className="h-[340px] w-full scale-[1.35] object-cover"
+                  className="scale-[1.35] object-cover"
                 />
               </div>
               <div className="p-6 text-center">
                 <h3 className="text-xl font-bold text-dark-black">Global Presence</h3>
-                <p className="mt-2 text-sm text-neutral-500">
+                <p className="mt-2 text-sm text-muted">
                   Our footprint extends across key international markets, enabling us to serve
                   global clients through strategic alliances and trusted international partners.
                 </p>
@@ -223,8 +252,9 @@ export default function Home() {
       </section>
 
       {/* Global Opportunities */}
-      <section className="relative overflow-hidden bg-dark-black py-20">
-        <div className="container relative">
+      <section className="relative bg-global-section py-20 text-white">
+        <div className="absolute inset-0 bg-overlay-dark" aria-hidden="true" />
+        <div className="container relative z-[1]">
           <SectionHeading
             title="Global Opportunities"
             description="Invest in the world's finest destinations"
@@ -236,18 +266,19 @@ export default function Home() {
               { name: "Dubai", image: "/images/global-dubai.png", href: "/nri-corner" },
             ].map((place, index) => (
               <Reveal key={place.name} delay={delaySequence[index % delaySequence.length]}>
+                {/* Live: Bootstrap `.card.bg-dark` (#212529) with the photo at 50% opacity. */}
                 <Link
                   href={place.href}
-                  className="group relative block h-[320px] overflow-hidden rounded-2xl"
+                  className="group relative block h-[400px] overflow-hidden rounded-md bg-bs-dark"
                 >
                   <Image
                     src={place.image}
                     alt={`${place.name} skyline`}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes={HALF_ROW_MD_SIZES}
+                    className="object-cover opacity-50 transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                  <span className="absolute bottom-5 left-5 text-2xl font-bold text-white">
+                  <span className="absolute bottom-6 left-6 text-2xl font-bold text-white">
                     {place.name}
                   </span>
                 </Link>
@@ -255,7 +286,7 @@ export default function Home() {
             ))}
           </div>
           <div className="mt-12 text-center">
-            <Button href="/nri-corner" variant="outline-light">
+            <Button href="/nri-corner" variant="outline">
               Explore International
             </Button>
           </div>
@@ -274,12 +305,18 @@ export default function Home() {
       </section>
 
       {/* Awards */}
-      <section className="bg-neutral-50 py-20">
+      <section className="bg-white py-20">
         <div className="container">
-          <SectionHeading
-            eyebrow="Our Awards"
-            title="Recognized Excellence in Real Estate"
-          />
+          {/* Live: `OUR <span class="text-gold">AWARDS</span>` over a 60x3 separator, then the h2. */}
+          <div className="mb-12 text-center">
+            <h4 className="mb-2 text-lg font-bold uppercase tracking-[2px] text-dark-black">
+              Our <span className="text-primary-gold">Awards</span>
+            </h4>
+            <div className="mx-auto h-[3px] w-[60px] bg-primary-gold" />
+            <h2 className="mt-3 text-3xl font-bold text-dark-black sm:text-[2.2rem]">
+              Recognized Excellence in Real Estate
+            </h2>
+          </div>
           <AwardsCarousel images={awardImages} />
           <div className="mt-10 text-center">
             <Link
@@ -293,64 +330,85 @@ export default function Home() {
       </section>
 
       {/* NRI Investment Services */}
-      <section id="nri" className="bg-neutral-50 py-20">
-        <div className="container">
+      <section id="nri" className="relative overflow-hidden bg-bs-light py-20">
+        <div className="absolute inset-0 bg-gold-dots opacity-10" aria-hidden="true" />
+        <div className="container relative z-[1]">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <Reveal direction="right">
               <p className="text-sm font-bold uppercase tracking-[2px] text-primary-gold">
                 Global Citizens
               </p>
-              <h2 className="mt-2 text-3xl font-bold text-dark-black sm:text-4xl">
+              <h2 className="mt-2 text-3xl font-bold text-bs-dark sm:text-4xl">
                 NRI Investment Services
               </h2>
-              <p className="mt-5 text-neutral-500">
+              <div className="mt-4 h-1 w-20 bg-primary-gold" />
+              <p className="mt-5 text-lg text-bs-muted">
                 Seamless real estate investment solutions designed exclusively for Non-Resident
                 Indians seeking to build wealth in India.
               </p>
               <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {nriServices.map((item, index) => (
                   <Reveal key={item.title} delay={delaySequence[index % delaySequence.length]}>
-                    <CompactFeatureCard {...item} />
+                    <CompactFeatureCard {...item} variant="nri" />
                   </Reveal>
                 ))}
               </div>
-              <Button href="/nri-corner" className="mt-8">
+              <Button
+                href="/nri-corner"
+                iconRight="fas fa-arrow-right"
+                className="mt-8 rounded-full px-12 shadow-bs-sm"
+              >
                 Schedule a Consultation
               </Button>
             </Reveal>
             <Reveal direction="left" className="relative">
-              <div className="relative h-[420px] w-full overflow-hidden rounded-2xl">
+              <div className="relative z-[2] h-[420px] w-full overflow-hidden rounded-2xl shadow-bs-lg">
                 <Image
                   src="/images/secure-ecosystem.webp"
                   alt="Premium residence serving NRI investors worldwide"
                   fill
+                  sizes={HALF_ROW_LG_SIZES}
                   className="object-cover"
                 />
+                <div className="absolute inset-0 bg-linear-to-b from-transparent from-60% to-black/60" />
               </div>
-              <div className="absolute bottom-6 left-6 flex items-center gap-3 rounded-xl bg-white p-4 shadow-lg">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-gold/10 text-primary-gold">
-                  <i className="fas fa-globe" aria-hidden="true" />
-                </div>
+              {/* Live `.floating-badge`: white, Bootstrap `.shadow`, 4px #ffc107 left border. */}
+              <div className="absolute -left-3 bottom-6 z-[3] hidden items-center gap-3 rounded-lg border-l-4 border-bs-warning bg-white p-4 shadow-bs md:flex">
+                <i className="fas fa-globe text-[2.5rem] text-primary-gold" aria-hidden="true" />
                 <div>
-                  <p className="font-bold text-dark-black">Global Reach</p>
-                  <p className="text-sm text-neutral-500">Serving clients worldwide</p>
+                  <p className="font-bold text-bs-dark">Global Reach</p>
+                  <p className="text-sm text-bs-muted">Serving clients worldwide</p>
                 </div>
               </div>
+              <svg
+                className="absolute -right-4 top-0 z-[1] -translate-y-1/2 opacity-25"
+                width="200"
+                height="200"
+                viewBox="0 0 200 200"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle cx="100" cy="100" r="100" fill="#D4AF37" />
+              </svg>
+              <svg
+                className="absolute -bottom-4 right-0 z-[1] -translate-x-1/2 opacity-25"
+                width="150"
+                height="150"
+                viewBox="0 0 200 200"
+                fill="none"
+                aria-hidden="true"
+              >
+                <rect x="0" y="0" width="200" height="200" rx="20" fill="#D4AF37" />
+              </svg>
             </Reveal>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="relative overflow-hidden bg-dark-black py-20">
-        <Image
-          src="/images/banner-4.png"
-          alt=""
-          fill
-          aria-hidden="true"
-          className="object-cover opacity-20"
-        />
-        <div className="container relative">
+      <section className="relative bg-faq-section py-20 text-white">
+        <div className="absolute inset-0 bg-overlay-dark" aria-hidden="true" />
+        <div className="container relative z-[1]">
           <SectionHeading
             title="Frequently Asked Questions"
             description="Common queries about real estate investment"
@@ -365,27 +423,28 @@ export default function Home() {
         <div className="container">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold text-dark-black sm:text-4xl">Google Reviews</h2>
-            <p className="mt-2 text-neutral-500">What our clients say about us</p>
+            <p className="mt-2 text-muted">What our clients say about us</p>
           </div>
-          <div className="mb-10 flex flex-col items-center justify-between gap-6 rounded-2xl border border-neutral-100 p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] sm:flex-row">
+          {/* Live `.google-reviews-header`: white, 12px radius, 0 5px 20px rgba(0,0,0,.05). */}
+          <div className="mb-10 flex flex-col items-center justify-between gap-6 rounded-xl bg-white px-[30px] py-[25px] shadow-card sm:flex-row">
             <div className="flex items-center gap-3">
-              <span className="text-4xl font-bold text-dark-black">
+              <span className="text-[3.5rem] font-bold leading-none text-muted-5">
                 {googleRating.score.toFixed(1)}
               </span>
               <div>
-                <div className="flex gap-0.5 text-primary-gold" aria-hidden="true">
+                <div className="flex gap-0.5 text-[1.2rem] text-google-star" aria-hidden="true">
                   {Array.from({ length: 5 }).map((_, index) => (
                     <i key={index} className="fas fa-star" />
                   ))}
                 </div>
-                <p className="text-sm text-neutral-500">{googleRating.count} reviews on Google</p>
+                <p className="text-[0.95rem] text-muted">{googleRating.count} reviews on Google</p>
               </div>
             </div>
             <a
               href="https://www.google.com/search?q=elitepro+infra+reviews"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-[#1a73e8] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1558b3]"
+              className="inline-flex items-center gap-2 rounded-full bg-google-blue px-[30px] py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-google-blue-hover hover:shadow-[0_5px_15px_rgba(26,115,232,0.3)]"
             >
               <i className="fab fa-google" aria-hidden="true" />
               Review us on Google
@@ -395,67 +454,72 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact CTA */}
-      <section className="bg-neutral-50 py-20">
-        <div className="container">
-          <div className="grid grid-cols-1 overflow-hidden rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.1)] lg:grid-cols-12">
-            <div className="bg-gradient-to-br from-primary-gold to-secondary-gold p-10 text-[#1a1200] lg:col-span-5 lg:p-12">
-              <h2 className="text-3xl font-bold">Get in Touch</h2>
-              <p className="mt-4 text-[#1a1200]/80">
-                Ready to start your real estate journey? Our team of experts is here to guide you
-                through every step.
-              </p>
-              <ul className="mt-8 space-y-5">
-                <li className="flex items-start gap-3">
-                  <i className="fas fa-phone mt-1" aria-hidden="true" />
-                  <div>
-                    <p className="font-bold">Call Us</p>
-                    <a href="tel:+919968686868" className="text-sm">
-                      +91 9968686868
-                    </a>
+      {/* Contact CTA — live `#contact`: dark gradient section, frosted rgba(255,255,255,.03)
+          panel, gold-gradient info side with white icon circles, white form side. */}
+      <section className="relative overflow-hidden bg-dark-gradient py-20 text-white">
+        <i
+          className="far fa-building absolute right-0 top-0 hidden p-12 text-[10em] text-white opacity-10 lg:block"
+          aria-hidden="true"
+        />
+        <div className="container relative z-[1]">
+          <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] shadow-bs-lg backdrop-blur-[10px] lg:grid-cols-12">
+            <div className="relative overflow-hidden bg-primary-gold p-12 text-white lg:col-span-5">
+              <div className="absolute inset-0 bg-gold-panel" aria-hidden="true" />
+              <i
+                className="fas fa-comments absolute bottom-0 right-0 translate-x-[20%] translate-y-[20%] text-[10em] text-white opacity-25"
+                aria-hidden="true"
+              />
+              <div className="relative z-[1] flex h-full flex-col justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Get in Touch</h2>
+                  <p className="mt-4 opacity-90">
+                    Ready to start your real estate journey? Our team of experts is here to guide
+                    you through every step.
+                  </p>
+                  <ul className="mt-10 space-y-6">
+                    {contactDetails.map((detail) => (
+                      <li key={detail.title} className="flex items-start gap-3">
+                        <span className="flex h-[45px] w-[45px] shrink-0 items-center justify-center rounded-full bg-white text-primary-gold shadow-bs-sm">
+                          <i className={detail.icon} aria-hidden="true" />
+                        </span>
+                        <div>
+                          <p className="font-bold text-white">{detail.title}</p>
+                          {detail.href ? (
+                            <a href={detail.href} className="text-sm text-white opacity-90">
+                              {detail.value}
+                            </a>
+                          ) : (
+                            <p className="text-sm opacity-90">{detail.value}</p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-10 border-t border-white/20 pt-6">
+                  <h3 className="mb-3 text-sm font-bold uppercase tracking-[2px] text-white">
+                    Follow Us
+                  </h3>
+                  <div className="flex gap-4">
+                    {socialLinks.map((social) => (
+                      <a
+                        key={social.label}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={social.label}
+                        className="text-lg text-white transition-transform hover:scale-110"
+                      >
+                        <i className={social.icon} aria-hidden="true" />
+                      </a>
+                    ))}
                   </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <i className="fas fa-envelope mt-1" aria-hidden="true" />
-                  <div>
-                    <p className="font-bold">Email Us</p>
-                    <a href="mailto:info@eliteproinfra.com" className="text-sm">
-                      info@eliteproinfra.com
-                    </a>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <i className="fas fa-map-marker-alt mt-1" aria-hidden="true" />
-                  <div>
-                    <p className="font-bold">Visit Us</p>
-                    <p className="text-sm">
-                      3rd Floor, Golf View Corporate Tower A, Golf Course Road, Sector 42, Gurgaon
-                      122002
-                    </p>
-                  </div>
-                </li>
-              </ul>
-              <div className="mt-10 border-t border-[#1a1200]/20 pt-6">
-                <h3 className="mb-3 text-sm font-bold uppercase tracking-[2px]">Follow Us</h3>
-                <div className="flex gap-4">
-                  {socialLinks.map((social) => (
-                    <a
-                      key={social.label}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={social.label}
-                      className="text-lg transition-transform hover:scale-110"
-                    >
-                      <i className={social.icon} aria-hidden="true" />
-                    </a>
-                  ))}
                 </div>
               </div>
             </div>
-            <div className="bg-white p-10 lg:col-span-7 lg:p-12">
+            <div className="bg-white p-10 text-dark-black lg:col-span-7 lg:p-12">
               <h3 className="text-2xl font-bold text-dark-black">Send us a Message</h3>
-              <p className="mt-2 text-neutral-500">
+              <p className="mt-2 text-bs-muted">
                 Fill out the form below and we&apos;ll get back to you shortly.
               </p>
               <HomeEnquiryForm />

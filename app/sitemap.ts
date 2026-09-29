@@ -2,6 +2,10 @@ import type { MetadataRoute } from "next";
 import { articleHref, articles } from "@/lib/data/articles";
 import { propertyDetails } from "@/lib/data/propertyDetails";
 
+// Already prerendered in the server build; stated explicitly because a static
+// export (scripts/export.sh) errors on any metadata route that has not opted in.
+export const dynamic = "force-static";
+
 const baseUrl = "https://eliteproinfra.com";
 
 const routes: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [

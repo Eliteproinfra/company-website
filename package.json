@@ -6,11 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "verify": "npm run lint && npm run typecheck && npm run build",
+    "build:full": "bash scripts/build.sh",
+    "export": "bash scripts/export.sh",
+    "instagram:token": "node scripts/refresh-instagram-token.mjs",
+    "audit:sql": "node scripts/audit-sql-dump.mjs",
+    "db:setup": "node scripts/db-setup.mjs",
+    "db:seed": "node --experimental-transform-types scripts/db-seed.mjs",
+    "db:passwd": "node scripts/db-passwd.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.1",
     "clsx": "^2.1.1",
+    "mysql2": "^3.24.2",
     "next": "16.2.12",
     "nodemailer": "^9.0.3",
     "react": "19.2.4",

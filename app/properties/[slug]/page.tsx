@@ -57,7 +57,7 @@ function CardHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="border-b border-black/[0.06] px-[18px] py-4">
       <h2 className="text-[1.05rem] font-extrabold text-dark-black">{title}</h2>
-      <p className="mt-1 text-[0.92rem] text-neutral-500">{subtitle}</p>
+      <p className="mt-1 text-[0.92rem] text-muted">{subtitle}</p>
     </div>
   );
 }
@@ -71,7 +71,7 @@ function Badges({ property }: { property: PropertyDetail }) {
         </span>
       ) : null}
       {property.location ? (
-        <span className="rounded border border-neutral-200 bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-dark-black">
+        <span className="rounded border border-border-pill bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-dark-black">
           {property.location}
         </span>
       ) : null}
@@ -110,7 +110,7 @@ export default async function PropertyDetailPage({
                 <div className="text-right">
                   <div className="text-[1.4rem] font-bold text-dark-black">{property.price}</div>
                   {property.priceNote ? (
-                    <div className="text-sm text-neutral-500">{property.priceNote}</div>
+                    <div className="text-sm text-muted">{property.priceNote}</div>
                   ) : null}
                 </div>
               </div>
@@ -125,8 +125,8 @@ export default async function PropertyDetailPage({
                       key={spec.label}
                       className="rounded-xl border border-black/[0.06] bg-white p-3"
                     >
-                      <div className="text-[0.78rem] font-bold text-neutral-500">{spec.label}</div>
-                      <div className="mt-0.5 text-[0.98rem] font-extrabold text-[#111827]">
+                      <div className="text-[0.78rem] font-bold text-muted">{spec.label}</div>
+                      <div className="mt-0.5 text-[0.98rem] font-extrabold text-ink">
                         {spec.value}
                       </div>
                     </div>
@@ -139,7 +139,7 @@ export default async function PropertyDetailPage({
               <Card className="mb-4">
                 <CardHeader title="Property Description" subtitle="About the project" />
                 <div className="p-[18px]">
-                  <p className="leading-[1.9] text-neutral-500">{property.description}</p>
+                  <p className="leading-[1.9] text-muted">{property.description}</p>
                 </div>
               </Card>
             ) : null}
@@ -210,7 +210,7 @@ export default async function PropertyDetailPage({
                   ) : null}
                   <div>
                     <h3 className="text-lg font-bold text-dark-black">{property.developer.name}</h3>
-                    <p className="mt-2 leading-[1.9] text-neutral-500">{property.developer.about}</p>
+                    <p className="mt-2 leading-[1.9] text-muted">{property.developer.about}</p>
                   </div>
                 </div>
               </div>
@@ -231,7 +231,7 @@ export default async function PropertyDetailPage({
                 <div className="p-[18px]">
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                     {property.experts.map((expert) => (
-                      <div key={expert.email || expert.name} className="rounded-xl border border-neutral-200 p-3">
+                      <div key={expert.email || expert.name} className="rounded-xl border border-border-pill p-3">
                         <div className="flex items-center gap-3">
                           {expert.image ? (
                             <Image
@@ -248,7 +248,7 @@ export default async function PropertyDetailPage({
                           )}
                           <div>
                             <div className="font-bold text-dark-black">{expert.name}</div>
-                            <div className="text-sm text-neutral-500">{expert.role}</div>
+                            <div className="text-sm text-muted">{expert.role}</div>
                           </div>
                         </div>
                         <div className="mt-3 flex gap-2">
@@ -312,7 +312,7 @@ export default async function PropertyDetailPage({
                 <Badges property={property} />
                 <div className="text-2xl font-bold text-dark-black">{property.price}</div>
                 {property.priceNote ? (
-                  <div className="mb-4 mt-1 text-neutral-500">{property.priceNote}</div>
+                  <div className="mb-4 mt-1 text-muted">{property.priceNote}</div>
                 ) : null}
                 <div className="grid gap-2">
                   <Button href="tel:+919968686868" variant="outline">

@@ -26,8 +26,8 @@ export default function SignatureProjectsGrid({ projects }: { projects: Signatur
             className={clsx(
               "rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-wide transition-colors",
               active === city
-                ? "border-primary-gold bg-primary-gold text-dark-black"
-                : "border-neutral-200 bg-white text-neutral-500 hover:border-primary-gold/50 hover:text-dark-black"
+                ? "border-primary-gold bg-primary-gold text-white"
+                : "border-border-pill bg-transparent text-pill-text"
             )}
           >
             {city}
@@ -59,6 +59,7 @@ export default function SignatureProjectsGrid({ projects }: { projects: Signatur
                   badgeVariant={project.badgeVariant}
                   href={project.href}
                   detailsLabel="Details"
+                  variant="compact"
                 />
               </Reveal>
             ))}

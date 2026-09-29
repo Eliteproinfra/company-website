@@ -22,9 +22,9 @@ const pressItems = articlesByKind("press").map((article) => ({
 export default function MediaPressPage() {
   return (
     <>
-      <PageHero image="/images/heroes/pr-media.webp" title="Media & Press" breadcrumbCurrent="Media & Press" />
+      <PageHero image="/images/heroes/pr-media.webp" title="PR & Media" breadcrumbCurrent="PR & Media" uppercase overlay="bg-linear-to-b from-black/70 to-black/80" />
 
-      <section className="bg-white py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {pressItems.map((item, index) => (

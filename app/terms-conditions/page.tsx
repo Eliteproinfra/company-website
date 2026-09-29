@@ -12,13 +12,14 @@ export default function TermsConditionsPage() {
       <PageHero
         image="/images/banner-1.jpg"
         title="Terms & Conditions"
-        breadcrumbCurrent="Terms & Conditions"
+        breadcrumbCurrent="Terms & Conditions" uppercase
         height="60vh"
+        overlay="bg-linear-to-b from-black/70 to-black/80"
       />
 
-      <section className="bg-white py-20">
+      <section className="bg-bs-light py-20">
         <div className="container">
-          <div className="mx-auto max-w-3xl text-neutral-600">
+          <div className="mx-auto max-w-4xl rounded-md bg-white p-6 text-bs-muted shadow-bs-sm lg:p-12">
             <p>
               These Terms &amp; Conditions govern your use of the Elite Pro Infraventure website
               and services. By using this website, you agree to these terms.

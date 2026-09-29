@@ -42,8 +42,8 @@ export default function InsightsHubTabs({ categories }: { categories: InsightHub
             className={clsx(
               "rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-wide transition-colors",
               active === category.key
-                ? "border-primary-gold bg-primary-gold text-dark-black"
-                : "border-neutral-200 bg-white text-neutral-500 hover:border-primary-gold/50 hover:text-dark-black"
+                ? "border-primary-gold bg-primary-gold text-white"
+                : "border-border-pill bg-transparent text-pill-text"
             )}
           >
             {category.label}
@@ -69,7 +69,7 @@ export default function InsightsHubTabs({ categories }: { categories: InsightHub
             {category.items.map((item) => (
               <div
                 key={item.href}
-                className="group w-[85%] shrink-0 snap-start overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_5px_20px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(0,0,0,0.08)] sm:w-[46%] lg:w-[23.5%]"
+                className="group w-[85%] shrink-0 snap-start overflow-hidden rounded-md border border-black/[0.175] bg-white shadow-bs-sm sm:w-[46%] lg:w-[23.5%]"
               >
                 <div className="relative h-[200px] w-full overflow-hidden">
                   <Image
@@ -80,12 +80,12 @@ export default function InsightsHubTabs({ categories }: { categories: InsightHub
                     className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                <div className="p-5">
-                  <p className="font-semibold text-dark-black">{item.title}</p>
-                  <p className="mt-2 text-sm text-neutral-500">{item.excerpt}</p>
+                <div className="border-t border-black/[0.175] p-5">
+                  <p className="font-bold text-bs-dark">{item.title}</p>
+                  <p className="mt-2 text-[13px] text-bs-muted">{item.excerpt}</p>
                   <Link
                     href={item.href}
-                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-gold"
+                    className="mt-4 inline-flex items-center gap-1.5 text-sm text-bs-link underline transition-colors hover:text-bs-link-hover"
                   >
                     Read more <i className="fas fa-arrow-right text-xs" aria-hidden="true" />
                   </Link>
