@@ -28,7 +28,12 @@ module.exports = {
       // wrapper in between swallows SIGINT/SIGTERM, which turns a graceful
       // reload into a hard kill and drops in-flight requests.
       script: `${APP_ROOT}/current/node_modules/next/dist/bin/next`,
-      args: "start --port 3000",
+      // --hostname 127.0.0.1 is load-bearing, not cosmetic. `next start`
+      // defaults to 0.0.0.0, which leaves the app port answering on the
+      // instance's private address — reachable from anything else in the VPC
+      // even though the security group blocks it from the internet. nginx is
+      // the only thing that should ever talk to this port.
+      args: "start --hostname 127.0.0.1 --port 3000",
 
       // Fork mode, single instance. The site is ~130 prerendered pages plus a
       // handful of dynamic admin routes, so there is nothing to gain from
