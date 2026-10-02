@@ -83,6 +83,23 @@ jobs:
           fi
           echo "artifact is clean"
 
+      - name: Show the OIDC subject claim
+        # The IAM trust policy pins an exact `sub`. When that does not match,
+        # STS returns a deliberately vague "Not authorized to perform
+        # sts:AssumeRoleWithWebIdentity" that does not say what was presented.
+        # Printing the claim turns guessing into reading. The claims are not
+        # secret; the token itself is never echoed.
+        run: |
+          TOKEN=$(curl -sS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" | jq -r .value)
+          PAYLOAD=$(printf '%s' "$TOKEN" | cut -d. -f2)
+          # base64url -> base64, then pad to a multiple of 4.
+          PAYLOAD=$(printf '%s' "$PAYLOAD" | tr '_-' '/+')
+          while [ $(( ${#PAYLOAD} % 4 )) -ne 0 ]; do PAYLOAD="${PAYLOAD}="; done
+          printf '%s' "$PAYLOAD" | base64 -d 2>/dev/null \
+            | jq '{sub, aud, repository, ref, event_name, workflow_ref}'
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.ROLE_ARN }}
