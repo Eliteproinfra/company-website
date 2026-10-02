@@ -1,0 +1,84 @@
+name: CI
+
+# Runs on every pull request and on pushes to main. Deployment (deploy.yml)
+# waits for this workflow to succeed, so a red build cannot reach production.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# A newer push to the same branch makes an in-flight run irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Must match the server. next@16.3.7 requires >=20.9 and the EC2 box
+          # runs Node 22; building on a different major risks shipping an
+          # artifact that behaves differently in production.
+          node-version: '22'
+          cache: npm
+
+      - name: Install from the lockfile
+        # `npm ci`, never `npm install`: it installs exactly what
+        # package-lock.json pins and fails if the lockfile is out of sync,
+        # rather than silently resolving different versions than production.
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        # Next 16 moved route-type generation into `next typegen`, which the
+        # typecheck script runs before tsc. Without it tsc cannot see the
+        # generated route types.
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
+
+      - name: Check the health route is registered
+        # Cheap guard against the deploy gate silently disappearing: the CD
+        # workflow and the deploy script both require /health to respond, so
+        # losing the route would break deployment in a confusing way.
+        run: |
+          test -f app/health/route.ts || { echo "app/health/route.ts is missing"; exit 1; }
+          echo "health route present"
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      - name: Audit production dependencies
+        # Only --omit=dev: a vulnerability in a build-time-only package is
+        # worth knowing about but is not reachable from the internet, and
+        # failing the build on it would block unrelated work.
+        #
+        # Fails on high or critical. One moderate is currently accepted:
+        # GHSA-6vj9-mwq6-2f5v (nodemailer DNS cache reuses TLS servername
+        # across transports). This app builds exactly one transport to one
+        # SMTP host, so the cross-tenant condition cannot occur; fixing it
+        # needs a nodemailer major bump, tracked separately.
+        run: npm audit --omit=dev --audit-level=high
