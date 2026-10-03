@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { logoutAction } from "../login/actions";
+import { AdminSidebarNav, AdminMobileNav, type AdminNavItem } from "@/components/admin/AdminNav";
 
 export const metadata: Metadata = {
   title: { default: "Admin", template: "%s | Elite Pro Admin" },
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
  */
 export const dynamic = "force-dynamic";
 
-const NAV = [
+const NAV: AdminNavItem[] = [
   { href: "/admin", label: "Dashboard", icon: "fas fa-gauge-high", exact: true },
   { href: "/admin/properties", label: "Properties", icon: "fas fa-building" },
   { href: "/admin/articles?kind=press", label: "PR & Media", icon: "fas fa-newspaper" },
@@ -56,18 +58,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="mt-2 block font-bold text-white">Admin Panel</span>
           </Link>
         </div>
-        <nav className="flex-1 space-y-1 p-4" aria-label="Admin sections">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <i className={`${item.icon} w-4 text-primary-gold`} aria-hidden="true" />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        {/* useSearchParams suspends, and this layout wraps every admin page, so
+            the boundary keeps one slow nav from blocking the whole shell. */}
+        <Suspense fallback={<div className="flex-1 p-4" aria-hidden="true" />}>
+          <AdminSidebarNav items={NAV} />
+        </Suspense>
         <div className="border-t border-white/10 p-4">
           <Link
             href="/"
@@ -113,20 +108,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             whole page scroll sideways. */}
         <main className="min-w-0 flex-1 overflow-x-auto p-6">{children}</main>
 
-        <nav
-          className="flex gap-1 overflow-x-auto border-t border-neutral-200 bg-white p-2 lg:hidden"
-          aria-label="Admin sections"
-        >
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-neutral-600 hover:bg-neutral-100"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <Suspense fallback={null}>
+          <AdminMobileNav items={NAV} />
+        </Suspense>
       </div>
     </div>
   );

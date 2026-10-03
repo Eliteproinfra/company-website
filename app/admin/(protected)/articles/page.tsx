@@ -77,8 +77,11 @@ export default async function AdminArticlesPage({
               rows.map((row) => (
                 <tr key={row.id}>
                   <td className="px-4 py-3">
+                    {/* Carry the kind: the three article sections share this
+                        route, so without it the sidebar cannot tell which one
+                        an edit page belongs to. */}
                     <Link
-                      href={`/admin/articles/${row.id}`}
+                      href={`/admin/articles/${row.id}?kind=${kind}`}
                       className="font-semibold text-dark-black hover:text-primary-gold"
                     >
                       {row.title}
@@ -104,7 +107,7 @@ export default async function AdminArticlesPage({
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        href={`/admin/articles/${row.id}`}
+                        href={`/admin/articles/${row.id}?kind=${kind}`}
                         className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold hover:bg-neutral-50"
                       >
                         Edit
