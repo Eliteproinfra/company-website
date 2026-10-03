@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Button from "@/components/ui/Button";
 import PageHero from "@/components/ui/PageHero";
 import TeamMemberCard from "@/components/about/TeamMemberCard";
-import { leasingTeam } from "@/lib/data/teams";
+import { getTeam } from "@/lib/content/teams";
 
 export const metadata: Metadata = {
   title: "Leasing Portfolio Management",
@@ -10,7 +10,9 @@ export const metadata: Metadata = {
     "Experts in Commercial & Retail Leasing Strategies — maximizing value for occupiers and owners.",
 };
 
-export default function LeasingPortfolioManagementPage() {
+export default async function LeasingPortfolioManagementPage() {
+  const leasingTeam = await getTeam("leasing");
+
   return (
     <>
       <PageHero
@@ -34,8 +36,10 @@ export default function LeasingPortfolioManagementPage() {
           </div>
 
           <div className="mx-auto grid max-w-md grid-cols-1">
-            {leasingTeam.map((member) => (
-              <TeamMemberCard key={member.name} {...member} />
+            {leasingTeam.map((member, index) => (
+              // Keyed by position too: the admin cannot stop two people sharing
+              // a name, and a duplicate key would drop one of the cards.
+              <TeamMemberCard key={`${index}-${member.name}`} {...member} />
             ))}
           </div>
 

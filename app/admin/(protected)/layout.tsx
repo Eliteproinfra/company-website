@@ -24,6 +24,7 @@ const NAV: AdminNavItem[] = [
   { href: "/admin/articles?kind=press", label: "PR & Media", icon: "fas fa-newspaper" },
   { href: "/admin/articles?kind=blog", label: "Insights & Blogs", icon: "fas fa-pen-nib" },
   { href: "/admin/articles?kind=news", label: "News & Updates", icon: "fas fa-bullhorn" },
+  { href: "/admin/team", label: "Our Management", icon: "fas fa-users" },
   { href: "/admin/careers", label: "Careers", icon: "fas fa-briefcase" },
   { href: "/admin/awards", label: "Awards", icon: "fas fa-trophy" },
   { href: "/admin/enquiries", label: "Enquiries", icon: "fas fa-inbox" },

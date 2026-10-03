@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import Button from "@/components/ui/Button";
 import PageHero from "@/components/ui/PageHero";
 import TeamMemberCard from "@/components/about/TeamMemberCard";
-import { salesTeam } from "@/lib/data/teams";
+import { getTeam } from "@/lib/content/teams";
 
 export const metadata: Metadata = {
   title: "Sales Portfolio Management",
   description: "Meet Our Champions — the dedicated sales professionals behind Elite Pro Infraventure's record-breaking sales.",
 };
 
-export default function SalesPortfolioManagementPage() {
+export default async function SalesPortfolioManagementPage() {
+  const salesTeam = await getTeam("sales");
+
   return (
     <>
       <PageHero
@@ -35,8 +37,10 @@ export default function SalesPortfolioManagementPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {salesTeam.map((member) => (
-              <TeamMemberCard key={member.name} {...member} />
+            {salesTeam.map((member, index) => (
+              // Keyed by position too: the admin cannot stop two people sharing
+              // a name, and a duplicate key would drop one of the cards.
+              <TeamMemberCard key={`${index}-${member.name}`} {...member} />
             ))}
           </div>
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Button from "@/components/ui/Button";
 import PageHero from "@/components/ui/PageHero";
 import TeamMemberCard from "@/components/about/TeamMemberCard";
-import { crmTeam } from "@/lib/data/teams";
+import { getTeam } from "@/lib/content/teams";
 
 export const metadata: Metadata = {
   title: "CRM & Marketing",
@@ -10,7 +10,9 @@ export const metadata: Metadata = {
     "CRM & Accounts — ensuring seamless operations and client satisfaction at Elite Pro Infraventure.",
 };
 
-export default function CrmMarketingPage() {
+export default async function CrmMarketingPage() {
+  const crmTeam = await getTeam("crm");
+
   return (
     <>
       <PageHero
@@ -36,8 +38,10 @@ export default function CrmMarketingPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {crmTeam.map((member) => (
-              <TeamMemberCard key={member.name} {...member} />
+            {crmTeam.map((member, index) => (
+              // Keyed by position too: the admin cannot stop two people sharing
+              // a name, and a duplicate key would drop one of the cards.
+              <TeamMemberCard key={`${index}-${member.name}`} {...member} />
             ))}
           </div>
 

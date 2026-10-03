@@ -110,6 +110,29 @@ CREATE TABLE IF NOT EXISTS job_listings (
   INDEX idx_jobs_listing (is_published, sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- The three "Our Management" pages (/about/sales-portfolio-management,
+-- /about/leasing-portfolio-management, /about/crm-marketing) render the same
+-- card and differ only in whose roster they list, so they share one table keyed
+-- by `department` — the same shape as articles/`kind`.
+CREATE TABLE IF NOT EXISTS team_members (
+  id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  department   ENUM('sales','leasing','crm') NOT NULL,
+  name         VARCHAR(190) NOT NULL,
+  title        VARCHAR(190) NOT NULL DEFAULT '',
+  -- Free text, not a number: the live site lists "10yrs", "19 years" and "7".
+  experience   VARCHAR(80)  NOT NULL DEFAULT '',
+  photo        VARCHAR(500) NOT NULL DEFAULT '',
+  phone        VARCHAR(60)  NOT NULL DEFAULT '',
+  email        VARCHAR(190) NOT NULL DEFAULT '',
+  linkedin     VARCHAR(500) NOT NULL DEFAULT '',
+  is_published TINYINT(1)   NOT NULL DEFAULT 1,
+  sort_order   INT          NOT NULL DEFAULT 0,
+  created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+                            ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_team_listing (department, is_published, sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS awards (
   id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   image        VARCHAR(500) NOT NULL,

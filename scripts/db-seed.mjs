@@ -75,9 +75,10 @@ async function main() {
   const { articles } = await load("lib/data/articles.ts");
   const { jobListings } = await load("lib/data/careers.ts");
   const { awardImages } = await load("lib/data/awards.ts");
+  const { salesTeam, leasingTeam, crmTeam } = await load("lib/data/teams.ts");
 
   const featuredTitles = new Set(featuredProperties.map((p) => p.title));
-  const stats = { properties: 0, articles: 0, jobs: 0, awards: 0, skipped: 0 };
+  const stats = { properties: 0, articles: 0, jobs: 0, awards: 0, team: 0, skipped: 0 };
 
   // -------------------------------------------------------- properties ---
   for (const [index, property] of propertyDetails.entries()) {
@@ -200,6 +201,60 @@ async function main() {
     }
   }
 
+  // ------------------------------------------------------- team members ---
+  // Keyed on (department, name): the static rosters carry no ids, and the same
+  // person legitimately appears on two pages (Dev Verma is in sales and in
+  // leasing), so the department has to be part of the key.
+  const rosters = [
+    ["sales", salesTeam],
+    ["leasing", leasingTeam],
+    ["crm", crmTeam],
+  ];
+
+  for (const [department, roster] of rosters) {
+    for (const [index, member] of roster.entries()) {
+      const [existing] = await connection.execute(
+        "SELECT id FROM team_members WHERE department = ? AND name = ?",
+        [department, member.name]
+      );
+      if (existing.length && !force) {
+        stats.skipped++;
+        continue;
+      }
+
+      // Preserves the order the page lists them in today — the rosters are not
+      // alphabetical and the seniority order is deliberate.
+      const values = [
+        department,
+        member.name,
+        member.title ?? "",
+        member.experience ?? "",
+        member.photo ?? "",
+        member.phone ?? "",
+        member.email ?? "",
+        member.linkedin ?? "",
+        1,
+        index,
+      ];
+
+      if (existing.length) {
+        await connection.execute(
+          `UPDATE team_members SET department=?, name=?, title=?, experience=?, photo=?,
+             phone=?, email=?, linkedin=?, is_published=?, sort_order=? WHERE id=?`,
+          [...values, existing[0].id]
+        );
+      } else {
+        await connection.execute(
+          `INSERT INTO team_members (department, name, title, experience, photo, phone,
+             email, linkedin, is_published, sort_order)
+           VALUES (?,?,?,?,?,?,?,?,?,?)`,
+          values
+        );
+      }
+      stats.team++;
+    }
+  }
+
   // ------------------------------------------------------------ awards ---
   for (const [index, image] of awardImages.entries()) {
     const [existing] = await connection.execute("SELECT id FROM awards WHERE image = ?", [image]);
@@ -218,6 +273,7 @@ async function main() {
   console.log(`  articles   : ${stats.articles}`);
   console.log(`  jobs       : ${stats.jobs}`);
   console.log(`  awards     : ${stats.awards}`);
+  console.log(`  team       : ${stats.team}`);
   console.log(`  skipped    : ${stats.skipped} (already present — use --force to overwrite)\n`);
 }
 

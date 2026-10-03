@@ -390,6 +390,102 @@ export async function deleteJob(id: number): Promise<void> {
   await execute("DELETE FROM job_listings WHERE id = ?", [id]);
 }
 
+// ----------------------------------------------------------- team members ---
+
+export type TeamDepartment = "sales" | "leasing" | "crm";
+
+export type TeamMemberRow = {
+  id: number;
+  department: TeamDepartment;
+  name: string;
+  title: string;
+  experience: string;
+  photo: string;
+  phone: string;
+  email: string;
+  linkedin: string;
+  is_published: number;
+  sort_order: number;
+};
+
+const TEAM_COLUMNS = `id, department, name, title, experience, photo, phone, email,
+  linkedin, is_published, sort_order`;
+
+export async function listTeamMembers(
+  department?: TeamDepartment,
+  options: { includeUnpublished?: boolean } = {}
+) {
+  const clauses: string[] = [];
+  const params: SqlParam[] = [];
+  if (department) {
+    clauses.push("department = ?");
+    params.push(department);
+  }
+  if (!options.includeUnpublished) clauses.push("is_published = 1");
+  const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+
+  return query<TeamMemberRow>(
+    `SELECT ${TEAM_COLUMNS} FROM team_members ${where}
+     ORDER BY sort_order ASC, id ASC`,
+    params
+  );
+}
+
+export async function getTeamMemberById(id: number) {
+  return queryOne<TeamMemberRow>(`SELECT ${TEAM_COLUMNS} FROM team_members WHERE id = ?`, [id]);
+}
+
+export type TeamMemberInput = {
+  department: TeamDepartment;
+  name: string;
+  title: string;
+  experience: string;
+  photo: string;
+  phone: string;
+  email: string;
+  linkedin: string;
+  isPublished: boolean;
+  sortOrder: number;
+};
+
+function teamMemberParams(input: TeamMemberInput): SqlParam[] {
+  return [
+    input.department,
+    input.name,
+    input.title,
+    input.experience,
+    input.photo,
+    input.phone,
+    input.email,
+    input.linkedin,
+    input.isPublished ? 1 : 0,
+    input.sortOrder,
+  ];
+}
+
+export async function createTeamMember(input: TeamMemberInput): Promise<number> {
+  const { insertId } = await execute(
+    `INSERT INTO team_members
+       (department, name, title, experience, photo, phone, email, linkedin,
+        is_published, sort_order)
+     VALUES (?,?,?,?,?,?,?,?,?,?)`,
+    teamMemberParams(input)
+  );
+  return insertId;
+}
+
+export async function updateTeamMember(id: number, input: TeamMemberInput): Promise<void> {
+  await execute(
+    `UPDATE team_members SET department=?, name=?, title=?, experience=?, photo=?,
+       phone=?, email=?, linkedin=?, is_published=?, sort_order=? WHERE id=?`,
+    [...teamMemberParams(input), id]
+  );
+}
+
+export async function deleteTeamMember(id: number): Promise<void> {
+  await execute("DELETE FROM team_members WHERE id = ?", [id]);
+}
+
 // ----------------------------------------------------------------- awards ---
 
 export type AwardRow = {
