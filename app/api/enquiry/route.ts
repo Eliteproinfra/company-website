@@ -15,7 +15,10 @@ export async function POST(request: Request) {
   }
 
   const entries = Object.entries(fields ?? {}).filter(([, value]) => value && String(value).trim());
-  if (entries.length < 2) {
+  // A backstop for an empty post only. Each form marks its own inputs `required`, and the
+  // count varies by form — the land-acquisition CTA legitimately sends a phone number and
+  // nothing else — so anything stricter here rejects valid leads.
+  if (entries.length === 0) {
     return NextResponse.json({ error: "Please fill in the required fields." }, { status: 400 });
   }
 
