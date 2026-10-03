@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -43,10 +44,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="flex min-h-screen bg-neutral-100">
       <aside className="hidden w-64 shrink-0 flex-col bg-dark-black lg:flex">
         <div className="border-b border-white/10 px-6 py-5">
-          <p className="text-xs font-bold uppercase tracking-[2px] text-primary-gold">
-            Elite Pro Infra
-          </p>
-          <p className="mt-1 font-bold text-white">Admin Panel</p>
+          <Link href="/admin" className="block">
+            {/* The light mark — the sidebar is dark-black. */}
+            <Image
+              src="/images/Elite-pro-logo.png"
+              alt="Elite Pro Infraventure"
+              width={845}
+              height={249}
+              className="h-8 w-auto object-contain"
+            />
+            <span className="mt-2 block font-bold text-white">Admin Panel</span>
+          </Link>
         </div>
         <nav className="flex-1 space-y-1 p-4" aria-label="Admin sections">
           {NAV.map((item) => (
@@ -74,8 +82,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between gap-4 border-b border-neutral-200 bg-white px-6 py-4">
           <div className="lg:hidden">
-            <Link href="/admin" className="font-bold text-dark-black">
-              Elite Pro Admin
+            <Link href="/admin" className="flex items-center gap-2">
+              {/* The dark mark — this bar is white, unlike the sidebar. */}
+              <Image
+                src="/images/dark-logo.png"
+                alt="Elite Pro Infraventure"
+                width={252}
+                height={81}
+                className="h-7 w-auto object-contain"
+              />
+              <span className="sr-only">Admin</span>
             </Link>
           </div>
           <div className="ml-auto flex items-center gap-4">
