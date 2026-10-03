@@ -1,0 +1,62 @@
+# Local MySQL for the admin CMS — development only. Production uses the managed
+# database described in deploy/README.md; nothing here is deployed.
+#
+# This describes the container that until now was created by hand with a long
+# `docker run`, so the setup is reproducible and reviewable. It deliberately
+# keeps the original container and volume names, and declares the volume as
+# external, so adopting it does NOT touch the existing data.
+#
+# The credentials come from .env.local, the same DB_* values the app reads, so
+# the container and the app can never drift apart. Compose only auto-loads .env,
+# not .env.local, so always go through the npm wrappers, which pass --env-file:
+#
+#   npm run db:up      start MySQL and wait until it accepts connections
+#   npm run db:down    stop it — the data survives in the elite-web-mysql-data volume
+#   npm run db:logs    tail the server log
+#
+# There is deliberately no "wipe" script. `down -v` will not remove the volume
+# below because it is external; starting over takes an explicit, typed-out
+#   docker volume rm elite-web-mysql-data
+#
+# On a machine that has never run it, after `npm run db:up`:
+#   docker volume create elite-web-mysql-data   # once; the volume is external
+#   npm run db:setup   schema + an admin user whose password is printed once
+#   npm run db:seed    imports the lib/data content into the tables
+
+services:
+  mysql:
+    # Pinned to the LTS line. The container was originally started from `mysql:8`,
+    # which now resolves to 8.4 — pinning stops a future retag from migrating the
+    # data directory underneath us.
+    image: mysql:8.4
+    container_name: elite-web-mysql
+    restart: unless-stopped
+    environment:
+      # No fallbacks: a typo in .env.local must fail loudly here rather than
+      # silently build a database the app cannot log into.
+      MYSQL_DATABASE: ${DB_NAME:?set DB_NAME in .env.local}
+      MYSQL_USER: ${DB_USER:?set DB_USER in .env.local}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env.local}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
+    # Loopback only. Without the 127.0.0.1 prefix Docker publishes the port on
+    # every interface, which puts a dev database on the office network.
+    ports:
+      - "127.0.0.1:${DB_PORT:-3307}:3306"
+    volumes:
+      - elite-web-mysql-data:/var/lib/mysql
+    healthcheck:
+      # `up --wait` blocks on this, so db:setup never races the server's
+      # first-boot initialisation.
+      test:
+        ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 40s
+
+volumes:
+  # External: the volume predates this file and holds the real content. Compose
+  # must attach to it, never create a project-prefixed copy, and must never
+  # remove it on `down -v`.
+  elite-web-mysql-data:
+    external: true
