@@ -10,8 +10,12 @@
 # and finally submits a real enquiry through the public form so the whole
 # path is exercised end to end.
 #
-# The password is never printed. The SMTP AUTH exchange is done with a
-# base64-encoded credential that is built in-memory and never echoed.
+# The password is never printed. It reaches the auth check through the
+# environment rather than argv, which /proc exposes to every local user.
+#
+# A failing check no longer aborts the run: the app is reloaded first, and the
+# remaining steps still report, so one bad signal cannot hide the rest. The
+# script's exit status is the number of failed checks.
 
 set -uo pipefail
 
@@ -51,32 +55,54 @@ else
 fi
 
 echo
-echo "=== 3. authenticate against the SMTP server directly ==="
-# AUTH PLAIN payload: \0user\0pass, base64. Built here and never printed.
-AUTH=$(printf '\0%s\0%s' "$SMTP_USER" "$SMTP_PASS" | base64 -w0)
-RESP=$(printf 'EHLO eliteproinfra.com\r\nAUTH PLAIN %s\r\nQUIT\r\n' "$AUTH" \
-  | timeout 25 openssl s_client -starttls smtp -connect "${SMTP_HOST}:${SMTP_PORT}" -crlf -quiet 2>/dev/null)
-
-if printf '%s' "$RESP" | grep -q "235"; then
-  P "SMTP authentication accepted (235)"
-elif printf '%s' "$RESP" | grep -q "535"; then
-  F "SMTP rejected the credentials (535)"
-  printf '%s\n' "$RESP" | grep -E "^5[0-9][0-9]" | head -3 | sed 's/^/        /'
-  echo "        -> wrong app password, or app passwords are disabled for this"
-  echo "           Workspace user (Admin console > Security > Less secure apps /"
-  echo "           app passwords), or 2-Step Verification is not enabled."
-  exit 1
-else
-  F "unexpected SMTP response"
-  printf '%s\n' "$RESP" | tail -5 | sed 's/^/        /'
-  exit 1
-fi
-
-echo
-echo "=== 4. reload the app with the new environment ==="
+echo "=== 3. reload the app with the new environment ==="
+# Before the auth check, deliberately. Step 1 has already rewritten .env.local,
+# so from here on the file and the running process disagree; aborting in between
+# used to leave the app serving stale credentials while the env file looked
+# correct — a confusing half-applied state. Reload first, diagnose after.
 sudo -u elite -H pm2 reload eliteproinfra --update-env >/dev/null 2>&1
 sleep 6
 curl -s http://127.0.0.1:3000/health | jq -c '{status,commit}' | sed 's/^/  /'
+
+echo
+echo "=== 4. authenticate against the SMTP server ==="
+# Uses the app's own nodemailer rather than a hand-rolled openssl exchange.
+# The previous version piped EHLO + AUTH PLAIN + QUIT in a single write, which
+# is command pipelining before the server has advertised PIPELINING; Gmail
+# answers "451-4.5.0 SMTP protocol violation" and the check failed against
+# credentials that were in fact valid. Driving the real client also means this
+# tests the exact code path the forms use.
+#
+# The password is passed through the environment, never on the command line
+# (argv is world-readable via /proc) and never printed.
+AUTH_OUT=$(cd /var/www/eliteproinfra/current && \
+  SMTP_HOST="$SMTP_HOST" SMTP_PORT="$SMTP_PORT" SMTP_USER="$SMTP_USER" SMTP_PASS="$SMTP_PASS" \
+  timeout 40 node -e '
+    const nodemailer = require("nodemailer");
+    nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: Number(process.env.SMTP_PORT) === 465,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    }).verify()
+      .then(() => console.log("OK"))
+      .catch((e) => { console.log("ERR " + e.message.replace(/\s+/g, " ")); });
+  ' 2>&1)
+
+case "$AUTH_OUT" in
+  OK*) P "SMTP authentication accepted" ;;
+  *"Invalid login"*|*535*)
+    F "SMTP rejected the credentials"
+    printf '        %s\n' "$AUTH_OUT"
+    echo "        -> wrong app password, or app passwords are disabled for this"
+    echo "           Workspace user (Admin console > Security > Less secure apps /"
+    echo "           app passwords), or 2-Step Verification is not enabled."
+    ;;
+  *)
+    F "could not verify SMTP auth"
+    printf '        %s\n' "$AUTH_OUT"
+    ;;
+esac
 
 echo
 echo "=== 5. submit a REAL enquiry through the public form ==="
