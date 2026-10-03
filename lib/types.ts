@@ -1,14 +1,3 @@
-export type HeroSlide = {
-  image: string;
-  mobileImage?: string;
-  eyebrow?: string;
-  heading?: string;
-  subheading?: string;
-  showCta?: boolean;
-  align?: "center" | "left";
-  imagePosition?: string;
-};
-
 export type IconTextItem = {
   icon: string;
   title: string;

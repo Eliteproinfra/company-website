@@ -3,7 +3,7 @@ import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
-import HeroCarousel from "@/components/home/HeroCarousel";
+import HeroVideo from "@/components/home/HeroVideo";
 import CompactFeatureCard from "@/components/home/CompactFeatureCard";
 import StatIconCard from "@/components/home/StatIconCard";
 import SignatureProjectsGrid from "@/components/home/SignatureProjectsGrid";
@@ -14,7 +14,7 @@ import HomeEnquiryForm from "@/components/home/HomeEnquiryForm";
 import ReviewsCarousel from "@/components/home/ReviewsCarousel";
 import InstagramReels from "@/components/home/InstagramReels";
 import Faq from "@/components/home/Faq";
-import { heroSlides, heroSlidesMobile } from "@/lib/data/heroSlides";
+import { hero } from "@/lib/data/hero";
 import { services } from "@/lib/data/services";
 import { nriServices } from "@/lib/data/nri";
 import { signatureProjects } from "@/lib/data/signatureProjects";
@@ -62,7 +62,13 @@ const contactDetails = [
 export default function Home() {
   return (
     <>
-      <HeroCarousel slides={heroSlides} mobileSlides={heroSlidesMobile} />
+      <HeroVideo
+        src={hero.video}
+        eyebrow={hero.eyebrow}
+        heading={hero.heading}
+        subheading={hero.subheading}
+        align={hero.align}
+      />
 
       {/* Who We Are */}
       <section className="bg-white py-20">
