@@ -116,8 +116,22 @@ printf '%s' "$BODY" | grep -q '"ok":true' && P "enquiry form accepted and sent" 
 
 echo
 echo "=== 6. application log ==="
-tail -20 /var/log/eliteproinfra/app-error.log 2>/dev/null | grep -i "smtp\|mail\|enquiry" | tail -5 | sed 's/^/  /' \
-  || echo "  (no mail errors logged)"
+# PM2 appends its instance number, so the file is app-error-0.log, not
+# app-error.log. The old glob-less path matched nothing, so this step reported
+# "no mail errors logged" even while every submission was failing — the
+# 500s on 2026-10-03 sat in app-error-0.log unnoticed. Glob it.
+LOGS=$(ls /var/log/eliteproinfra/app-error*.log 2>/dev/null)
+if [ -z "$LOGS" ]; then
+  echo "  (no application error log found)"
+else
+  # shellcheck disable=SC2086
+  MAIL_ERRS=$(grep -ih "smtp\|mail\|enquiry" $LOGS 2>/dev/null | tail -5)
+  if [ -n "$MAIL_ERRS" ]; then
+    printf '%s\n' "$MAIL_ERRS" | sed 's/^/  /'
+  else
+    echo "  (no mail errors logged)"
+  fi
+fi
 
 echo
 printf '\n===== %d passed, %d failed =====\n' "$pass" "$fail"
