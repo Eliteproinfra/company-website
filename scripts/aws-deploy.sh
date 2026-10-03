@@ -110,6 +110,22 @@ step "Installing dependencies (npm ci)"
 cd "$RELEASE"
 npm ci --no-audit --no-fund
 
+step "Applying schema migrations"
+# BEFORE the build, deliberately. The build prerenders the public pages, and the
+# DB-backed ones fall back to their static module when a table is missing — so a
+# release that migrated afterwards would bake the fallback into the HTML and look
+# like the migration had not worked.
+#
+# --schema-only: this is unattended and its output lands in SSM command history,
+# so it must not be able to print a generated admin password.
+#
+# `set -e` makes a failure here abort before the symlink is touched, leaving the
+# previous release serving. That is the intent: shipping code that expects a
+# table the database does not have is how /admin/team went out broken on
+# 2026-10-03. Seeding is NOT done here — it is a one-off content import, not a
+# migration, and re-running it on every deploy would fight the editors.
+npm run db:migrate
+
 step "Building"
 # On failure `set -e` aborts here, before the symlink is touched, so the
 # previous release keeps serving.

@@ -5,6 +5,7 @@
  * Usage:
  *   npm run db:setup
  *   npm run db:setup -- --user admin --email you@example.com
+ *   npm run db:migrate            # schema only, no admin user (see below)
  *
  * Safe to re-run: every table uses CREATE TABLE IF NOT EXISTS, and an existing
  * admin user is left alone rather than overwritten.
@@ -12,6 +13,12 @@
  * The password is generated here and printed once. It is never written to a
  * file — the previous site's admin credentials should be treated as stolen, so
  * this deliberately does not reuse or import them.
+ *
+ * `--schema-only` exists for scripts/aws-deploy.sh, which applies the schema on
+ * every deploy. Deploy output is captured into SSM command history and CI logs,
+ * so the unattended path must never be able to print a generated password —
+ * hence a flag that skips the admin-user block entirely rather than relying on
+ * "a user probably already exists".
  */
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -98,6 +105,12 @@ async function main() {
     await connection.query(statement);
   }
   console.log(`Applied ${statements.length} schema statement(s).`);
+
+  if (process.argv.includes("--schema-only")) {
+    await connection.end();
+    console.log("Schema only — admin user not touched.");
+    return;
+  }
 
   const username = arg("--user", "admin");
   const email = arg("--email", `${username}@eliteproinfra.com`);
