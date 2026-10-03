@@ -52,19 +52,32 @@ function sniffExtension(buffer: Buffer): string | null {
  * this project's own previous host (`1780881274_nax.php`) was exactly that: a
  * valid PDF/JPEG carrying PHP.
  *
- * So the whole buffer is scanned for interpreter markers. A genuine photo will
- * not contain these byte sequences; if one ever does by coincidence, re-saving
- * it in an editor clears it.
+ * So the whole buffer is scanned for interpreter markers.
+ *
+ * Every marker here must be long enough that it cannot plausibly occur inside
+ * compressed pixel data. That is not a style rule, it is arithmetic: a marker of
+ * n bytes collides at roughly 1/256^n per offset, and an 8 MB upload offers ~8M
+ * offsets. Two- and three-byte markers are therefore near-certain false
+ * positives, and `<%` and `<?=` used to be on this list — measured against 400
+ * of this site's own photographs, `<%` matched 317 of them (79%) and `<?=`
+ * matched 40 (10%), so most legitimate uploads were refused. Every marker below
+ * matched zero. Keep the five-byte floor when adding to this list.
+ *
+ * Dropping those two costs little in practice: nothing on this host interprets
+ * ASP or PHP. nginx serves /uploads/ as static bytes with `X-Content-Type-
+ * Options: nosniff` (deploy/nginx-production.conf), the stored extension comes
+ * from sniffed magic bytes, and the filename is generated. This scan is
+ * defence-in-depth behind those controls, not the control itself.
  */
 const PAYLOAD_MARKERS = [
   "<?php",
-  "<?=",
   "<script",
-  "<%",
   "system(",
   "shell_exec",
   "base64_decode",
   "eval(",
+  "passthru(",
+  "proc_open(",
 ];
 
 function containsExecutablePayload(buffer: Buffer): string | null {
