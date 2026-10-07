@@ -66,6 +66,7 @@ export function TextAreaField({
   label,
   defaultValue = "",
   rows = 4,
+  placeholder,
   hint,
   className,
 }: {
@@ -73,6 +74,7 @@ export function TextAreaField({
   label: string;
   defaultValue?: string;
   rows?: number;
+  placeholder?: string;
   hint?: string;
   className?: string;
 }) {
@@ -83,6 +85,7 @@ export function TextAreaField({
         name={name}
         rows={rows}
         defaultValue={defaultValue}
+        placeholder={placeholder}
         className={`${adminInputClass} font-mono text-sm`}
       />
     </Field>

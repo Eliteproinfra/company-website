@@ -31,12 +31,30 @@ export default async function AdminAwardsPage({
       <AdminNotice saved={params.saved} deleted={params.deleted} error={params.error ?? dbError} />
 
       <section className="rounded-xl border border-neutral-200 bg-white p-6">
-        <h2 className="mb-4 font-bold text-dark-black">Add an award</h2>
+        <h2 className="font-bold text-dark-black">Add an award</h2>
+        <p className="mb-4 mt-1 text-xs text-neutral-500">
+          A photo of the trophy or certificate. One entry per image.
+        </p>
         <form action={addAwardAction} className="space-y-4">
-          <ImageField name="image" label="Image" hint="Upload, or point at an existing /images/awards/... path." />
+          <ImageField
+            name="image"
+            label="Image"
+            hint="Upload a file, or type a path to an existing /images/awards/... image. Shown fitted whole, so nothing gets cropped off."
+          />
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <TextField name="caption" label="Caption" hint="Optional; used as the alt text." />
-            <TextField name="sortOrder" label="Sort order" type="number" defaultValue={0} />
+            <TextField
+              name="caption"
+              label="Caption"
+              placeholder="Best Real Estate Consultant 2024"
+              hint="Not printed on the page — it is the description read out by screen readers and shown if the image fails to load. Optional, but worth filling in."
+            />
+            <TextField
+              name="sortOrder"
+              label="Sort order"
+              type="number"
+              defaultValue={0}
+              hint="Position in the row, lowest number first."
+            />
           </div>
           <button
             type="submit"
