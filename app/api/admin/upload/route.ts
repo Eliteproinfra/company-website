@@ -18,6 +18,35 @@ export const runtime = "nodejs";
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 
+/**
+ * Where uploaded images are written.
+ *
+ * Deliberately NOT written as a literal `path.join(process.cwd(), "public",
+ * "uploads", …)`. Turbopack folds that into a directory asset reference and
+ * traces every file already under public/uploads into this route's build
+ * output. In production that directory is a symlink to
+ * `/var/www/eliteproinfra/shared/uploads`, which lives outside the release
+ * directory Turbopack treats as the filesystem root, so the build fails with
+ * "Symlink … is invalid, it points out of the filesystem root" — see
+ * deploy/AWS.md for why uploads are shared rather than per-release. The failure
+ * only appears once something has actually been uploaded, which is why it lay
+ * dormant until the first admin upload.
+ *
+ * Splitting the relative path at runtime keeps the value opaque to that static
+ * analysis. UPLOADS_DIR overrides it outright if the shared directory ever
+ * stops being symlinked into the release.
+ */
+/** Relative to the working directory, matching the nginx alias for /uploads/. */
+const DEFAULT_UPLOADS_DIR = "public/uploads";
+
+function uploadsRoot(): string {
+  // `path.resolve` with a single environment-derived argument on purpose: there
+  // is deliberately no `process.cwd()` token and no literal path next to it for
+  // the build to fold. Relative input still resolves against the working
+  // directory at runtime, so behaviour is unchanged.
+  return path.resolve(process.env.UPLOADS_DIR || DEFAULT_UPLOADS_DIR);
+}
+
 /** Magic-byte signatures. The declared MIME type and filename are ignored. */
 function sniffExtension(buffer: Buffer): string | null {
   if (buffer.length < 12) return null;
@@ -149,7 +178,7 @@ export async function POST(request: Request) {
     now.getUTCDate()
   ).padStart(2, "0")}-${randomBytes(8).toString("hex")}.${extension}`;
 
-  const targetDir = path.join(process.cwd(), "public", "uploads", folder);
+  const targetDir = path.join(uploadsRoot(), folder);
   await mkdir(targetDir, { recursive: true });
   await writeFile(path.join(targetDir, filename), buffer);
 
