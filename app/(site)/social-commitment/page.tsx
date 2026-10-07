@@ -3,7 +3,7 @@ import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
 import PillarCard from "@/components/social-commitment/PillarCard";
-import { pillars, impactStats, philosophyImages } from "@/lib/data/socialCommitment";
+import { pillars, philosophyImages } from "@/lib/data/socialCommitment";
 
 export const metadata: Metadata = {
   title: "Social Commitment",
@@ -21,8 +21,11 @@ const heroBadges = [
 /*
  * social-commitment.php: left-aligned .csr-hero (.55 -> .85 over the banner, 80vh) with the
  * gold button and two inline icon badges; white philosophy section (copy + quote box + 2x2
- * photo grid); #impact-pillars .csr-pillars-section #050608; .csr-stats-strip white (#000
- * numbers, #777 labels); white closing CTA with .btn-dark + .btn-outline-dark.
+ * photo grid); #impact-pillars .csr-pillars-section #050608; white closing CTA with
+ * .btn-dark + .btn-outline-dark.
+ *
+ * Live's .csr-stats-strip (5000+ Lives Touched etc.) is deliberately dropped — the
+ * figures were unsourced, so we do not carry them over.
  */
 export default function SocialCommitmentPage() {
   return (
@@ -112,19 +115,6 @@ export default function SocialCommitmentPage() {
               <Reveal key={pillar.title} delay={delaySequence[index % delaySequence.length]}>
                 <PillarCard {...pillar} />
               </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white pb-10 pt-16">
-        <div className="container">
-          <div className="mx-auto grid max-w-[900px] grid-cols-2 gap-5 text-center md:grid-cols-4">
-            {impactStats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-[2.2rem] font-extrabold text-black">{stat.value}</p>
-                <p className="mt-1 text-[0.8rem] uppercase tracking-[1.5px] text-csr-label">{stat.label}</p>
-              </div>
             ))}
           </div>
         </div>

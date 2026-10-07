@@ -35,14 +35,6 @@ export const pillars: Pillar[] = [
   },
 ];
 
-/** Live `.csr-stats-strip` values (printed exactly as live formats them). */
-export const impactStats = [
-  { value: "5000+", label: "Lives Touched" },
-  { value: "1200+", label: "Women Trained" },
-  { value: "25+", label: "Skill Centers" },
-  { value: "10k+", label: "Saplings Planted" },
-];
-
 /** Live philosophy section's 2x2 photo grid (self-hosted copies of its Unsplash images). */
 export const philosophyImages = [
   ["/images/bg/csr-skill.jpg", "/images/bg/csr-education.jpg"],
