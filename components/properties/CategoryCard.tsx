@@ -1,11 +1,20 @@
 import Image from "next/image";
+import Link from "next/link";
+import { categoryHref } from "@/lib/data/categories";
 import type { CategoryItem } from "@/lib/types";
 
 /** Live `.category-card`: 12px radius, image scales 1.1 on hover, black->transparent overlay,
- *  gold pill `.category-badge` (20px radius, white uppercase text). */
+ *  gold pill `.category-badge` (20px radius, white uppercase text).
+ *
+ *  Links to the same pre-filtered /properties view as the header dropdown — the card
+ *  has always shown a pointer cursor, so it read as clickable before it was one. */
 export default function CategoryCard({ image, badge, title, subtitle }: CategoryItem) {
   return (
-    <div className="group relative h-80 cursor-pointer overflow-hidden rounded-xl">
+    <Link
+      href={categoryHref(title)}
+      aria-label={`${title} — ${subtitle}`}
+      className="group relative block h-80 cursor-pointer overflow-hidden rounded-xl"
+    >
       <Image
         src={image}
         alt={title}
@@ -20,6 +29,6 @@ export default function CategoryCard({ image, badge, title, subtitle }: Category
         <h4 className="text-xl font-bold">{title}</h4>
         <p className="text-sm text-white/50">{subtitle}</p>
       </div>
-    </div>
+    </Link>
   );
 }

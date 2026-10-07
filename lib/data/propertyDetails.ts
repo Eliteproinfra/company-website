@@ -20,15 +20,22 @@ export type PropertyDetail = {
   location: string;
   price: string;
   priceNote: string;
+  /** Card-only fields, editable in the admin. Absent in this static snapshot. */
+  beds?: string;
+  area?: string;
   images: string[];
   specs: PropertySpec[];
   description?: string;
   amenities: PropertyAmenity[];
   mapUrl?: string;
-  developer: { name: string; logo: string; about: string };
+  /** Optional: the admin stores no developer at all when the name is left blank,
+   *  so the detail page has to be able to render without this section. */
+  developer?: { name: string; logo: string; about: string };
   faqs: PropertyFaq[];
   experts: PropertyExpert[];
   relatedIds: number[];
+  /** "Featured on the homepage" — pins the listing to the front of its city tab. */
+  isFeatured?: boolean;
 };
 
 // Mirrors the live property-detail pages on eliteproinfra.com, newest listing

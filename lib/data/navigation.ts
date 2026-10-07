@@ -1,3 +1,5 @@
+import { categories, categoryHref } from "@/lib/data/categories";
+
 export type NavLeaf = { label: string; href: string; children?: NavLeaf[] };
 export type NavItem = { label: string; href?: string; children?: NavLeaf[] };
 
@@ -36,10 +38,11 @@ export const navItems: NavItem[] = [
     href: "/properties",
     children: [
       { label: "All Properties", href: "/properties" },
-      { label: "Commercial", href: "/properties?category=commercial" },
-      { label: "Industrial Plots", href: "/properties?category=industrial-plots" },
-      { label: "Residential", href: "/properties?category=residential" },
-      { label: "SCO Plots", href: "/properties?category=sco-plots" },
+      // Built from the category list so a rename cannot leave these pointing at a
+      // ?category= slug the browser no longer recognises. Live's A-Z order.
+      ...[...categories]
+        .sort((a, b) => a.title.localeCompare(b.title))
+        .map((category) => ({ label: category.title, href: categoryHref(category.title) })),
     ],
   },
   {

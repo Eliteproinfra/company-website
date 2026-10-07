@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import {
   createProperty,
   deleteProperty,
+  getPropertyById,
   updateProperty,
   type PropertyInput,
 } from "@/lib/db/queries";
@@ -80,11 +81,20 @@ function readPropertyInput(form: FormData): PropertyInput {
   };
 }
 
-/** Public pages that render property data, refreshed after every write. */
-function revalidateProperties(slug?: string) {
+/**
+ * Public pages that render property data, refreshed after every write.
+ *
+ * Takes every slug the write touched, not just the current one: renaming a
+ * listing has to clear the page at its old address too, and deleting one has to
+ * clear the page that no longer exists — otherwise the stale copy keeps being
+ * served from the prerendered output.
+ */
+function revalidateProperties(...slugs: (string | undefined | null)[]) {
   revalidatePath("/properties");
   revalidatePath("/");
-  if (slug) revalidatePath(`/properties/${slug}`);
+  for (const slug of new Set(slugs.filter(Boolean))) {
+    revalidatePath(`/properties/${slug}`);
+  }
 }
 
 export async function savePropertyAction(formData: FormData): Promise<void> {
@@ -97,15 +107,20 @@ export async function savePropertyAction(formData: FormData): Promise<void> {
     redirect(`/admin/properties/${idValue || "new"}?error=Title+is+required`);
   }
 
+  let written: string;
+  let previousSlug: string | undefined;
+
   if (idValue && idValue !== "new") {
     const id = Number(idValue);
     if (!Number.isInteger(id) || id <= 0) redirect("/admin/properties?error=Invalid+id");
-    await updateProperty(id, input);
+    // Read before writing so a renamed listing can clear its old URL.
+    previousSlug = (await getPropertyById(id))?.slug;
+    ({ slug: written } = await updateProperty(id, input));
   } else {
-    await createProperty(input);
+    ({ slug: written } = await createProperty(input));
   }
 
-  revalidateProperties(input.slug);
+  revalidateProperties(written, previousSlug);
   revalidatePath("/admin/properties");
   redirect("/admin/properties?saved=1");
 }
@@ -116,8 +131,11 @@ export async function deletePropertyAction(formData: FormData): Promise<void> {
   const id = Number(String(formData.get("id") ?? ""));
   if (!Number.isInteger(id) || id <= 0) redirect("/admin/properties?error=Invalid+id");
 
+  // Read before deleting — afterwards there is no row to learn the slug from,
+  // and its detail page still needs clearing.
+  const deletedSlug = (await getPropertyById(id))?.slug;
   await deleteProperty(id);
-  revalidateProperties();
+  revalidateProperties(deletedSlug);
   revalidatePath("/admin/properties");
   redirect("/admin/properties?deleted=1");
 }

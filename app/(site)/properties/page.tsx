@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import CategoryCard from "@/components/properties/CategoryCard";
 import LocalityCard from "@/components/properties/LocalityCard";
 import PropertyBrowser from "@/components/properties/PropertyBrowser";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
+import { getPropertyListItems } from "@/lib/content/properties";
 import { categories } from "@/lib/data/categories";
 import { localities } from "@/lib/data/localities";
-import { featuredProperties } from "@/lib/data/properties";
 
 export const metadata: Metadata = {
   title: "Properties",
@@ -21,7 +22,9 @@ const delaySequence = [0, 100, 200, 300, 400, 500] as const;
  * hero, "Top Localities to Invest" (h3, left), the four .category-cards, "Featured Collection"
  * on white with 9 cards per page, then the .bg-light market copy.
  */
-export default function PropertiesPage() {
+export default async function PropertiesPage() {
+  const properties = await getPropertyListItems();
+
   return (
     <>
       <PageHero
@@ -32,39 +35,45 @@ export default function PropertiesPage() {
         overlay="bg-black/60"
       />
 
-      <PropertyBrowser
-        properties={featuredProperties}
-        locations={["All Locations", "Delhi", "Dubai", "Faridabad", "Gurgaon", "Manesar", "Noida"]}
-        types={["All Types", "Commercial", "Industrial Plots", "Residential", "SCO Plots"]}
-        between={
-          <>
-            <section className="bg-white py-12">
-              <div className="container">
-                <h3 className="mb-2 text-2xl font-bold text-dark-black">Top Localities to Invest</h3>
-                <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  {localities.map((locality, index) => (
-                    <Reveal key={locality.name} delay={delaySequence[index % delaySequence.length]}>
-                      <LocalityCard {...locality} />
-                    </Reveal>
-                  ))}
+      {/* PropertyBrowser reads ?category= via useSearchParams, which a prerendered
+          page requires a Suspense boundary around. The hero above and the market
+          copy below stay outside it, so the page's indexable text is still in the
+          static HTML. */}
+      <Suspense fallback={<div className="min-h-[60vh] bg-white" />}>
+        <PropertyBrowser
+          properties={properties}
+          locations={["All Locations", "Delhi", "Dubai", "Faridabad", "Gurgaon", "Manesar", "Noida"]}
+          types={["All Types", "Commercial", "Industrial Plots", "Residential", "SCO Plots"]}
+          between={
+            <>
+              <section className="bg-white py-12">
+                <div className="container">
+                  <h3 className="mb-2 text-2xl font-bold text-dark-black">Top Localities to Invest</h3>
+                  <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {localities.map((locality, index) => (
+                      <Reveal key={locality.name} delay={delaySequence[index % delaySequence.length]}>
+                        <LocalityCard {...locality} />
+                      </Reveal>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            <section className="bg-white pb-12">
-              <div className="container">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  {categories.map((category, index) => (
-                    <Reveal key={category.title} delay={delaySequence[index % delaySequence.length]}>
-                      <CategoryCard {...category} />
-                    </Reveal>
-                  ))}
+              <section className="bg-white pb-12">
+                <div className="container">
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {categories.map((category, index) => (
+                      <Reveal key={category.title} delay={delaySequence[index % delaySequence.length]}>
+                        <CategoryCard {...category} />
+                      </Reveal>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
-          </>
-        }
-      />
+              </section>
+            </>
+          }
+        />
+      </Suspense>
 
       <section className="bg-bs-light py-20">
         <div className="container">

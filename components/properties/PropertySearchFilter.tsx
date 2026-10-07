@@ -6,6 +6,9 @@ import { useState } from "react";
 type PropertySearchFilterProps = {
   locations: string[];
   types: string[];
+  /** What the boxes start on. Defaults to the "All …" entry at the head of each list. */
+  initialLocation?: string;
+  initialType?: string;
   showBudget?: boolean;
   onSearch?: (location: string, type: string) => void;
 };
@@ -17,11 +20,13 @@ const labelClasses = "mb-2 block text-xs font-bold uppercase tracking-wide text-
 export default function PropertySearchFilter({
   locations,
   types,
+  initialLocation,
+  initialType,
   showBudget,
   onSearch,
 }: PropertySearchFilterProps) {
-  const [location, setLocation] = useState(locations[0]);
-  const [type, setType] = useState(types[0]);
+  const [location, setLocation] = useState(initialLocation ?? locations[0]);
+  const [type, setType] = useState(initialType ?? types[0]);
 
   return (
     <div className="relative z-10 -mt-14 rounded-lg border-t-4 border-primary-gold bg-white p-6 shadow-card sm:p-8">

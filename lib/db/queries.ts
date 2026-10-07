@@ -163,7 +163,9 @@ function propertyParams(input: PropertyInput, slug: string): SqlParam[] {
   ];
 }
 
-export async function createProperty(input: PropertyInput): Promise<number> {
+/** Returns the slug actually written — `uniqueSlug` may differ from the input,
+ *  and the caller needs it to revalidate the right public page. */
+export async function createProperty(input: PropertyInput): Promise<{ id: number; slug: string }> {
   const slug = await uniqueSlug("properties", input.slug || slugify(input.title));
   const { insertId } = await execute(
     `INSERT INTO properties
@@ -173,10 +175,11 @@ export async function createProperty(input: PropertyInput): Promise<number> {
      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     propertyParams(input, slug)
   );
-  return insertId;
+  return { id: insertId, slug };
 }
 
-export async function updateProperty(id: number, input: PropertyInput): Promise<void> {
+/** Returns the slug actually written — see {@link createProperty}. */
+export async function updateProperty(id: number, input: PropertyInput): Promise<{ slug: string }> {
   const slug = await uniqueSlug("properties", input.slug || slugify(input.title), id);
   await execute(
     `UPDATE properties SET
@@ -187,6 +190,7 @@ export async function updateProperty(id: number, input: PropertyInput): Promise<
      WHERE id=?`,
     [...propertyParams(input, slug), id]
   );
+  return { slug };
 }
 
 export async function deleteProperty(id: number): Promise<void> {

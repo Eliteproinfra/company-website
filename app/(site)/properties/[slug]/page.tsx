@@ -8,14 +8,18 @@ import PropertyGallery from "@/components/properties/PropertyGallery";
 import Button from "@/components/ui/Button";
 import Separator from "@/components/ui/Separator";
 import {
+  getProperties,
   getPropertyById,
   getPropertyBySlug,
-  propertyDetails,
-  type PropertyDetail,
-} from "@/lib/data/propertyDetails";
+  toPropertyItem,
+} from "@/lib/content/properties";
+import type { PropertyDetail } from "@/lib/data/propertyDetails";
 
-export function generateStaticParams() {
-  return propertyDetails.map((property) => ({ slug: property.slug }));
+/** Prerenders every listing that exists at build time. A listing added in the
+ *  admin afterwards is rendered on first request (dynamicParams defaults to true)
+ *  and then revalidated by savePropertyAction. */
+export async function generateStaticParams() {
+  return (await getProperties()).map((property) => ({ slug: property.slug }));
 }
 
 export async function generateMetadata({
@@ -24,7 +28,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug);
+  const property = await getPropertyBySlug(slug);
   if (!property) return { title: "Property Not Found" };
 
   const description =
@@ -85,12 +89,12 @@ export default async function PropertyDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug);
+  const property = await getPropertyBySlug(slug);
   if (!property) notFound();
 
-  const related = property.relatedIds
-    .map((id) => getPropertyById(id))
-    .filter((item): item is PropertyDetail => Boolean(item));
+  const related = (
+    await Promise.all(property.relatedIds.map((id) => getPropertyById(id)))
+  ).filter((item): item is PropertyDetail => Boolean(item));
 
   return (
     <section className="bg-white pb-16 pt-28 lg:pt-32">
@@ -193,28 +197,32 @@ export default async function PropertyDetailPage({
               </Card>
             ) : null}
 
-            <Card className="mb-4">
-              <CardHeader title="About Developer" subtitle="Developer and compliance information" />
-              <div className="p-[18px]">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                  {property.developer.logo ? (
-                    <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-xl border border-black/[0.06] bg-white">
-                      <Image
-                        src={property.developer.logo}
-                        alt={`${property.developer.name} logo`}
-                        fill
-                        sizes="128px"
-                        className="object-contain p-2"
-                      />
+            {/* Hidden outright when the listing has no developer — the admin stores
+                none at all when the name is left blank. */}
+            {property.developer ? (
+              <Card className="mb-4">
+                <CardHeader title="About Developer" subtitle="Developer and compliance information" />
+                <div className="p-[18px]">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                    {property.developer.logo ? (
+                      <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-xl border border-black/[0.06] bg-white">
+                        <Image
+                          src={property.developer.logo}
+                          alt={`${property.developer.name} logo`}
+                          fill
+                          sizes="128px"
+                          className="object-contain p-2"
+                        />
+                      </div>
+                    ) : null}
+                    <div>
+                      <h3 className="text-lg font-bold text-dark-black">{property.developer.name}</h3>
+                      <p className="mt-2 leading-[1.9] text-muted">{property.developer.about}</p>
                     </div>
-                  ) : null}
-                  <div>
-                    <h3 className="text-lg font-bold text-dark-black">{property.developer.name}</h3>
-                    <p className="mt-2 leading-[1.9] text-muted">{property.developer.about}</p>
                   </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            ) : null}
 
             {property.faqs.length ? (
               <Card className="mb-4">
@@ -289,17 +297,7 @@ export default async function PropertyDetailPage({
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                   {related.map((item) => (
-                    <PropertyCard
-                      key={item.id}
-                      image={item.images[0]}
-                      title={item.title}
-                      location={item.location}
-                      price={item.price}
-                      badgeText={item.category}
-                      badgeVariant={item.badgeVariant}
-                      href={`/properties/${item.slug}`}
-                      detailsLabel="View"
-                    />
+                    <PropertyCard key={item.id} {...toPropertyItem(item)} detailsLabel="View" />
                   ))}
                 </div>
               </div>

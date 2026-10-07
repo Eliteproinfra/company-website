@@ -27,3 +27,24 @@ export const categories: CategoryItem[] = [
     subtitle: "Explore properties",
   },
 ];
+
+/**
+ * The `?category=` slug that preselects a Property Type on /properties — the one
+ * spelling shared by the header dropdown, the category cards and the browser, so
+ * a renamed category cannot leave a link pointing at a filter that no longer exists.
+ */
+export function categorySlug(title: string): string {
+  return title.toLowerCase().replace(/\s+/g, "-");
+}
+
+/** The /properties link that lands on this category, pre-filtered. */
+export function categoryHref(title: string): string {
+  return `/properties?category=${categorySlug(title)}`;
+}
+
+/** Resolves `?category=` back to the Property Type label the browser filters on.
+ *  Returns undefined for a missing or unrecognised slug, which shows everything. */
+export function typeFromCategorySlug(slug: string | null | undefined): string | undefined {
+  if (!slug) return undefined;
+  return categories.find((category) => categorySlug(category.title) === slug)?.title;
+}

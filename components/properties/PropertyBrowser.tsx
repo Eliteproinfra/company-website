@@ -1,12 +1,13 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
 import Separator from "@/components/ui/Separator";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertySearchFilter from "@/components/properties/PropertySearchFilter";
 import Pagination from "@/components/properties/Pagination";
-import { propertyHref } from "@/lib/data/propertyDetails";
+import { typeFromCategorySlug } from "@/lib/data/categories";
 import type { PropertyItem } from "@/lib/types";
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
@@ -37,10 +38,32 @@ export default function PropertyBrowser({
   /** Sections rendered between the search filter and the listing (live: localities + categories). */
   between?: React.ReactNode;
 }) {
-  const [location, setLocation] = useState(locations[0]);
-  const [type, setType] = useState(types[0]);
+  /**
+   * `?category=commercial`, set by the header dropdown and the category cards.
+   *
+   * Read client-side rather than from the page's `searchParams` prop because this
+   * page is also built by the static-export target (next.config `output: "export"`),
+   * where there is no request-time render to read them on the server.
+   *
+   * Derived straight into `type` below instead of being pushed into state by an
+   * effect, so arriving on a category link renders filtered on the first paint
+   * rather than flashing the full list — and so a later in-app click on another
+   * category is picked up, which a mount-only effect would miss.
+   */
+  const searchParams = useSearchParams();
+  const urlType = typeFromCategorySlug(searchParams.get("category"));
+
+  const [chosenLocation, setChosenLocation] = useState<string | null>(null);
+  const [chosenType, setChosenType] = useState<string | null>(null);
   const [sort, setSort] = useState<"recommended" | "low-high" | "high-low">("recommended");
   const [page, setPage] = useState(1);
+
+  // An explicit Search beats the URL; otherwise the URL's category leads, and
+  // anything unrecognised falls back to showing everything. The `typeToVariant`
+  // guard keeps a category with no matching badge variant from filtering the
+  // list down to nothing.
+  const location = chosenLocation ?? locations[0];
+  const type = chosenType ?? (urlType && urlType in typeToVariant ? urlType : types[0]);
 
   const filtered = useMemo(() => {
     let list = properties;
@@ -63,8 +86,8 @@ export default function PropertyBrowser({
   const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   function applyFilters(nextLocation: string, nextType: string) {
-    setLocation(nextLocation);
-    setType(nextType);
+    setChosenLocation(nextLocation);
+    setChosenType(nextType);
     setPage(1);
   }
 
@@ -73,8 +96,15 @@ export default function PropertyBrowser({
       <section className="relative z-10 bg-white">
         <div className="container">
           <PropertySearchFilter
+            // Remounting on an applied change re-seeds the two dropdowns, so the
+            // boxes show the filter actually in force — including the one a
+            // ?category= link arrived with. After a Search the drafts already
+            // equal the applied values, so nothing the user picked is lost.
+            key={`${location}|${type}`}
             locations={locations}
             types={types}
+            initialLocation={location}
+            initialType={type}
             showBudget
             onSearch={applyFilters}
           />
@@ -109,7 +139,7 @@ export default function PropertyBrowser({
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {pageItems.map((property, index) => (
                 <Reveal key={property.title} delay={delaySequence[index % delaySequence.length]}>
-                  <PropertyCard {...property} href={property.href ?? propertyHref(property.title)} />
+                  <PropertyCard {...property} />
                 </Reveal>
               ))}
             </div>
