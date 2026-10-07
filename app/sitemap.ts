@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
+import { getProperties } from "@/lib/content/properties";
 import { articleHref, articles } from "@/lib/data/articles";
-import { propertyDetails } from "@/lib/data/propertyDetails";
 
 // Already prerendered in the server build; stated explicitly because a static
 // export (scripts/export.sh) errors on any metadata route that has not opted in.
@@ -33,8 +33,11 @@ const routes: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["ch
   { path: "/terms-conditions", changeFrequency: "yearly", priority: 0.3 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
+  // From the database, so a listing added in the admin is submitted for
+  // indexing rather than only existing as a page nothing links to.
+  const properties = await getProperties();
 
   return [
     ...routes.map(({ path, changeFrequency, priority }) => ({
@@ -43,7 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency,
       priority,
     })),
-    ...propertyDetails.map((property) => ({
+    ...properties.map((property) => ({
       url: `${baseUrl}/properties/${property.slug}`,
       lastModified,
       changeFrequency: "weekly" as const,
