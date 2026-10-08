@@ -78,7 +78,7 @@ export default async function ArticleEditorPage({
               label="Slug (web address)"
               defaultValue={article?.slug ?? ""}
               placeholder="gurgaon-market-outlook-2026"
-              hint="The ending of the public URL. Leave blank to build it from the title. Lowercase, dashes instead of spaces, and unique within this section."
+              hint="The ending of the public URL. Leave blank to build it from the title. Lowercase, dashes instead of spaces, and unique within this section — anything else is turned into a dash when you save."
             />
             <TextField
               name="publishedOn"

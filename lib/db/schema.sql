@@ -206,3 +206,25 @@ SET @m := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
 PREPARE stmt FROM @m;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+-- Slugs typed into the admin used to be stored verbatim, so a space in the
+-- "Slug (web address)" field became a %20 in the path and the page 404'd:
+-- /properties/M3M-CFC-Sector%20113-Gurugram was unreachable while the listing
+-- itself was published. uniqueSlug() in lib/db/queries.ts now runs every slug
+-- through sanitizeSlug(); these two repair the rows written before it did.
+--
+-- Capitalisation is deliberately left alone, matching sanitizeSlug: the
+-- already-indexed /properties/DLF-The-Aureva-Sector-63-Gurgaon has to keep
+-- working. The WHERE clause is the statement's own output, so a second run
+-- matches nothing.
+--
+-- UPDATE IGNORE rather than UPDATE: slug is UNIQUE, and a repair that happened
+-- to collide with an existing row should leave that row for a human to rename
+-- rather than abort the deploy's migration step.
+UPDATE IGNORE properties
+   SET slug = TRIM(BOTH '-' FROM REGEXP_REPLACE(slug, '[^A-Za-z0-9]+', '-'))
+ WHERE slug <> TRIM(BOTH '-' FROM REGEXP_REPLACE(slug, '[^A-Za-z0-9]+', '-'));
+
+UPDATE IGNORE articles
+   SET slug = TRIM(BOTH '-' FROM REGEXP_REPLACE(slug, '[^A-Za-z0-9]+', '-'))
+ WHERE slug <> TRIM(BOTH '-' FROM REGEXP_REPLACE(slug, '[^A-Za-z0-9]+', '-'));

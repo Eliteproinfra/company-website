@@ -67,7 +67,7 @@ export default async function PropertyEditorPage({
               label="Slug (web address)"
               defaultValue={property?.slug ?? ""}
               placeholder="m3m-paragon"
-              hint="The ending of the public URL: /properties/m3m-paragon. Leave blank to build it from the title. Lowercase, dashes instead of spaces, and unique across all listings."
+              hint="The ending of the public URL: /properties/m3m-paragon. Leave blank to build it from the title. Lowercase, dashes instead of spaces, and unique across all listings — anything else is turned into a dash when you save."
             />
             <TextField
               name="category"

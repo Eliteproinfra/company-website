@@ -7,7 +7,7 @@
  */
 import "server-only";
 import { execute, query, queryOne, type SqlParam } from "@/lib/db/client";
-import { sanitizeArticleHtml, slugify } from "@/lib/db/sanitize";
+import { sanitizeArticleHtml, sanitizeSlug, slugify } from "@/lib/db/sanitize";
 import type { PropertyBadgeVariant } from "@/lib/types";
 
 export type ArticleKind = "press" | "blog" | "news";
@@ -652,7 +652,12 @@ async function uniqueSlug(
   excludeId?: number,
   scope?: { column: "kind"; value: string }
 ): Promise<string> {
-  const clean = base || "item";
+  // Every slug the CMS writes passes through here, which is why the sanitising
+  // lives here rather than at each call site: `base` is either slugify(title),
+  // already safe, or whatever was typed into the admin's slug field, which is
+  // not. A space in that field used to be stored as-is and the listing then
+  // 404'd, its URL carrying a %20 that matches no route.
+  const clean = sanitizeSlug(base) || "item";
   let candidate = clean;
   let suffix = 1;
 
