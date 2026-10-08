@@ -3,26 +3,31 @@
 import Image from "next/image";
 import { useState } from "react";
 import AwardLightbox from "@/components/awards/AwardLightbox";
+import type { Award } from "@/lib/types";
 
 /** Live awards.php gallery: four 280px tiles per row with no card chrome; on hover the image
  *  scales 1.05 under an rgba(0,0,0,.5) overlay carrying a white zoom icon. */
-export default function AwardsGrid({ images }: { images: string[] }) {
+export default function AwardsGrid({ awards }: { awards: Award[] }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {images.map((image, index) => (
+        {awards.map(({ image, caption }, index) => (
           <button
             key={image}
             type="button"
             onClick={() => setActiveIndex(index)}
-            aria-label={`View award ${index + 1} of ${images.length} enlarged`}
+            aria-label={
+              caption
+                ? `View “${caption}” enlarged`
+                : `View award ${index + 1} of ${awards.length} enlarged`
+            }
             className="group relative flex h-[280px] cursor-pointer items-center justify-center overflow-hidden"
           >
             <Image
               src={image}
-              alt="Elite Pro Infraventure award recognition"
+              alt={caption || "Elite Pro Infraventure award recognition"}
               width={300}
               height={280}
               sizes="(min-width: 992px) 25vw, (min-width: 768px) 33vw, (min-width: 576px) 50vw, 100vw"
@@ -36,7 +41,7 @@ export default function AwardsGrid({ images }: { images: string[] }) {
       </div>
 
       <AwardLightbox
-        images={images}
+        images={awards.map((award) => award.image)}
         index={activeIndex}
         onClose={() => setActiveIndex(null)}
         onIndexChange={setActiveIndex}

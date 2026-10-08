@@ -14,13 +14,15 @@ import HomeEnquiryForm from "@/components/home/HomeEnquiryForm";
 import ReviewsCarousel from "@/components/home/ReviewsCarousel";
 import InstagramReels from "@/components/home/InstagramReels";
 import Faq from "@/components/home/Faq";
+import { getAwards } from "@/lib/content/awards";
+import { getInsightsHub } from "@/lib/content/insightsHub";
 import { getSignatureProjects } from "@/lib/content/properties";
 import { hero } from "@/lib/data/hero";
 import { services } from "@/lib/data/services";
 import { nriServices } from "@/lib/data/nri";
-import { insightsHub } from "@/lib/data/insightsHub";
+
 import { partners } from "@/lib/data/partners";
-import { awardImages } from "@/lib/data/awards";
+
 import { reviews, googleRating } from "@/lib/data/reviews";
 import { socialLinks } from "@/lib/data/social";
 import { homeFaqs } from "@/lib/data/faq";
@@ -60,7 +62,11 @@ const contactDetails = [
  * #faq skyline + rgba(10,10,10,.85) / white / #contact dark gradient.
  */
 export default async function Home() {
-  const signatureProjects = await getSignatureProjects();
+  const [signatureProjects, awards, insightsHub] = await Promise.all([
+    getSignatureProjects(),
+    getAwards(),
+    getInsightsHub(),
+  ]);
 
   return (
     <>
@@ -325,7 +331,7 @@ export default async function Home() {
               Recognized Excellence in Real Estate
             </h2>
           </div>
-          <AwardsCarousel images={awardImages} />
+          <AwardsCarousel awards={awards} />
           <div className="mt-10 text-center">
             <Link
               href="/awards"

@@ -3,7 +3,7 @@ import AwardsGrid from "@/components/awards/AwardsGrid";
 import PageHero from "@/components/ui/PageHero";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Faq from "@/components/home/Faq";
-import { awardImages } from "@/lib/data/awards";
+import { getAwards } from "@/lib/content/awards";
 import { homeFaqs } from "@/lib/data/faq";
 
 export const metadata: Metadata = {
@@ -16,7 +16,9 @@ export const metadata: Metadata = {
  * "Awards"), .awards-gallery-section ("Our Achievements", gold radial to white with the
  * repeating trophy line-art at 18%), then the same skyline #faq block and FAQs as the home page.
  */
-export default function AwardsPage() {
+export default async function AwardsPage() {
+  const awards = await getAwards();
+
   return (
     <>
       <PageHero
@@ -35,7 +37,7 @@ export default function AwardsPage() {
             title="Our Achievements"
             description="Honoring our commitment to excellence and innovation in real estate."
           />
-          <AwardsGrid images={awardImages} />
+          <AwardsGrid awards={awards} />
         </div>
       </section>
 

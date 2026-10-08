@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import AwardLightbox from "@/components/awards/AwardLightbox";
+import type { Award } from "@/lib/types";
 
-export default function AwardsCarousel({ images }: { images: string[] }) {
+export default function AwardsCarousel({ awards }: { awards: Award[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -24,17 +25,21 @@ export default function AwardsCarousel({ images }: { images: string[] }) {
         role="group"
         aria-label="Awards and recognitions"
       >
-        {images.map((image, index) => (
+        {awards.map(({ image, caption }, index) => (
           <button
             key={image}
             type="button"
             onClick={() => setActiveIndex(index)}
-            aria-label={`View award ${index + 1} of ${images.length} enlarged`}
+            aria-label={
+              caption
+                ? `View “${caption}” enlarged`
+                : `View award ${index + 1} of ${awards.length} enlarged`
+            }
             className="flex aspect-square w-[50%] shrink-0 cursor-zoom-in snap-start items-center justify-center rounded-lg bg-white p-1 shadow-bs-sm sm:w-[36%] md:w-[25%] lg:w-[18%]"
           >
             <Image
               src={image}
-              alt="Elite Pro Infraventure award recognition"
+              alt={caption || "Elite Pro Infraventure award recognition"}
               width={260}
               height={260}
               sizes="(min-width: 1024px) 18vw, (min-width: 768px) 25vw, (min-width: 640px) 36vw, 50vw"
@@ -62,7 +67,7 @@ export default function AwardsCarousel({ images }: { images: string[] }) {
       </button>
 
       <AwardLightbox
-        images={images}
+        images={awards.map((award) => award.image)}
         index={activeIndex}
         onClose={() => setActiveIndex(null)}
         onIndexChange={setActiveIndex}

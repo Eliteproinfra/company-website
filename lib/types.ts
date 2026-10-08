@@ -40,6 +40,12 @@ export type CategoryItem = {
   subtitle: string;
 };
 
+export type Award = {
+  image: string;
+  /** Alt text for the tile. Falls back to a generic label when blank. */
+  caption: string;
+};
+
 export type PropertyBadgeVariant = "residential" | "commercial" | "sco" | "industrial";
 
 export type PropertyItem = {
