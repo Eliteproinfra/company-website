@@ -3,7 +3,8 @@ import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
 import JobOpenings from "@/components/careers/JobOpenings";
-import { jobListings, cultureHighlights, careerGallery } from "@/lib/data/careers";
+import { getJobListings } from "@/lib/content/careers";
+import { cultureHighlights, careerGallery, type JobListing } from "@/lib/data/careers";
 
 export const metadata: Metadata = {
   title: "Careers",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 const delaySequence = [0, 100, 200, 300] as const;
 
-function jobPostingSchema(job: (typeof jobListings)[number]) {
+function jobPostingSchema(job: JobListing) {
   return {
     "@context": "https://schema.org",
     "@type": "JobPosting",
@@ -46,7 +47,9 @@ function jobPostingSchema(job: (typeof jobListings)[number]) {
  * "Life at Elite Pro Infra" gallery, white #openings (departments + job accordion),
  * .bg-light "Didn't find a role" strip with .btn-outline-dark.
  */
-export default function CareersPage() {
+export default async function CareersPage() {
+  const jobListings = await getJobListings();
+
   return (
     <>
       {jobListings.map((job) => (

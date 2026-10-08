@@ -1,9 +1,9 @@
 "use client";
 
 import clsx from "clsx";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ApplyModal from "@/components/careers/ApplyModal";
-import { departments, type JobListing } from "@/lib/data/careers";
+import { departments as liveDepartments, type JobListing } from "@/lib/data/careers";
 
 /**
  * Live career.php #openings: a `.bg-light` "Departments" filter box (gold "All Openings",
@@ -19,6 +19,34 @@ export default function JobOpenings({ jobs }: { jobs: JobListing[] }) {
   const [applying, setApplying] = useState<JobListing | null>(null);
 
   const visible = filter ? jobs.filter((job) => job.department === filter) : jobs;
+
+  /**
+   * Derived from the postings actually on the page, not a fixed list: the
+   * counts have to follow what the admin holds, and a posting filed under a
+   * department nobody hardcoded would otherwise have no tab to reach it by.
+   * Live's own departments are kept first, and in its order, so the box still
+   * reads the way it does today even when one of them currently has no opening.
+   */
+  const departments = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const job of jobs) {
+      if (job.department) counts.set(job.department, (counts.get(job.department) ?? 0) + 1);
+    }
+
+    const known = liveDepartments
+      .filter((dept) => dept.filter !== null)
+      .map((dept) => dept.filter as string);
+    const extra = [...counts.keys()].filter((name) => !known.includes(name)).sort();
+
+    return [
+      { label: "All Openings", filter: null, count: jobs.length },
+      ...[...known, ...extra].map((name) => ({
+        label: name,
+        filter: name,
+        count: counts.get(name) ?? 0,
+      })),
+    ];
+  }, [jobs]);
 
   return (
     <>

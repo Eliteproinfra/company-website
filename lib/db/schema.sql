@@ -102,6 +102,14 @@ CREATE TABLE IF NOT EXISTS job_listings (
   location     VARCHAR(120) NOT NULL DEFAULT '',
   type         VARCHAR(80)  NOT NULL DEFAULT '',
   experience   VARCHAR(80)  NOT NULL DEFAULT '',
+  -- The accordion body on /careers: an opening paragraph and two bullet lists.
+  summary        TEXT       NULL,
+  qualifications JSON       NULL,
+  responsibilities JSON     NULL,
+  -- Live entered these lists with an inconsistent glyph ("*" on three postings,
+  -- "•" on the rest). Kept so existing postings render as they always have; the
+  -- admin does not expose it and new rows take the default.
+  bullet       VARCHAR(4)   NOT NULL DEFAULT '•',
   is_published TINYINT(1)   NOT NULL DEFAULT 1,
   sort_order   INT          NOT NULL DEFAULT 0,
   created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -158,3 +166,43 @@ CREATE TABLE IF NOT EXISTS enquiries (
   created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_enquiries_inbox (is_read, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------- migrations
+--
+-- Everything above is CREATE TABLE IF NOT EXISTS, which is a no-op against a
+-- database that already has the table — so a column added to one of those
+-- definitions never reaches an existing deployment. Columns added after the
+-- first release therefore need an explicit ALTER here as well.
+--
+-- MySQL 8 has no ADD COLUMN IF NOT EXISTS, so each one is guarded against
+-- information_schema and executed through a prepared statement; re-running is
+-- a no-op. scripts/db-setup.mjs applies this file top to bottom on every
+-- deploy (npm run db:migrate), so these must stay idempotent.
+
+SET @m := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'job_listings' AND COLUMN_NAME = 'summary') = 0,
+  'ALTER TABLE job_listings ADD COLUMN summary TEXT NULL AFTER experience', 'DO 0');
+PREPARE stmt FROM @m;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @m := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'job_listings' AND COLUMN_NAME = 'qualifications') = 0,
+  'ALTER TABLE job_listings ADD COLUMN qualifications JSON NULL AFTER summary', 'DO 0');
+PREPARE stmt FROM @m;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @m := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'job_listings' AND COLUMN_NAME = 'responsibilities') = 0,
+  'ALTER TABLE job_listings ADD COLUMN responsibilities JSON NULL AFTER qualifications', 'DO 0');
+PREPARE stmt FROM @m;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @m := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'job_listings' AND COLUMN_NAME = 'bullet') = 0,
+  'ALTER TABLE job_listings ADD COLUMN bullet VARCHAR(4) NOT NULL DEFAULT ''•'' AFTER responsibilities', 'DO 0');
+PREPARE stmt FROM @m;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

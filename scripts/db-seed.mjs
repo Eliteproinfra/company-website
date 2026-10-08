@@ -184,21 +184,65 @@ async function main() {
   // -------------------------------------------------------------- jobs ---
   for (const [index, job] of jobListings.entries()) {
     const [existing] = await connection.execute(
-      "SELECT id FROM job_listings WHERE title = ? AND department = ?",
+      "SELECT id, summary FROM job_listings WHERE title = ? AND department = ?",
       [job.title, job.department ?? ""]
     );
+
     if (existing.length && !force) {
-      stats.skipped++;
+      // The description columns were added after the first release, so rows
+      // seeded before that have them empty. Backfill those without --force,
+      // which would otherwise be the only way to get a description onto an
+      // existing posting — and --force overwrites admin edits everywhere else.
+      // A posting that already has a description is left alone.
+      if (!existing[0].summary) {
+        await connection.execute(
+          `UPDATE job_listings SET summary=?, qualifications=?, responsibilities=?, bullet=?
+           WHERE id=?`,
+          [
+            job.summary ?? "",
+            JSON.stringify(job.qualifications ?? []),
+            JSON.stringify(job.responsibilities ?? []),
+            job.bullet ?? "•",
+            existing[0].id,
+          ]
+        );
+        stats.jobs++;
+      } else {
+        stats.skipped++;
+      }
       continue;
     }
-    if (!existing.length) {
+
+    const values = [
+      job.title,
+      job.department ?? "",
+      job.location ?? "",
+      job.type ?? "",
+      job.experience ?? "",
+      job.summary ?? "",
+      JSON.stringify(job.qualifications ?? []),
+      JSON.stringify(job.responsibilities ?? []),
+      // Live typed these lists with an inconsistent glyph; preserved so seeded
+      // postings keep rendering as they do today (see schema.sql).
+      job.bullet ?? "•",
+      index,
+    ];
+
+    if (existing.length) {
       await connection.execute(
-        `INSERT INTO job_listings (title, department, location, type, experience, sort_order)
-         VALUES (?,?,?,?,?,?)`,
-        [job.title, job.department ?? "", job.location ?? "", job.type ?? "", job.experience ?? "", index]
+        `UPDATE job_listings SET title=?, department=?, location=?, type=?, experience=?,
+           summary=?, qualifications=?, responsibilities=?, bullet=?, sort_order=? WHERE id=?`,
+        [...values, existing[0].id]
       );
-      stats.jobs++;
+    } else {
+      await connection.execute(
+        `INSERT INTO job_listings (title, department, location, type, experience, summary,
+           qualifications, responsibilities, bullet, sort_order)
+         VALUES (?,?,?,?,?,?,?,?,?,?)`,
+        values
+      );
     }
+    stats.jobs++;
   }
 
   // ------------------------------------------------------- team members ---
