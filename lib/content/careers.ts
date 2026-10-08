@@ -14,8 +14,12 @@ import { isDatabaseConfigured } from "@/lib/db/client";
 import { listJobs, type JobRecord } from "@/lib/db/queries";
 import { jobListings, type JobListing } from "@/lib/data/careers";
 
+const STATIC_BY_TITLE = new Map(
+  jobListings.map((job) => [job.title.trim().toLowerCase(), job])
+);
+
 function toJobListing(record: JobRecord): JobListing {
-  return {
+  const listing: JobListing = {
     id: record.id,
     title: record.title,
     department: record.department,
@@ -29,6 +33,31 @@ function toJobListing(record: JobRecord): JobListing {
     // column (it is a VARCHAR) falls back to the bullet rather than rendering
     // a stray character in front of every line.
     bullet: record.bullet === "*" ? "*" : "•",
+  };
+
+  // The summary, qualifications and responsibilities columns were added after
+  // the first release. A row seeded before that has all three empty until
+  // `npm run db:seed` backfills it — and seeding is a manual step, so a deploy
+  // reaches production first and the accordion would render its headings with
+  // nothing underneath. Where the static file still has that posting's copy,
+  // use it rather than show an empty description.
+  //
+  // Deliberately all-or-nothing: a posting an author has actually written is
+  // never partly overwritten, and once any copy exists this never applies
+  // again. Safe to delete once every environment has been seeded.
+  const isEmpty =
+    !listing.summary && !listing.qualifications.length && !listing.responsibilities.length;
+  if (!isEmpty) return listing;
+
+  const fallback = STATIC_BY_TITLE.get(record.title.trim().toLowerCase());
+  if (!fallback) return listing;
+
+  return {
+    ...listing,
+    summary: fallback.summary,
+    qualifications: fallback.qualifications,
+    responsibilities: fallback.responsibilities,
+    bullet: fallback.bullet,
   };
 }
 

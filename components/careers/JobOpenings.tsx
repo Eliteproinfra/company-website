@@ -151,26 +151,43 @@ export default function JobOpenings({ jobs }: { jobs: JobListing[] }) {
                 >
                   <div className="min-h-0">
                     <div className="max-h-[70vh] overflow-y-auto px-[25px] pb-[22px] pt-[18px]">
-                      <div className="mb-2.5 text-base font-extrabold text-dark-black">Job Description</div>
-                      <div className="space-y-4 text-[0.95rem] leading-[1.65] text-muted-3">
-                        <p>{job.summary}</p>
-                        <div>
-                          <p>Qualifications and Skills</p>
-                          {job.qualifications.map((q) => (
-                            <p key={q}>
-                              {job.bullet} {q}
-                            </p>
-                          ))}
-                        </div>
-                        <div>
-                          <p>Roles and Responsibilities</p>
-                          {job.responsibilities.map((r) => (
-                            <p key={r}>
-                              {job.bullet} {r}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
+                      {/* Each part is omitted when the posting has not been given
+                          one, so a heading never appears with nothing under it. */}
+                      {job.summary || job.qualifications.length || job.responsibilities.length ? (
+                        <>
+                          <div className="mb-2.5 text-base font-extrabold text-dark-black">
+                            Job Description
+                          </div>
+                          <div className="space-y-4 text-[0.95rem] leading-[1.65] text-muted-3">
+                            {job.summary ? <p>{job.summary}</p> : null}
+                            {job.qualifications.length ? (
+                              <div>
+                                <p>Qualifications and Skills</p>
+                                {job.qualifications.map((q) => (
+                                  <p key={q}>
+                                    {job.bullet} {q}
+                                  </p>
+                                ))}
+                              </div>
+                            ) : null}
+                            {job.responsibilities.length ? (
+                              <div>
+                                <p>Roles and Responsibilities</p>
+                                {job.responsibilities.map((r) => (
+                                  <p key={r}>
+                                    {job.bullet} {r}
+                                  </p>
+                                ))}
+                              </div>
+                            ) : null}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-[0.95rem] text-muted-3">
+                          Full details for this role are available on request — use Apply Now and
+                          we will send them over.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
