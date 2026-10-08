@@ -36,15 +36,17 @@ const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
  * analysis. UPLOADS_DIR overrides it outright if the shared directory ever
  * stops being symlinked into the release.
  */
-/** Relative to the working directory, matching the nginx alias for /uploads/. */
-const DEFAULT_UPLOADS_DIR = "public/uploads";
-
 function uploadsRoot(): string {
-  // `path.resolve` with a single environment-derived argument on purpose: there
-  // is deliberately no `process.cwd()` token and no literal path next to it for
-  // the build to fold. Relative input still resolves against the working
-  // directory at runtime, so behaviour is unchanged.
-  return path.resolve(process.env.UPLOADS_DIR || DEFAULT_UPLOADS_DIR);
+  // turbopackIgnore stops the build treating this as a directory to bundle.
+  // Without it Turbopack resolves the path and walks everything already under
+  // public/uploads, which in production is a symlink to shared/uploads
+  // (deploy/AWS.md) — outside the release directory it treats as the filesystem
+  // root — and the build fails with "points out of the filesystem root". This
+  // directory is runtime state, never build input, so tracing it is always wrong.
+  return (
+    process.env.UPLOADS_DIR ||
+    path.join(/*turbopackIgnore: true*/ process.cwd(), "public", "uploads")
+  );
 }
 
 /** Magic-byte signatures. The declared MIME type and filename are ignored. */
