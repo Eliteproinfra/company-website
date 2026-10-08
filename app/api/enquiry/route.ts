@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { captureEnquiry } from "@/lib/enquiries";
 import { sendMail, escapeHtml } from "@/lib/mailer";
 
 export async function POST(request: Request) {
@@ -39,6 +40,9 @@ export async function POST(request: Request) {
     </table>
   `;
 
+  // Stored before the email is attempted, so an SMTP outage cannot lose the lead.
+  const { stored } = await captureEnquiry(source ?? "", entries as [string, string][]);
+
   try {
     await sendMail({
       subject: `New enquiry${source ? ` — ${source}` : ""} from ${nameEntry?.[1] ?? "website visitor"}`,
@@ -48,6 +52,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to send enquiry email:", error);
+    // The lead is safely in the admin's Enquiries inbox even though the
+    // notification did not go out, so asking the visitor to submit again would
+    // only create duplicates. Only a submission that reached neither is an error.
+    if (stored) return NextResponse.json({ ok: true });
     return NextResponse.json({ error: "Could not send your enquiry. Please try again shortly." }, { status: 500 });
   }
 }

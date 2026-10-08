@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { captureEnquiry } from "@/lib/enquiries";
 import { sendMail, escapeHtml } from "@/lib/mailer";
 
 const MAX_RESUME_SIZE = 5 * 1024 * 1024; // 5MB
@@ -64,6 +65,16 @@ export async function POST(request: Request) {
     </table>
   `;
 
+  // Stored before the email is attempted, so an SMTP outage cannot lose the
+  // applicant. The resume itself is an attachment and is not stored.
+  const { stored } = await captureEnquiry("Career application", [
+    ["Name", name],
+    ["Phone", phone],
+    ["Email", email],
+    ...(coverLetter ? [["Cover Letter", coverLetter] as [string, string]] : []),
+    ["Resume", resume.name],
+  ]);
+
   try {
     const resumeBuffer = Buffer.from(await resume.arrayBuffer());
     await sendMail({
@@ -81,6 +92,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to send career application email:", error);
+    // Already in the admin inbox — resubmitting would only duplicate it.
+    if (stored) return NextResponse.json({ ok: true });
     return NextResponse.json(
       { error: "Could not submit your application. Please try again shortly." },
       { status: 500 }
