@@ -27,6 +27,9 @@ export const metadata: Metadata = {
     template: "%s | Elite Pro Infraventure",
   },
   description: siteDescription,
+  verification: {
+    google: "UEGiyx1tWHuthWmRENqazlVjMCm1YPuBnxGVCWHMyRY",
+  },
   openGraph: {
     type: "website",
     siteName: "Elite Pro Infraventure",
