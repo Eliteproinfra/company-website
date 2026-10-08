@@ -1734,30 +1734,13 @@ export const articles: Article[] = [
   },
 ];
 
-const byKindSlug = new Map(articles.map((article) => [`${article.kind}:${article.slug}`, article]));
-const byKindId = new Map(articles.map((article) => [`${article.kind}:${article.id}`, article]));
-const byKindTitle = new Map(
-  articles.map((article) => [`${article.kind}:${article.title.toLowerCase()}`, article])
-);
-
-export function getArticle(kind: ArticleKind, slug: string): Article | undefined {
-  return byKindSlug.get(`${kind}:${slug}`);
-}
-
-export function getArticleById(kind: ArticleKind, id: number): Article | undefined {
-  return byKindId.get(`${kind}:${id}`);
-}
-
-export function articlesByKind(kind: ArticleKind): Article[] {
-  return articles.filter((article) => article.kind === kind);
-}
-
+/**
+ * The lookup helpers that used to live here (getArticle, getArticleById,
+ * articlesByKind, articleHrefByTitle) were removed when the public pages moved
+ * to the database: lib/content/articles.ts answers those questions now, against
+ * whatever the admin holds. This module is the static fallback and the shape,
+ * nothing more.
+ */
 export function articleHref(article: Article): string {
   return `${articleSections[article.kind].basePath}/${article.slug}`;
-}
-
-/** Resolves a listing card title (any casing) to its article page path. */
-export function articleHrefByTitle(kind: ArticleKind, title: string): string | undefined {
-  const match = byKindTitle.get(`${kind}:${title.toLowerCase()}`);
-  return match ? articleHref(match) : undefined;
 }

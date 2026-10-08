@@ -6,8 +6,10 @@ import { getCurrentUser } from "@/lib/auth/session";
 import {
   createArticle,
   deleteArticle,
+  getArticleById,
   updateArticle,
   type ArticleInput,
+  type ArticleKind,
 } from "@/lib/db/queries";
 import { KIND_BASE, normalizeKind } from "./kinds";
 
@@ -16,6 +18,34 @@ async function requireUser() {
   const user = await getCurrentUser();
   if (!user) redirect("/admin/login");
   return user;
+}
+
+type ArticleLocation = { kind: ArticleKind; slug: string };
+
+/**
+ * Public pages that render article data, refreshed after every write.
+ *
+ * Takes every location the write touched. Renaming an item, or moving it between
+ * sections, changes its public URL, and the page at the old one has to be
+ * cleared too — otherwise the prerendered copy keeps being served.
+ */
+function revalidateArticles(...locations: (ArticleLocation | undefined)[]) {
+  revalidatePath("/");
+  revalidatePath("/admin/articles");
+  const seen = new Set<string>();
+  for (const location of locations) {
+    if (!location) continue;
+    const base = KIND_BASE[location.kind];
+    if (!seen.has(base)) {
+      seen.add(base);
+      revalidatePath(base);
+    }
+    const href = `${base}/${location.slug}`;
+    if (location.slug && !seen.has(href)) {
+      seen.add(href);
+      revalidatePath(href);
+    }
+  }
 }
 
 function str(form: FormData, key: string): string {
@@ -54,20 +84,22 @@ export async function saveArticleAction(formData: FormData): Promise<void> {
     redirect(`/admin/articles/${idValue || "new"}?kind=${input.kind}&error=Title+is+required`);
   }
 
+  let written: string;
+  let previous: { kind: ArticleKind; slug: string } | undefined;
+
   if (idValue && idValue !== "new") {
     const id = Number(idValue);
     if (!Number.isInteger(id) || id <= 0) redirect("/admin/articles?error=Invalid+id");
-    await updateArticle(id, input);
+    // Read before writing: a renamed item, or one moved to another section, has
+    // to clear the page at its old address as well as the new one.
+    const existing = await getArticleById(id);
+    if (existing) previous = { kind: existing.kind, slug: existing.slug };
+    ({ slug: written } = await updateArticle(id, input));
   } else {
-    await createArticle(input);
+    ({ slug: written } = await createArticle(input));
   }
 
-  const base = KIND_BASE[input.kind];
-  revalidatePath(base);
-  if (input.slug) revalidatePath(`${base}/${input.slug}`);
-  revalidatePath("/");
-  revalidatePath("/admin/articles");
-
+  revalidateArticles({ kind: input.kind, slug: written }, previous);
   redirect(`/admin/articles?kind=${input.kind}&saved=1`);
 }
 
@@ -78,10 +110,11 @@ export async function deleteArticleAction(formData: FormData): Promise<void> {
   const kind = normalizeKind(String(formData.get("kind") ?? ""));
   if (!Number.isInteger(id) || id <= 0) redirect("/admin/articles?error=Invalid+id");
 
+  // Read before deleting — afterwards there is no row to learn the slug from,
+  // and its page still needs clearing.
+  const existing = await getArticleById(id);
   await deleteArticle(id);
-  revalidatePath(KIND_BASE[kind]);
-  revalidatePath("/");
-  revalidatePath("/admin/articles");
+  revalidateArticles(existing ? { kind: existing.kind, slug: existing.slug } : { kind, slug: "" });
 
   redirect(`/admin/articles?kind=${kind}&deleted=1`);
 }

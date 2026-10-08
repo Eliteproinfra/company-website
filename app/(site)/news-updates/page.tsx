@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
 import ArticleCard from "@/components/media/ArticleCard";
-import { articleHref, articlesByKind } from "@/lib/data/articles";
+import { getArticlesByKind } from "@/lib/content/articles";
+import { articleHref } from "@/lib/data/articles";
 
 export const metadata: Metadata = {
   title: "News & Updates",
@@ -11,15 +12,16 @@ export const metadata: Metadata = {
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 
-const newsItems = articlesByKind("news").map((article) => ({
-  title: article.title,
-  date: article.date,
-  excerpt: article.excerpt,
-  image: article.image,
-  href: articleHref(article),
-}));
 
-export default function NewsUpdatesPage() {
+export default async function NewsUpdatesPage() {
+  const newsItems = (await getArticlesByKind("news")).map((article) => ({
+    title: article.title,
+    date: article.date,
+    excerpt: article.excerpt,
+    image: article.image,
+    href: articleHref(article),
+  }));
+
   return (
     <>
       <PageHero image="/images/heroes/news-updates.jpg" title="News & Updates" breadcrumbCurrent="News & Updates" uppercase overlay="bg-linear-to-b from-black/70 to-black/80" />

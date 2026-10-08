@@ -1,18 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
-import {
-  articleHref,
-  articleSections,
-  getArticleById,
-  type Article,
-} from "@/lib/data/articles";
+import { articleHref, articleSections, type Article } from "@/lib/data/articles";
 
-export default function ArticleDetail({ article }: { article: Article }) {
+/** `related` is resolved by the caller: it comes from the database now, which
+ *  this presentational component should not be reaching into. */
+export default function ArticleDetail({
+  article,
+  related,
+}: {
+  article: Article;
+  related: Article[];
+}) {
   const section = articleSections[article.kind];
-  const related = article.relatedIds
-    .map((id) => getArticleById(article.kind, id))
-    .filter((item): item is Article => Boolean(item));
 
   return (
     <section className="bg-bs-light pb-16 pt-28 lg:pt-32">

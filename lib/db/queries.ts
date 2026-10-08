@@ -275,7 +275,9 @@ export type ArticleInput = {
   isPublished: boolean;
 };
 
-export async function createArticle(input: ArticleInput): Promise<number> {
+/** Returns the slug actually written — uniqueSlug may differ from the input,
+ *  and the caller needs it to revalidate the right public page. */
+export async function createArticle(input: ArticleInput): Promise<{ id: number; slug: string }> {
   const slug = await uniqueSlug("articles", input.slug || slugify(input.title), undefined, {
     column: "kind",
     value: input.kind,
@@ -299,10 +301,11 @@ export async function createArticle(input: ArticleInput): Promise<number> {
       input.isPublished ? 1 : 0,
     ]
   );
-  return insertId;
+  return { id: insertId, slug };
 }
 
-export async function updateArticle(id: number, input: ArticleInput): Promise<void> {
+/** Returns the slug actually written — see {@link createArticle}. */
+export async function updateArticle(id: number, input: ArticleInput): Promise<{ slug: string }> {
   const slug = await uniqueSlug("articles", input.slug || slugify(input.title), id, {
     column: "kind",
     value: input.kind,
@@ -326,6 +329,7 @@ export async function updateArticle(id: number, input: ArticleInput): Promise<vo
       id,
     ]
   );
+  return { slug };
 }
 
 export async function deleteArticle(id: number): Promise<void> {
@@ -341,24 +345,44 @@ export type JobRow = {
   location: string;
   type: string;
   experience: string;
+  summary: string | null;
+  qualifications: unknown;
+  responsibilities: unknown;
+  bullet: string;
   is_published: number;
   sort_order: number;
 };
 
+export type JobRecord = Omit<JobRow, "qualifications" | "responsibilities"> & {
+  qualifications: string[];
+  responsibilities: string[];
+};
+
+const JOB_COLUMNS = `id, title, department, location, type, experience, summary,
+  qualifications, responsibilities, bullet, is_published, sort_order`;
+
+function toJobRecord(row: JobRow): JobRecord {
+  return {
+    ...row,
+    qualifications: asJson<string[]>(row.qualifications, []),
+    responsibilities: asJson<string[]>(row.responsibilities, []),
+  };
+}
+
 export async function listJobs(options: { includeUnpublished?: boolean } = {}) {
   const where = options.includeUnpublished ? "" : "WHERE is_published = 1";
-  return query<JobRow>(
-    `SELECT id, title, department, location, type, experience, is_published, sort_order
-       FROM job_listings ${where} ORDER BY sort_order ASC, id ASC`
+  const rows = await query<JobRow>(
+    `SELECT ${JOB_COLUMNS} FROM job_listings ${where} ORDER BY sort_order ASC, id ASC`
   );
+  return rows.map(toJobRecord);
 }
 
 export async function getJobById(id: number) {
-  return queryOne<JobRow>(
-    `SELECT id, title, department, location, type, experience, is_published, sort_order
-       FROM job_listings WHERE id = ?`,
+  const row = await queryOne<JobRow>(
+    `SELECT ${JOB_COLUMNS} FROM job_listings WHERE id = ?`,
     [id]
   );
+  return row ? toJobRecord(row) : null;
 }
 
 export type JobInput = {
@@ -367,16 +391,36 @@ export type JobInput = {
   location: string;
   type: string;
   experience: string;
+  summary: string;
+  qualifications: string[];
+  responsibilities: string[];
   isPublished: boolean;
   sortOrder: number;
 };
 
+/** The bullet glyph is not part of JobInput — see the column comment in
+ *  schema.sql. Existing rows keep theirs; new rows take the column default. */
+function jobParams(input: JobInput): SqlParam[] {
+  return [
+    input.title,
+    input.department,
+    input.location,
+    input.type,
+    input.experience,
+    input.summary,
+    JSON.stringify(input.qualifications ?? []),
+    JSON.stringify(input.responsibilities ?? []),
+    input.isPublished ? 1 : 0,
+    input.sortOrder,
+  ];
+}
+
 export async function createJob(input: JobInput): Promise<number> {
   const { insertId } = await execute(
-    `INSERT INTO job_listings (title, department, location, type, experience, is_published, sort_order)
-     VALUES (?,?,?,?,?,?,?)`,
-    [input.title, input.department, input.location, input.type, input.experience,
-     input.isPublished ? 1 : 0, input.sortOrder]
+    `INSERT INTO job_listings (title, department, location, type, experience, summary,
+       qualifications, responsibilities, is_published, sort_order)
+     VALUES (?,?,?,?,?,?,?,?,?,?)`,
+    jobParams(input)
   );
   return insertId;
 }
@@ -384,10 +428,29 @@ export async function createJob(input: JobInput): Promise<number> {
 export async function updateJob(id: number, input: JobInput): Promise<void> {
   await execute(
     `UPDATE job_listings SET title=?, department=?, location=?, type=?, experience=?,
-       is_published=?, sort_order=? WHERE id=?`,
-    [input.title, input.department, input.location, input.type, input.experience,
-     input.isPublished ? 1 : 0, input.sortOrder, id]
+       summary=?, qualifications=?, responsibilities=?, is_published=?, sort_order=?
+     WHERE id=?`,
+    [...jobParams(input), id]
   );
+}
+
+/**
+ * Publish state and ordering only, for the quick controls on the listing page.
+ *
+ * Deliberately a separate statement rather than a full updateJob: that form
+ * carries no description, so reusing the full update would blank the summary,
+ * qualifications and responsibilities every time someone reordered a posting.
+ */
+export async function setJobVisibility(
+  id: number,
+  isPublished: boolean,
+  sortOrder: number
+): Promise<void> {
+  await execute("UPDATE job_listings SET is_published=?, sort_order=? WHERE id=?", [
+    isPublished ? 1 : 0,
+    sortOrder,
+    id,
+  ]);
 }
 
 export async function deleteJob(id: number): Promise<void> {

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { getArticles } from "@/lib/content/articles";
 import { getProperties } from "@/lib/content/properties";
-import { articleHref, articles } from "@/lib/data/articles";
+import { articleHref } from "@/lib/data/articles";
 
 // Already prerendered in the server build; stated explicitly because a static
 // export (scripts/export.sh) errors on any metadata route that has not opted in.
@@ -37,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
   // From the database, so a listing added in the admin is submitted for
   // indexing rather than only existing as a page nothing links to.
-  const properties = await getProperties();
+  const [properties, articles] = await Promise.all([getProperties(), getArticles()]);
 
   return [
     ...routes.map(({ path, changeFrequency, priority }) => ({
