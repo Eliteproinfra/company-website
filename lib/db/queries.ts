@@ -7,7 +7,8 @@
  */
 import "server-only";
 import { execute, query, queryOne, type SqlParam } from "@/lib/db/client";
-import { sanitizeArticleHtml, sanitizeSlug, slugify } from "@/lib/db/sanitize";
+import { sanitizeArticleHtml } from "@/lib/db/sanitize";
+import { sanitizeSlug, slugify } from "@/lib/slug";
 import type { PropertyBadgeVariant } from "@/lib/types";
 
 export type ArticleKind = "press" | "blog" | "news";
