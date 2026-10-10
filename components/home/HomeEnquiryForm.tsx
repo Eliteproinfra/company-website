@@ -2,15 +2,40 @@
 
 import { useState } from "react";
 import Button from "@/components/ui/Button";
+import {
+  PHONE_INPUT_MAX_DIGITS,
+  countryCodes,
+  defaultCountry,
+  validatePhoneNumber,
+} from "@/lib/data/countryCodes";
 
 const inputClass =
   "rounded-md border-0 bg-bs-light px-3 py-3.5 text-bs-dark placeholder:text-bs-muted focus:outline-none";
+
+const MESSAGE_WORD_LIMIT = 500;
+
+const countWords = (value: string) => value.trim().split(/\s+/).filter(Boolean).length;
+
+/**
+ * The phone field takes digits and nothing else: letters, spaces, dashes and a "+" are dropped
+ * as they are typed rather than rejected, so pasting "+91 99686-86868" still lands a usable
+ * number. The cap is E.164's 15 digits — wide enough to hold a pasted international number
+ * whatever the country — and validatePhoneNumber judges the length from there.
+ */
+const toPhoneDigits = (value: string) => value.replace(/\D/g, "").slice(0, PHONE_INPUT_MAX_DIGITS);
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 export default function HomeEnquiryForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [country, setCountry] = useState(defaultCountry.iso);
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [message, setMessage] = useState("");
+
+  const messageWords = countWords(message);
+  const messageTooLong = messageWords > MESSAGE_WORD_LIMIT;
 
   if (status === "success") {
     return (
@@ -24,7 +49,12 @@ export default function HomeEnquiryForm() {
         </p>
         <button
           type="button"
-          onClick={() => setStatus("idle")}
+          onClick={() => {
+            setPhone("");
+            setPhoneError("");
+            setMessage("");
+            setStatus("idle");
+          }}
           className="mt-4 text-sm font-semibold text-primary-gold hover:underline"
         >
           Submit another enquiry
@@ -37,9 +67,23 @@ export default function HomeEnquiryForm() {
     <form
       onSubmit={async (event) => {
         event.preventDefault();
+        const form = event.currentTarget;
+
+        const check = validatePhoneNumber(country, phone);
+        if (!check.ok) {
+          setPhoneError(check.error);
+          form.querySelector<HTMLInputElement>("#home-phone")?.focus();
+          return;
+        }
+        setPhoneError("");
+        if (messageTooLong) {
+          form.querySelector<HTMLTextAreaElement>("#home-message")?.focus();
+          return;
+        }
+
         setStatus("submitting");
         setErrorMessage("");
-        const data = new FormData(event.currentTarget);
+        const data = new FormData(form);
         try {
           const res = await fetch("/api/enquiry", {
             method: "POST",
@@ -49,9 +93,9 @@ export default function HomeEnquiryForm() {
               fields: {
                 Name: data.get("name"),
                 Email: data.get("email"),
-                Phone: data.get("phone"),
+                Phone: check.e164,
                 Interest: data.get("interest"),
-                Message: data.get("message"),
+                Message: message.trim(),
               },
             }),
           });
@@ -86,17 +130,60 @@ export default function HomeEnquiryForm() {
         required
         className={inputClass}
       />
-      <label htmlFor="home-phone" className="sr-only">
-        Phone Number
-      </label>
-      <input
-        id="home-phone"
-        name="phone"
-        type="tel"
-        placeholder="Phone Number"
-        required
-        className={inputClass}
-      />
+      <div>
+        <div className="flex gap-2">
+          <label htmlFor="home-country" className="sr-only">
+            Country code
+          </label>
+          <select
+            id="home-country"
+            name="countryCode"
+            value={country}
+            onChange={(event) => {
+              setCountry(event.target.value);
+              setPhoneError("");
+            }}
+            className={`${inputClass} shrink-0`}
+          >
+            {countryCodes.map((item) => (
+              <option key={item.iso} value={item.iso}>
+                {item.dial} ({item.short})
+              </option>
+            ))}
+          </select>
+          <label htmlFor="home-phone" className="sr-only">
+            Phone Number
+          </label>
+          <input
+            id="home-phone"
+            name="phone"
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            placeholder="Phone Number"
+            required
+            value={phone}
+            onChange={(event) => {
+              setPhone(toPhoneDigits(event.target.value));
+              if (phoneError) setPhoneError("");
+            }}
+            onBlur={(event) => {
+              const value = event.target.value.trim();
+              if (!value) return;
+              const check = validatePhoneNumber(country, value);
+              setPhoneError(check.ok ? "" : check.error);
+            }}
+            aria-invalid={phoneError ? true : undefined}
+            aria-describedby={phoneError ? "home-phone-error" : undefined}
+            className={`${inputClass} min-w-0 flex-1`}
+          />
+        </div>
+        {phoneError ? (
+          <p id="home-phone-error" role="alert" className="mt-1.5 text-sm font-semibold text-red-600">
+            {phoneError}
+          </p>
+        ) : null}
+      </div>
       <label htmlFor="home-interest" className="sr-only">
         Interested In
       </label>
@@ -115,16 +202,33 @@ export default function HomeEnquiryForm() {
         <option value="investment">Investment</option>
         <option value="consulting">Consulting</option>
       </select>
-      <label htmlFor="home-message" className="sr-only">
-        Your Message
-      </label>
-      <textarea
-        id="home-message"
-        name="message"
-        placeholder="Leave a message here"
-        rows={4}
-        className={`sm:col-span-2 ${inputClass}`}
-      />
+      <div className="sm:col-span-2">
+        <label htmlFor="home-message" className="sr-only">
+          Your Message
+        </label>
+        <textarea
+          id="home-message"
+          name="message"
+          placeholder="Leave a message here"
+          rows={4}
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+          aria-invalid={messageTooLong ? true : undefined}
+          aria-describedby="home-message-count"
+          className={`w-full ${inputClass}`}
+        />
+        <p
+          id="home-message-count"
+          aria-live="polite"
+          className={`mt-1.5 text-right text-sm ${
+            messageTooLong ? "font-semibold text-red-600" : "text-muted"
+          }`}
+        >
+          {messageTooLong
+            ? `${messageWords} words — please keep it to ${MESSAGE_WORD_LIMIT} words or fewer.`
+            : `${messageWords} / ${MESSAGE_WORD_LIMIT} words`}
+        </p>
+      </div>
       {status === "error" ? (
         <p role="alert" className="sm:col-span-2 text-sm font-semibold text-red-600">
           {errorMessage}
@@ -134,7 +238,7 @@ export default function HomeEnquiryForm() {
         type="submit"
         iconRight="fas fa-paper-plane"
         className="sm:col-span-2"
-        disabled={status === "submitting"}
+        disabled={status === "submitting" || messageTooLong}
       >
         {status === "submitting" ? "Sending…" : "Send Enquiry"}
       </Button>

@@ -6,7 +6,7 @@ import PropertyBrowser from "@/components/properties/PropertyBrowser";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
 import { getPropertyListItems } from "@/lib/content/properties";
-import { categories } from "@/lib/data/categories";
+import { categories, propertyTypeOptions } from "@/lib/data/categories";
 import { localities } from "@/lib/data/localities";
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 
 /*
  * Live properties.php order: .properties-hero (.6 flat), .search-filter-section overlapping the
- * hero, "Top Localities to Invest" (h3, left), the four .category-cards, "Featured Collection"
+ * hero, "Top Localities to Invest" (h3, left), the .category-cards, "Featured Collection"
  * on white with 9 cards per page, then the .bg-light market copy.
  */
 export default async function PropertiesPage() {
@@ -43,7 +43,7 @@ export default async function PropertiesPage() {
         <PropertyBrowser
           properties={properties}
           locations={["All Locations", "Delhi", "Dubai", "Faridabad", "Gurgaon", "Manesar", "Noida"]}
-          types={["All Types", "Commercial", "Industrial Plots", "Residential", "SCO Plots"]}
+          types={propertyTypeOptions}
           between={
             <>
               <section className="bg-white py-12">
@@ -61,7 +61,9 @@ export default async function PropertiesPage() {
 
               <section className="bg-white pb-12">
                 <div className="container">
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {/* Five categories, so the row only divides evenly at xl; below that
+                      three-up beats four-up-plus-an-orphan. */}
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                     {categories.map((category, index) => (
                       <Reveal key={category.title} delay={delaySequence[index % delaySequence.length]}>
                         <CategoryCard {...category} />

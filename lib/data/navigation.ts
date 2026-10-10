@@ -39,10 +39,9 @@ export const navItems: NavItem[] = [
     children: [
       { label: "All Properties", href: "/properties" },
       // Built from the category list so a rename cannot leave these pointing at a
-      // ?category= slug the browser no longer recognises. Live's A-Z order.
-      ...[...categories]
-        .sort((a, b) => a.title.localeCompare(b.title))
-        .map((category) => ({ label: category.title, href: categoryHref(category.title) })),
+      // ?category= slug the browser no longer recognises, and in that list's own
+      // order so the dropdown, the cards and the filter all read the same way.
+      ...categories.map((category) => ({ label: category.title, href: categoryHref(category.title) })),
     ],
   },
   {

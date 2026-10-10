@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { categories } from "@/lib/data/categories";
 import {
   createProperty,
   deleteProperty,
@@ -23,7 +24,8 @@ async function requireUser() {
   return user;
 }
 
-const BADGE_VARIANTS: PropertyBadgeVariant[] = ["residential", "commercial", "sco", "industrial"];
+/** Taken from the category list so a category added there is accepted here too. */
+const BADGE_VARIANTS: PropertyBadgeVariant[] = categories.map((category) => category.variant);
 
 function parseJsonArray<T>(value: FormDataEntryValue | null): T[] {
   if (typeof value !== "string" || !value.trim()) return [];

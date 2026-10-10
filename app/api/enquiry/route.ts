@@ -2,13 +2,23 @@ import { NextResponse } from "next/server";
 import { captureEnquiry } from "@/lib/enquiries";
 import { sendMail, escapeHtml } from "@/lib/mailer";
 
+type EnquiryBody = {
+  source?: string;
+  fields?: Record<string, string>;
+  honeypot?: string;
+};
+
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { source, fields, honeypot } = body as {
-    source?: string;
-    fields?: Record<string, string>;
-    honeypot?: string;
-  };
+  // An unparseable body used to throw out of here as a 500 with a stack trace. It is a bad
+  // request, not a server fault, and scanners post junk to this path all day.
+  let body: EnquiryBody | null;
+  try {
+    body = (await request.json()) as EnquiryBody | null;
+  } catch {
+    return NextResponse.json({ error: "Could not read your submission." }, { status: 400 });
+  }
+
+  const { source, fields, honeypot } = body ?? {};
 
   if (honeypot) {
     // Bot filled in a field that's hidden from real users — silently pretend success.
@@ -21,6 +31,12 @@ export async function POST(request: Request) {
   // nothing else — so anything stricter here rejects valid leads.
   if (entries.length === 0) {
     return NextResponse.json({ error: "Please fill in the required fields." }, { status: 400 });
+  }
+
+  // The forms cap a message at 500 words; 5,000 characters is comfortably above that in any
+  // language and still keeps a scripted post from filling the Enquiries inbox with an essay.
+  if (entries.some(([, value]) => String(value).length > 5000)) {
+    return NextResponse.json({ error: "Your message is too long. Please shorten it and try again." }, { status: 400 });
   }
 
   const emailEntry = entries.find(([key]) => key.toLowerCase().includes("email"));

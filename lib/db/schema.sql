@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS properties (
   title         VARCHAR(255) NOT NULL,
   category      VARCHAR(80)  NOT NULL DEFAULT '',
   -- Drives the card badge colour; mirrors PropertyBadgeVariant in lib/types.ts.
-  badge_variant ENUM('residential','commercial','sco','industrial')
+  badge_variant ENUM('residential','commercial','sco','industrial','residential-plots')
                 NOT NULL DEFAULT 'residential',
   badge_text    VARCHAR(80)  NOT NULL DEFAULT '',
   location      VARCHAR(190) NOT NULL DEFAULT '',
@@ -203,6 +203,22 @@ DEALLOCATE PREPARE stmt;
 SET @m := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'job_listings' AND COLUMN_NAME = 'bullet') = 0,
   'ALTER TABLE job_listings ADD COLUMN bullet VARCHAR(4) NOT NULL DEFAULT ''•'' AFTER responsibilities', 'DO 0');
+PREPARE stmt FROM @m;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- "Residential Plots" joined the category list after the first release, so the
+-- badge_variant ENUM above needs the value adding to databases that already have
+-- the table — without it the admin's Save writes '' and the listing drops out of
+-- every Property Type filter. Appending to the end of an ENUM leaves the existing
+-- rows' values untouched. Guarded on COLUMN_TYPE so a re-run is a no-op rather
+-- than another table rebuild.
+SET @m := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'properties'
+    AND COLUMN_NAME = 'badge_variant' AND COLUMN_TYPE LIKE '%residential-plots%') = 0,
+  'ALTER TABLE properties MODIFY badge_variant
+     ENUM(''residential'',''commercial'',''sco'',''industrial'',''residential-plots'')
+     NOT NULL DEFAULT ''residential''', 'DO 0');
 PREPARE stmt FROM @m;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;

@@ -27,6 +27,58 @@ export type OfficeInfo = {
   email?: string;
 };
 
+/**
+ * A place pinned on one of the home page footprint maps. The coordinates are
+ * real WGS84 degrees — components/home/PresenceMap projects them with the same
+ * projection the artwork was drawn in, so a pin sits on its actual city.
+ */
+export type PresenceMarker = {
+  name: string;
+  /** Degrees north, positive. */
+  lat: number;
+  /** Degrees east, positive. */
+  lng: number;
+  /**
+   * "hub" is the place we are based in and gets the emphasised pin. The other
+   * two draw alike today and are kept apart because the distinction is real:
+   * an "office" is staffed, a "city" is somewhere we operate.
+   */
+  kind: "hub" | "office" | "city";
+  /** Second line under an always-on label. */
+  note?: string;
+  /**
+   * Where an always-on label sits relative to its pin. Only set on the world
+   * map, where the three labels are permanent and have to be placed by hand so
+   * they neither overlap each other nor run out of the column. Defaults to
+   * "right".
+   */
+  labelSide?: "left" | "right" | "below";
+};
+
+/**
+ * One of the home page's full-bleed footprint banners. The artwork carries its
+ * own titling, but it is set small on a phone and unreadable to a screen
+ * reader, so `title` and `description` repeat it as real text underneath.
+ */
+export type PresenceBanner = {
+  image: string;
+  alt: string;
+  title: string;
+  description: string;
+};
+
+/**
+ * A place name printed straight onto a footprint map — a neighbouring country
+ * or a sea. Positioned by coordinate like a marker, so it stays put when the
+ * map is redrawn, but it is lettering rather than a pin: nothing we operate.
+ */
+export type MapAnnotation = {
+  text: string;
+  lat: number;
+  lng: number;
+  kind: "land" | "water";
+};
+
 export type LocalityItem = {
   icon: string;
   name: string;
@@ -38,6 +90,8 @@ export type CategoryItem = {
   badge: string;
   title: string;
   subtitle: string;
+  /** The listing badge variant this category files under on /properties. */
+  variant: PropertyBadgeVariant;
 };
 
 export type Award = {
@@ -46,7 +100,12 @@ export type Award = {
   caption: string;
 };
 
-export type PropertyBadgeVariant = "residential" | "commercial" | "sco" | "industrial";
+export type PropertyBadgeVariant =
+  | "residential"
+  | "commercial"
+  | "sco"
+  | "industrial"
+  | "residential-plots";
 
 export type PropertyItem = {
   image: string;
@@ -59,6 +118,10 @@ export type PropertyItem = {
   price: string;
   /** Detail-page path; falls back to /contact when the listing has no page yet. */
   href?: string;
+  /** `?developer=` slug of the partner this listing belongs to, resolved once on
+   *  the server — the homepage's developer logos filter the grid on it. Absent
+   *  when the listing matches no partner. */
+  developerSlug?: string;
 };
 
 export type ProcessStepItem = {

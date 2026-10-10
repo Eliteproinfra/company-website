@@ -49,3 +49,7 @@ next-env.d.ts
 
 # Local Windows shortcut to out/, not source
 /out - Shortcut.lnk
+
+# Downloaded boundary data for npm run maps:generate. Re-fetched on demand; the
+# SVGs it produces under public/images/maps/ are what gets committed.
+/scripts/.map-cache/

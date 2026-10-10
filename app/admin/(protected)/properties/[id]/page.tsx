@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { categories } from "@/lib/data/categories";
 import { getPropertyById } from "@/lib/db/queries";
 import { savePropertyAction } from "../actions";
 import AdminNotice from "@/components/admin/AdminNotice";
@@ -74,18 +75,18 @@ export default async function PropertyEditorPage({
               label="Category"
               defaultValue={property?.category ?? ""}
               placeholder="Residential"
-              hint="Printed on the card badge and as the dark pill on the detail page. Type one of: Residential, Commercial, SCO Plots, Industrial."
+              hint={`Printed on the card badge and as the dark pill on the detail page. Type one of: ${categories.map((category) => category.title).join(", ")}.`}
             />
             <SelectField
               name="badgeVariant"
               label="Property type (filter)"
               defaultValue={property?.badge_variant ?? "residential"}
-              options={[
-                { value: "residential", label: "Residential" },
-                { value: "commercial", label: "Commercial" },
-                { value: "sco", label: "SCO Plots" },
-                { value: "industrial", label: "Industrial Plots" },
-              ]}
+              // Built from the category list, so the options here are exactly the
+              // Property Types the public filter offers.
+              options={categories.map((category) => ({
+                value: category.variant,
+                label: category.title,
+              }))}
               hint="Decides which “Type” the /properties filter files this listing under. Set it to match the Category."
             />
             <TextField

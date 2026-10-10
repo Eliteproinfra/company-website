@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getProperties } from "@/lib/content/properties";
+import type { PropertyDetail } from "@/lib/data/propertyDetails";
 import { socialLinks } from "@/lib/data/social";
 import FooterCopyright from "./FooterCopyright";
 import NewsletterForm from "./NewsletterForm";
@@ -19,44 +21,53 @@ const serviceLinks = [
   { label: "Land & Acquisition", href: "/services/land-acquisition" },
 ];
 
-const seoLinkColumns = [
-  {
-    title: "Property in India",
-    links: [
-      { label: "Property in Gurgaon", href: "/properties?city=Gurgaon" },
-      { label: "Property in Manesar", href: "/properties?city=Manesar" },
-      { label: "Property in Delhi", href: "/properties?city=Delhi" },
-      { label: "Property in Noida", href: "/properties?city=Noida" },
-    ],
-  },
-  {
-    title: "Residential Properties",
-    links: [
-      { label: "Birla Pravaah", href: "/properties" },
-      { label: "Emaar Serenity Hills", href: "/properties" },
-      { label: "Tulip Monsella", href: "/properties" },
-      { label: "Godrej Sora", href: "/properties" },
-    ],
-  },
-  {
-    title: "Commercial Properties",
-    links: [
-      { label: "AIPL Joy Central", href: "/properties" },
-      { label: "Conscient SOHO", href: "/properties" },
-      { label: "Reach Airia Corporate Tower", href: "/properties" },
-      { label: "Emaar India Business Centre", href: "/properties" },
-    ],
-  },
-  {
-    title: "SCO Plots",
-    links: [
-      { label: "Emaar EBD 65", href: "/properties" },
-      { label: "Emaar EBD 65 NXT", href: "/properties" },
-      { label: "M3M SCO 113 Market", href: "/properties" },
-      { label: "Emaar EBD 89", href: "/properties" },
-    ],
-  },
+const cityColumn = {
+  title: "Property in India",
+  links: [
+    { label: "Property in Gurgaon", href: "/properties?city=Gurgaon" },
+    { label: "Property in Manesar", href: "/properties?city=Manesar" },
+    { label: "Property in Delhi", href: "/properties?city=Delhi" },
+    { label: "Property in Noida", href: "/properties?city=Noida" },
+  ],
+};
+
+/** The three project columns, keyed by the `category` the listings carry. */
+const projectColumns = [
+  { title: "Residential Properties", category: "Residential" },
+  { title: "Commercial Properties", category: "Commercial" },
+  { title: "SCO Plots", category: "SCO Plots" },
 ];
+
+/** Links per project column — the live footer shows four. */
+const LINKS_PER_COLUMN = 4;
+
+/**
+ * Builds the project columns from the catalogue rather than a hardcoded list, so
+ * every name in the footer is a listing that actually has a detail page to open.
+ * The live site names twelve projects here and sends all twelve to /properties;
+ * only one of those names is a listing we hold, so copying the list verbatim
+ * would mean eleven names that lead nowhere in particular.
+ *
+ * Featured listings lead each column — same rule as the homepage's Signature
+ * Projects — and the rest follow in the admin's sort order, which getProperties
+ * has already applied.
+ */
+function buildProjectColumns(properties: PropertyDetail[]) {
+  return projectColumns
+    .map((column) => ({
+      title: column.title,
+      links: properties
+        .filter((property) => property.category === column.category)
+        .slice()
+        .sort((a, b) => Number(b.isFeatured ?? false) - Number(a.isFeatured ?? false))
+        .slice(0, LINKS_PER_COLUMN)
+        .map((property) => ({
+          label: property.title,
+          href: `/properties/${property.slug}`,
+        })),
+    }))
+    .filter((column) => column.links.length > 0);
+}
 
 const contactItems = [
   {
@@ -80,7 +91,9 @@ const headingClasses = "mb-6 text-[0.85rem] font-bold uppercase tracking-[2px] t
  *    headings/links, `.btn-outline-light.border-secondary` social circles that turn gold on
  *    hover, and the copyright bar (see FooterCopyright).
  */
-export default function Footer() {
+export default async function Footer() {
+  const seoLinkColumns = [cityColumn, ...buildProjectColumns(await getProperties())];
+
   return (
     <>
       <section className="border-b border-bs-secondary/10 bg-bs-dark py-12">
@@ -92,7 +105,7 @@ export default function Footer() {
               </h6>
               <ul className="space-y-2 text-sm">
                 {column.links.map((link) => (
-                  <li key={link.label}>
+                  <li key={link.href}>
                     <Link
                       href={link.href}
                       className="block py-1 text-bs-secondary transition-colors hover:text-primary-gold"

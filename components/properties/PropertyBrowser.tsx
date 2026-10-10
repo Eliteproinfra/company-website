@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
@@ -7,18 +8,12 @@ import Separator from "@/components/ui/Separator";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertySearchFilter from "@/components/properties/PropertySearchFilter";
 import Pagination from "@/components/properties/Pagination";
-import { typeFromCategorySlug } from "@/lib/data/categories";
+import { typeFromCategorySlug, typeToVariant } from "@/lib/data/categories";
+import { partnerFromSlug, partnerSlug } from "@/lib/data/partners";
 import type { PropertyItem } from "@/lib/types";
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 const PAGE_SIZE = 9;
-
-const typeToVariant: Record<string, PropertyItem["badgeVariant"]> = {
-  Residential: "residential",
-  Commercial: "commercial",
-  "SCO Plots": "sco",
-  "Industrial Plots": "industrial",
-};
 
 function priceRank(price: string): number {
   const match = price.replace(/,/g, "").match(/[\d.]+/);
@@ -53,6 +48,20 @@ export default function PropertyBrowser({
   const searchParams = useSearchParams();
   const urlType = typeFromCategorySlug(searchParams.get("category"));
 
+  /** `?city=Gurgaon`, set by the footer's "Property in India" links. Matched
+   *  against the dropdown's own options so a city we do not list — or a different
+   *  casing — falls back to All Locations instead of emptying the grid. */
+  const urlCity = searchParams.get("city");
+  const urlLocation = urlCity
+    ? locations.find((option) => option.toLowerCase() === urlCity.toLowerCase())
+    : undefined;
+
+  /** `?developer=dlf`, set by the homepage's developer logos. Unlike the
+   *  location and type dropdowns this one has no control of its own, so it is
+   *  never overridden by a Search — it stays until the visitor follows the
+   *  "View all properties" link out of it. */
+  const developer = partnerFromSlug(searchParams.get("developer"));
+
   const [chosenLocation, setChosenLocation] = useState<string | null>(null);
   const [chosenType, setChosenType] = useState<string | null>(null);
   const [sort, setSort] = useState<"recommended" | "low-high" | "high-low">("recommended");
@@ -62,11 +71,15 @@ export default function PropertyBrowser({
   // anything unrecognised falls back to showing everything. The `typeToVariant`
   // guard keeps a category with no matching badge variant from filtering the
   // list down to nothing.
-  const location = chosenLocation ?? locations[0];
+  const location = chosenLocation ?? urlLocation ?? locations[0];
   const type = chosenType ?? (urlType && urlType in typeToVariant ? urlType : types[0]);
 
   const filtered = useMemo(() => {
     let list = properties;
+    if (developer) {
+      const slug = partnerSlug(developer.name);
+      list = list.filter((property) => property.developerSlug === slug);
+    }
     if (location !== locations[0]) {
       list = list.filter((property) => property.location === location);
     }
@@ -79,7 +92,7 @@ export default function PropertyBrowser({
       list = [...list].sort((a, b) => priceRank(b.price) - priceRank(a.price));
     }
     return list;
-  }, [properties, location, type, sort, locations, types]);
+  }, [properties, developer, location, type, sort, locations, types]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -117,8 +130,18 @@ export default function PropertyBrowser({
         <div className="container">
           <div className="mb-10 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div>
-              <h2 className="text-3xl font-bold text-dark-black">Featured Collection</h2>
+              <h2 className="text-3xl font-bold text-dark-black">
+                {developer ? `${developer.name} Projects` : "Featured Collection"}
+              </h2>
               <Separator align="left" width={80} className="mt-4" />
+              {developer && (
+                <Link
+                  href="/properties"
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary-gold"
+                >
+                  <i className="fas fa-arrow-left text-xs" aria-hidden="true" /> View all properties
+                </Link>
+              )}
             </div>
             <select
               value={sort}
@@ -137,19 +160,36 @@ export default function PropertyBrowser({
 
           {pageItems.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Keyed on href, not title: two listings can legitimately carry the
+                  same name (a relaunch, or the same project re-entered), and the
+                  slug behind the href is what the admin keeps unique. */}
               {pageItems.map((property, index) => (
-                <Reveal key={property.title} delay={delaySequence[index % delaySequence.length]}>
+                <Reveal key={property.href} delay={delaySequence[index % delaySequence.length]}>
                   <PropertyCard {...property} />
                 </Reveal>
               ))}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border-card py-16 text-center text-muted">
-              No properties match your filters right now — try a different location or type, or{" "}
-              <a href="/contact" className="font-semibold text-primary-gold">
-                get in touch
-              </a>{" "}
-              and we&apos;ll help you find one.
+              {developer ? (
+                <>
+                  We have no {developer.name} listings online right now — we broker their
+                  inventory, so{" "}
+                  <a href="/contact" className="font-semibold text-primary-gold">
+                    get in touch
+                  </a>{" "}
+                  and we&apos;ll share what&apos;s available.
+                </>
+              ) : (
+                <>
+                  No properties match your filters right now — try a different location or type,
+                  or{" "}
+                  <a href="/contact" className="font-semibold text-primary-gold">
+                    get in touch
+                  </a>{" "}
+                  and we&apos;ll help you find one.
+                </>
+              )}
             </div>
           )}
 

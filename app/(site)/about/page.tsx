@@ -41,32 +41,37 @@ const essence = [
 const timeline = [
   {
     year: "2013",
+    icon: "fas fa-lightbulb",
     title: "Inception",
     description:
       "Elite Pro Infra was founded with a vision to organize the unorganized real estate sector.",
   },
   {
     year: "2018",
+    icon: "fas fa-chart-line",
     title: "Rapid Expansion",
     description:
       "Expanded operations across Gurugram and NCR, partnering with top-tier developers.",
   },
   {
     year: "2021",
+    icon: "fas fa-trophy",
     title: "Award Recognition",
     description:
       "Recognized as “Best Emerging Real Estate Consultant” for outstanding client service.",
   },
   {
     year: "2024",
+    icon: "fas fa-globe",
     title: "Global Reach",
     description: "Launched NRI services and digital platforms to serve a global clientele.",
   },
   {
     year: "2026",
+    icon: "fas fa-building",
     title: "14 Years of Excellence. One Trusted Name.",
     description:
-      "Since 2012, Elite Pro Infra has been redefining real estate with trust, transparency, and scale. From a single vision to a global presence, we’ve delivered thousands of successful transactions and ₹1 Lakh Cr+ in property value. We don’t just deal in properties—we build lasting relationships and create real wealth.",
+      "From a single vision to a global presence, we’ve delivered thousands of successful transactions and ₹1 Lakh Cr+ in property value. We build lasting relationships and create real wealth.",
   },
 ];
 
@@ -111,7 +116,8 @@ const coreValues = [
 ];
 
 /*
- * Section backgrounds follow live our-story.php: intro white, timeline .bg-light,
+ * Section backgrounds follow live our-story.php, except the timeline, which is now a
+ * dark panel of its own: intro white, timeline dark skyline,
  * mission .bg-dark-black (gold radial to #111827 + greyscale skyline + .8->.9 overlay),
  * values white, closing CTA .bg-gold with a Bootstrap .btn-dark.
  */
@@ -149,13 +155,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Journey Timeline */}
-      <section className="bg-bs-light py-20">
-        <div className="container">
-          <SectionHeading eyebrow="Our Path" title="The Journey of Excellence" />
-          <JourneyTimeline steps={timeline} />
-        </div>
-      </section>
+      {/* Journey Timeline — dark panel, the trail and its heading live in the component */}
+      <JourneyTimeline steps={timeline} />
 
       {/* Mission & Vision — live `.story-mission.bg-dark-black` */}
       <section className="relative overflow-hidden bg-dark-radial py-20 text-white">

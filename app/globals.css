@@ -105,6 +105,9 @@
   --animate-marquee: marquee 30s linear infinite;
   --animate-marquee-reverse: marquee-reverse 34s linear infinite;
   --animate-shine: shine 4s ease-in-out infinite;
+  /* Dashes travelling along the world map's India-to-market arcs. The offset
+     is two dash periods (6 + 7), so the loop has no visible seam. */
+  --animate-map-arc: map-arc-flow 2.2s linear infinite;
 
   @keyframes kenburns {
     from {
@@ -146,6 +149,11 @@
     }
     100% {
       background-position: -200% 0;
+    }
+  }
+  @keyframes map-arc-flow {
+    to {
+      stroke-dashoffset: -26;
     }
   }
 }
@@ -259,6 +267,18 @@
 /* Awards gallery section */
 @utility bg-awards-gallery {
   background-image: radial-gradient(circle at top left, rgb(212 175 55 / 0.08), #ffffff);
+}
+
+/* Home footprint cards: the night sky the maps hang in. A warm bloom at the
+   horizon over a navy-to-black fall-off, so the lit coastlines and the city
+   lights read as the earth after dark rather than as a flat dark fill. The
+   artwork's own palette is in scripts/generate-maps.mjs and moves with this. */
+@utility bg-map-panel {
+  background-color: #04070e;
+  background-image:
+    radial-gradient(85% 60% at 50% 4%, rgb(212 175 55 / 0.13), transparent 62%),
+    radial-gradient(70% 50% at 50% 104%, rgb(212 175 55 / 0.08), transparent 60%),
+    radial-gradient(120% 95% at 50% 25%, #10213c 0%, #091425 48%, #04070e 100%);
 }
 
 /* Home `.stats-section`: 80% black over the Unsplash towers photo, fixed */

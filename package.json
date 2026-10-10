@@ -12,6 +12,7 @@
     "build:full": "bash scripts/build.sh",
     "export": "bash scripts/export.sh",
     "instagram:token": "node scripts/refresh-instagram-token.mjs",
+    "maps:generate": "node --experimental-transform-types --import ./scripts/alias-register.mjs scripts/generate-maps.mjs",
     "audit:sql": "node scripts/audit-sql-dump.mjs",
     "db:up": "docker compose --env-file .env.local up -d --wait",
     "db:down": "docker compose --env-file .env.local down",
@@ -36,7 +37,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.7",
+    "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

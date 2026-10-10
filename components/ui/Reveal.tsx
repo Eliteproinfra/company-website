@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import type { ElementType, ReactNode } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
 import { useInView } from "@/hooks/useInView";
 
 type Direction = "up" | "left" | "right";
@@ -13,6 +13,8 @@ type RevealProps = {
   direction?: Direction;
   once?: boolean;
   className?: string;
+  /** For passing custom properties a breakpoint-scoped utility reads back. */
+  style?: CSSProperties;
 };
 
 const directionHiddenClasses: Record<Direction, string> = {
@@ -40,12 +42,14 @@ export default function Reveal({
   direction = "up",
   once = true,
   className,
+  style,
 }: RevealProps) {
   const [ref, isVisible] = useInView<HTMLElement>({ once });
 
   return (
     <Component
       ref={ref}
+      style={style}
       className={clsx(
         "transition-all duration-700 ease-out",
         delayClasses[delay],

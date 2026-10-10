@@ -22,6 +22,7 @@ import { services } from "@/lib/data/services";
 import { nriServices } from "@/lib/data/nri";
 
 import { partners } from "@/lib/data/partners";
+import { presenceBanners } from "@/lib/data/presence";
 
 import { reviews, googleRating } from "@/lib/data/reviews";
 import { socialLinks } from "@/lib/data/social";
@@ -33,9 +34,6 @@ const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 // Rendered widths for `fill` images, derived from this project's Bootstrap-style
 // `.container` steps (540/720/960/1140/1320 with 24px side padding). Without a
 // `sizes` the browser assumes 100vw and pulls a needlessly large file.
-/** Half of a `.container` two-column `md:grid-cols-2` row with `gap-6` (24px). */
-const HALF_ROW_MD_SIZES =
-  "(max-width: 575px) 100vw, (max-width: 767px) 492px, (max-width: 991px) 324px, (max-width: 1199px) 444px, (max-width: 1399px) 534px, 624px";
 /** Half of a `.container` two-column `lg:grid-cols-2` row with `gap-12` (48px). */
 const HALF_ROW_LG_SIZES =
   "(max-width: 575px) 100vw, (max-width: 767px) 492px, (max-width: 991px) 672px, (max-width: 1199px) 432px, (max-width: 1399px) 522px, 612px";
@@ -221,91 +219,40 @@ export default async function Home() {
             title="Nationwide & Global Reach"
             description="Extending our reach across India and key global markets through reliable partners and strategic alliances."
           />
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Reveal direction="right">
-              <div className="relative h-[340px] overflow-hidden rounded-2xl bg-black">
+        </div>
+        {/*
+          Deliberately outside the container: these are 16:9 banners that carry
+          their own titling, and boxing them into a column would letterbox them
+          into a strip with the lettering too small to read. The heading and
+          copy stay in the container around them.
+        */}
+        <div className="space-y-12">
+          {presenceBanners.map((banner, index) => (
+            <Reveal key={banner.image} delay={delaySequence[index % delaySequence.length]}>
+              <figure>
                 <Image
-                  src="/images/2.png"
-                  alt="Map of ElitePro Infra's presence across India"
-                  fill
-                  sizes={HALF_ROW_MD_SIZES}
-                  style={{ objectPosition: "62% 45%" }}
-                  className="scale-[2.6] object-cover"
+                  src={banner.image}
+                  alt={banner.alt}
+                  width={1600}
+                  height={900}
+                  sizes="100vw"
+                  className="h-auto w-full"
                 />
-              </div>
-              <div className="p-6 text-center">
-                <h3 className="text-xl font-bold text-dark-black">Pan-India Presence</h3>
-                <p className="mt-2 text-sm text-muted">
-                  We actively operate across 20+ major cities in India, supported by a strong
-                  regional partner and execution network to ensure seamless service delivery
-                  nationwide.
-                </p>
-              </div>
+                <figcaption className="container mt-6 text-center">
+                  <h3 className="text-xl font-bold text-dark-black">{banner.title}</h3>
+                  <p className="mx-auto mt-2 max-w-3xl text-sm text-muted">{banner.description}</p>
+                </figcaption>
+              </figure>
             </Reveal>
-            <Reveal direction="left">
-              <div className="relative h-[340px] overflow-hidden rounded-2xl bg-black">
-                <Image
-                  src="/images/2.png"
-                  alt="Map of ElitePro Infra's global office locations"
-                  fill
-                  sizes={HALF_ROW_MD_SIZES}
-                  style={{ objectPosition: "50% 68%" }}
-                  className="scale-[1.35] object-cover"
-                />
-              </div>
-              <div className="p-6 text-center">
-                <h3 className="text-xl font-bold text-dark-black">Global Presence</h3>
-                <p className="mt-2 text-sm text-muted">
-                  Our footprint extends across key international markets, enabling us to serve
-                  global clients through strategic alliances and trusted international partners.
-                </p>
-              </div>
-            </Reveal>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Global Opportunities */}
-      <section className="relative bg-global-section py-20 text-white">
-        <div className="absolute inset-0 bg-overlay-dark" aria-hidden="true" />
-        <div className="container relative z-[1]">
-          <SectionHeading
-            title="Global Opportunities"
-            description="Invest in the world's finest destinations"
-            dark
-          />
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {[
-              { name: "India", image: "/images/global-india.jpg", href: "/properties" },
-              { name: "Dubai", image: "/images/global-dubai.png", href: "/nri-corner" },
-            ].map((place, index) => (
-              <Reveal key={place.name} delay={delaySequence[index % delaySequence.length]}>
-                {/* Live: Bootstrap `.card.bg-dark` (#212529) with the photo at 50% opacity. */}
-                <Link
-                  href={place.href}
-                  className="group relative block h-[400px] overflow-hidden rounded-md bg-bs-dark"
-                >
-                  <Image
-                    src={place.image}
-                    alt={`${place.name} skyline`}
-                    fill
-                    sizes={HALF_ROW_MD_SIZES}
-                    className="object-cover opacity-50 transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <span className="absolute bottom-6 left-6 text-2xl font-bold text-white">
-                    {place.name}
-                  </span>
-                </Link>
-              </Reveal>
-            ))}
-          </div>
-          <div className="mt-12 text-center">
-            <Button href="/nri-corner" variant="outline">
-              Explore International
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/*
+        A "Global Opportunities" section of India/Dubai photo cards used to sit here. The
+        footprint banners above now carry the international story, so it was dropped rather
+        than left commented out — git history has it if it is ever wanted back.
+      */}
 
       {/* Elite Developer Partners */}
       <section className="bg-white py-20">

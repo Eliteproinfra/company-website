@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          # Must match the server. next@16.3.7 requires >=20.9 and the EC2 box
+          # Must match the server. next@16.4.0 requires >=20.9 and the EC2 box
           # runs Node 22; building on a different major risks shipping an
           # artifact that behaves differently in production.
           node-version: '22'

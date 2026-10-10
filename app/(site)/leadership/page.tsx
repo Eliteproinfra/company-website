@@ -22,7 +22,7 @@ export default function LeadershipPage() {
   return (
     <>
       <PageHero
-        image="/images/heroes/leadership.webp"
+        image="/images/heroes/leadership-founders.webp"
         title="Our Leadership"
         description="Architects of Trust &amp; Excellence"
         breadcrumbCurrent="Leadership"

@@ -20,6 +20,7 @@ import { cache } from "react";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { listProperties, type PropertyRecord } from "@/lib/db/queries";
 import { propertyDetails, type PropertyDetail } from "@/lib/data/propertyDetails";
+import { partnerForListing, partnerSlug } from "@/lib/data/partners";
 import type { SignatureProject } from "@/lib/data/signatureProjects";
 import type { PropertyItem } from "@/lib/types";
 
@@ -88,6 +89,11 @@ export async function getPropertyById(id: number): Promise<PropertyDetail | unde
 
 /** The card shape the /properties grid and the related-properties strip render. */
 export function toPropertyItem(property: PropertyDetail): PropertyItem {
+  const partner = partnerForListing({
+    title: property.title,
+    developer: property.developer?.name,
+  });
+
   return {
     image: property.images[0] ?? "",
     badgeText: property.category,
@@ -98,6 +104,7 @@ export function toPropertyItem(property: PropertyDetail): PropertyItem {
     area: property.area,
     price: property.price,
     href: `/properties/${property.slug}`,
+    developerSlug: partner && partnerSlug(partner.name),
   };
 }
 
