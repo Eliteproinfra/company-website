@@ -11,20 +11,22 @@ type JourneyStep = {
 
 /* Pin geometry for the wide layout, as a percentage of the panel height: `node` is where
    the glowing trail passes, `badge` where the year sits above it. The gap between the two
-   is what the text drops into, so it has to clear the tallest block in that column.
+   is what the text drops into, so it has to clear the tallest block in that column — which
+   is why the last step, with the longest copy, gets the widest one.
+   The years climb left to right, so `node` walks up the panel as the list advances.
    Each step hands its pair to the stylesheet as custom properties. */
 const pins = [
-  { node: 52, badge: 24 },
-  { node: 62, badge: 34 },
-  { node: 72, badge: 43 },
-  { node: 81, badge: 54 },
-  { node: 90, badge: 54 },
+  { node: 90, badge: 62 },
+  { node: 81, badge: 51 },
+  { node: 72, badge: 42 },
+  { node: 62, badge: 38 },
+  { node: 52, badge: 16 },
 ];
 
 /* The trail, drawn in a 1000x800 box stretched to the panel: a flat run under each
-   pin, then a dip down to the next one. Node x values line up with the badge centres. */
+   pin, then a rise up to the next one. Node x values line up with the badge centres. */
 const TRAIL =
-  "M 0,404 C 8,412 12,416 24,416 C 95,416 135,494 213,496 C 300,498 330,574 401,576 C 485,578 515,646 590,648 C 672,650 702,716 779,720 C 865,722 930,738 1000,746";
+  "M 0,732 C 8,724 12,720 24,720 C 95,720 135,650 213,648 C 300,646 330,578 401,576 C 485,574 515,498 590,496 C 672,494 702,420 779,416 C 865,414 930,398 1000,390";
 
 /* A dark halo so the trail never cuts through a glyph where it passes behind a block. */
 const HALO = "[text-shadow:0_1px_14px_rgba(0,0,0,0.95)]";

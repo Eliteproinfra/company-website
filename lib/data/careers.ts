@@ -174,11 +174,11 @@ export const cultureHighlights = [
   },
 ];
 
-/** Live "Life at Elite Pro Infra" `.gallery-item`s (self-hosted copies of its Unsplash photos). */
+/** "Life at Elite Pro Infra" `.gallery-item`s — our own team photos, replacing the live site's stock shots. */
 export const careerGallery = [
-  { image: "/images/bg/career-strategy-meet.jpg", caption: "Annual Strategy Meet" },
-  { image: "/images/bg/life-culture.jpg", caption: "Collaborative Workspace" },
-  { image: "/images/bg/sales-team.jpg", caption: "Awards & Recognition" },
+  { image: "/images/bg/life-womens-day.jpg", caption: "Women's Day Celebration" },
+  { image: "/images/bg/life-team-trip.jpg", caption: "Annual Team Trip" },
+  { image: "/images/bg/life-celebrations.jpg", caption: "Milestones & Celebrations" },
 ];
 
 /** Live apply-modal "Why work with us" points. */

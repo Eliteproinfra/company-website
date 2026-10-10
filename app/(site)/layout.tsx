@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import EnquiryPopup from "@/components/layout/EnquiryPopup";
 
 const siteDescription =
   "Elite Pro Infraventure is a premier real estate consultancy firm dedicated to providing exceptional service and expertise in the property market.";
@@ -64,6 +65,10 @@ export default function SiteLayout({
         {children}
       </main>
       <Footer />
+      {/* Lead-capture modal on a timer. Mounted here so it covers every public
+          page and keeps its timer across navigations, and so the admin panel —
+          outside this route group — never sees it. */}
+      <EnquiryPopup />
     </>
   );
 }
