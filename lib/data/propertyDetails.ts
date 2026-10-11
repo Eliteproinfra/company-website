@@ -11,6 +11,61 @@ export type PropertyExpert = {
   email: string;
 };
 
+/** The iconed strip under the title: "1642 Sq.Ft.", "2 Bathrooms", "18th of 24".
+ *  Label/value like a spec, but rendered as tiles rather than a table row. */
+export type PropertyKeyFact = { label: string; value: string };
+
+/** "Furnishing Details" — what the flat comes with, and how many of each. */
+export type PropertyFurnishing = { item: string; count: string };
+
+export type PropertyFloorPlan = {
+  /** The configuration this plan is for: "2 BHK", "3 BHK + Study". */
+  name: string;
+  area: string;
+  price: string;
+  image: string;
+};
+
+/** One entry of "Locality & Commute", grouped on the page by `category`. */
+export type PropertyNearby = { category: string; name: string; distance: string };
+
+/** "About <project>" — the snapshot box above the builder's own. */
+export type PropertyProjectInfo = {
+  status: string;
+  size: string;
+  configurations: string;
+  priceRange: string;
+  rera: string;
+  /** Free-form selling points, one per line on the page. */
+  highlights: string[];
+};
+
+export type PropertyVideo = { title: string; url: string };
+
+export type PropertyReview = {
+  name: string;
+  /** "1".."5", kept as a string like every other repeater column. */
+  rating: string;
+  date: string;
+  good: string;
+  bad: string;
+  text: string;
+};
+
+/** A row of the price-trend table. Typed in by the admin — the site has no
+ *  market-rate feed, so nothing here is computed. */
+export type PropertyPriceTrend = { period: string; rate: string; change: string };
+
+export type PropertyDeveloper = {
+  name: string;
+  logo: string;
+  about: string;
+  /** Builder stats, all optional: older listings were saved before these existed. */
+  experience?: string;
+  projects?: string;
+  delivered?: string;
+};
+
 export type PropertyDetail = {
   id: number;
   slug: string;
@@ -30,10 +85,24 @@ export type PropertyDetail = {
   mapUrl?: string;
   /** Optional: the admin stores no developer at all when the name is left blank,
    *  so the detail page has to be able to render without this section. */
-  developer?: { name: string; logo: string; about: string };
+  developer?: PropertyDeveloper;
   faqs: PropertyFaq[];
   experts: PropertyExpert[];
   relatedIds: number[];
+  /**
+   * The sections added after the first release. All optional: this static
+   * snapshot predates them, and every one of them is hidden on the public page
+   * when it is empty, so a listing saved before they existed renders exactly as
+   * it always did.
+   */
+  keyFacts?: PropertyKeyFact[];
+  furnishings?: PropertyFurnishing[];
+  floorPlans?: PropertyFloorPlan[];
+  nearby?: PropertyNearby[];
+  projectInfo?: PropertyProjectInfo;
+  videos?: PropertyVideo[];
+  reviews?: PropertyReview[];
+  priceTrends?: PropertyPriceTrend[];
   /** "Featured on the homepage" — pins the listing to the front of its city tab. */
   isFeatured?: boolean;
 };

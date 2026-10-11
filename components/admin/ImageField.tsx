@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { adminInputClass } from "./FormField";
 
-async function upload(file: File): Promise<string> {
+/** Posts one file to the admin upload route and returns its public path.
+ *  Shared with RepeaterField's image columns (floor plans), so every upload in
+ *  the admin goes through the same endpoint and the same error handling. */
+export async function uploadAdminImage(file: File): Promise<string> {
   const body = new FormData();
   body.append("file", file);
   const res = await fetch("/api/admin/upload", { method: "POST", body });
@@ -19,11 +22,18 @@ export function ImageField({
   label,
   defaultValue = "",
   hint,
+  /** Defaults to `name`. Pass one when the same field appears more than once on
+   *  a page — the awards gallery renders an edit form per row — so the ids stay
+   *  unique and each label still points at its own input. */
+  id = name,
+  compact,
 }: {
   name: string;
   label: string;
   defaultValue?: string;
   hint?: string;
+  id?: string;
+  compact?: boolean;
 }) {
   const [value, setValue] = useState(defaultValue);
   const [busy, setBusy] = useState(false);
@@ -31,19 +41,30 @@ export function ImageField({
 
   return (
     <div>
-      <label htmlFor={name} className="mb-1.5 block text-sm font-bold text-dark-black">
+      <label
+        htmlFor={id}
+        className={
+          compact
+            ? "mb-1 block text-xs font-semibold text-neutral-500"
+            : "mb-1.5 block text-sm font-bold text-dark-black"
+        }
+      >
         {label}
       </label>
       <div className="flex flex-wrap gap-2">
         <input
-          id={name}
+          id={id}
           name={name}
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder="/images/... or /uploads/..."
           className={`${adminInputClass} min-w-0 flex-1`}
         />
-        <label className="shrink-0 cursor-pointer rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-dark-black hover:bg-neutral-50">
+        <label
+          className={`shrink-0 cursor-pointer rounded-lg border border-neutral-200 font-semibold text-dark-black hover:bg-neutral-50 ${
+            compact ? "px-3 py-2 text-xs" : "px-4 py-2.5 text-sm"
+          }`}
+        >
           {busy ? "Uploading…" : "Upload"}
           <input
             type="file"
@@ -56,7 +77,7 @@ export function ImageField({
               setBusy(true);
               setError(null);
               try {
-                setValue(await upload(file));
+                setValue(await uploadAdminImage(file));
               } catch (err) {
                 setError(err instanceof Error ? err.message : "Upload failed");
               } finally {
@@ -69,7 +90,9 @@ export function ImageField({
       </div>
       {error ? <p className="mt-1 text-xs font-semibold text-red-600">{error}</p> : null}
       {hint ? <p className="mt-1 text-xs text-neutral-500">{hint}</p> : null}
-      {value ? (
+      {/* The card already shows the award itself, so a second copy under the
+          path input would just take up room. */}
+      {value && !compact ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={value}
@@ -134,7 +157,7 @@ export function ImageListField({
                 setError(null);
                 try {
                   const urls: string[] = [];
-                  for (const file of files) urls.push(await upload(file));
+                  for (const file of files) urls.push(await uploadAdminImage(file));
                   setItems((prev) => [...prev, ...urls]);
                 } catch (err) {
                   setError(err instanceof Error ? err.message : "Upload failed");

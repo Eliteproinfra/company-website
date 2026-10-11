@@ -2,18 +2,31 @@
 
 import { useId, useState } from "react";
 import { adminInputClass } from "./FormField";
+import { uploadAdminImage } from "./ImageField";
 
 export type RepeaterColumn = {
   key: string;
   label: string;
   placeholder?: string;
-  /** Rendered as a textarea instead of a single-line input (FAQ answers). */
-  multiline?: boolean;
+  /**
+   * "text" (the default) is a single-line input.
+   * "textarea" takes the full row width — FAQ answers, review bodies.
+   * "image"    adds an Upload button and a thumbnail — floor plans.
+   * "select"   restricts the value to `options` — the nearby-landmark category,
+   *            which the public page groups by and so cannot be free text.
+   * "number"   is a numeric input, still stored as a string like every other
+   *            column so one JSON shape covers them all.
+   */
+  type?: "text" | "textarea" | "image" | "select" | "number";
+  options?: string[];
+  /** Narrower columns (a count, a distance) that should not take half the row. */
+  narrow?: boolean;
 };
 
 /**
- * Edits an array of flat objects (specs, amenities, FAQs, experts) and submits
- * it as JSON in one hidden input, so the server action reads a single field.
+ * Edits an array of flat objects (specs, FAQs, floor plans, reviews, …) and
+ * submits it as JSON in one hidden input, so the server action reads a single
+ * field.
  *
  * These live in JSON columns rather than child tables because the page always
  * reads and writes a listing whole, and renders these rows in the author's
@@ -38,6 +51,8 @@ export default function RepeaterField<T extends Record<string, string>>({
     Object.fromEntries(columns.map((column) => [column.key, ""])) as unknown as T;
 
   const [rows, setRows] = useState<T[]>(defaultValue.length ? defaultValue : []);
+  const [busyCell, setBusyCell] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const baseId = useId();
 
   function update(index: number, key: string, value: string) {
@@ -54,6 +69,19 @@ export default function RepeaterField<T extends Record<string, string>>({
     });
   }
 
+  async function uploadInto(index: number, key: string, file: File) {
+    const cell = `${index}-${key}`;
+    setBusyCell(cell);
+    setError(null);
+    try {
+      update(index, key, await uploadAdminImage(file));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setBusyCell(null);
+    }
+  }
+
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
@@ -68,6 +96,7 @@ export default function RepeaterField<T extends Record<string, string>>({
         </button>
       </div>
       {hint ? <p className="mb-2 text-xs text-neutral-500">{hint}</p> : null}
+      {error ? <p className="mb-2 text-xs font-semibold text-red-600">{error}</p> : null}
 
       {/* One hidden input carries the whole array to the server action. */}
       <input type="hidden" name={name} value={JSON.stringify(rows)} readOnly />
@@ -84,35 +113,101 @@ export default function RepeaterField<T extends Record<string, string>>({
               className="rounded-lg border border-neutral-200 bg-neutral-50 p-3"
             >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {columns.map((column) => (
-                  <div key={column.key} className={column.multiline ? "sm:col-span-2" : undefined}>
-                    <label
-                      htmlFor={`${baseId}-${index}-${column.key}`}
-                      className="mb-1 block text-xs font-semibold text-neutral-500"
+                {columns.map((column) => {
+                  const fieldId = `${baseId}-${index}-${column.key}`;
+                  const value = row[column.key] ?? "";
+                  const type = column.type ?? "text";
+                  return (
+                    <div
+                      key={column.key}
+                      className={
+                        type === "textarea"
+                          ? "sm:col-span-2"
+                          : column.narrow
+                            ? "sm:col-span-1"
+                            : undefined
+                      }
                     >
-                      {column.label}
-                    </label>
-                    {column.multiline ? (
-                      <textarea
-                        id={`${baseId}-${index}-${column.key}`}
-                        rows={3}
-                        value={row[column.key] ?? ""}
-                        placeholder={column.placeholder}
-                        onChange={(event) => update(index, column.key, event.target.value)}
-                        className={adminInputClass}
-                      />
-                    ) : (
-                      <input
-                        id={`${baseId}-${index}-${column.key}`}
-                        type="text"
-                        value={row[column.key] ?? ""}
-                        placeholder={column.placeholder}
-                        onChange={(event) => update(index, column.key, event.target.value)}
-                        className={adminInputClass}
-                      />
-                    )}
-                  </div>
-                ))}
+                      <label
+                        htmlFor={fieldId}
+                        className="mb-1 block text-xs font-semibold text-neutral-500"
+                      >
+                        {column.label}
+                      </label>
+
+                      {type === "textarea" ? (
+                        <textarea
+                          id={fieldId}
+                          rows={3}
+                          value={value}
+                          placeholder={column.placeholder}
+                          onChange={(event) => update(index, column.key, event.target.value)}
+                          className={adminInputClass}
+                        />
+                      ) : type === "select" ? (
+                        <select
+                          id={fieldId}
+                          value={value}
+                          onChange={(event) => update(index, column.key, event.target.value)}
+                          className={adminInputClass}
+                        >
+                          <option value="">Choose…</option>
+                          {(column.options ?? []).map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "image" ? (
+                        <div>
+                          <div className="flex flex-wrap gap-2">
+                            <input
+                              id={fieldId}
+                              type="text"
+                              value={value}
+                              placeholder={column.placeholder ?? "/images/… or /uploads/…"}
+                              onChange={(event) => update(index, column.key, event.target.value)}
+                              className={`${adminInputClass} min-w-0 flex-1`}
+                            />
+                            <label className="shrink-0 cursor-pointer rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-xs font-semibold text-dark-black hover:bg-neutral-50">
+                              {busyCell === `${index}-${column.key}` ? "Uploading…" : "Upload"}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="sr-only"
+                                disabled={busyCell !== null}
+                                onChange={async (event) => {
+                                  const file = event.target.files?.[0];
+                                  event.target.value = "";
+                                  if (file) await uploadInto(index, column.key, file);
+                                }}
+                              />
+                            </label>
+                          </div>
+                          {value ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={value}
+                              alt=""
+                              className="mt-2 h-20 w-auto rounded border border-neutral-200 object-contain"
+                            />
+                          ) : null}
+                        </div>
+                      ) : (
+                        <input
+                          id={fieldId}
+                          type={type === "number" ? "number" : "text"}
+                          inputMode={type === "number" ? "numeric" : undefined}
+                          min={type === "number" ? 0 : undefined}
+                          value={value}
+                          placeholder={column.placeholder}
+                          onChange={(event) => update(index, column.key, event.target.value)}
+                          className={adminInputClass}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
               <div className="mt-3 flex items-center gap-2">
                 <button

@@ -115,6 +115,12 @@ async function main() {
       index,
     ];
 
+    // key_facts, furnishings, floor_plans, nearby, project_info, videos, reviews
+    // and price_trends are deliberately absent from both statements below. This
+    // snapshot predates those sections and has nothing to put in them, so an
+    // INSERT leaves them NULL (an empty section) and a forced re-seed leaves
+    // whatever the admin entered alone. Adding them here would mean `--force`
+    // silently wiping every floor plan and review on the site.
     if (existing.length) {
       await connection.execute(
         `UPDATE properties SET slug=?, title=?, category=?, badge_variant=?, badge_text=?,

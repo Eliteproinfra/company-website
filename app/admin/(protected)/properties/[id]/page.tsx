@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { categories } from "@/lib/data/categories";
+import { nearbyCategoryNames } from "@/lib/data/nearbyCategories";
 import { getPropertyById } from "@/lib/db/queries";
 import { savePropertyAction } from "../actions";
 import AdminNotice from "@/components/admin/AdminNotice";
+import AmenityField from "@/components/admin/AmenityField";
 import { ImageField, ImageListField } from "@/components/admin/ImageField";
 import RepeaterField from "@/components/admin/RepeaterField";
 import {
@@ -162,26 +164,56 @@ export default async function PropertyEditorPage({
             leave it empty.
           </p>
           <RepeaterField
+            name="keyFacts"
+            label="Key facts"
+            addLabel="Add key fact"
+            hint="The iconed strip directly under the title — keep it to the six or seven facts a buyer scans first: Built-up Area, Bedrooms, Bathrooms, Floor, Facing, Possession. Write the unit into the value (“1,642 sq. ft.”, “18th of 24”). Known labels get a matching icon; anything else gets a plain dot."
+            columns={[
+              { key: "label", label: "Label", placeholder: "Built-up Area" },
+              { key: "value", label: "Value", placeholder: "1,642 sq. ft." },
+            ]}
+            defaultValue={property?.keyFacts ?? []}
+          />
+          <RepeaterField
             name="specs"
-            label="Specifications"
-            addLabel="Add spec"
-            hint="Rows of the “Property Overview” box. Existing listings carry Location, Category and Developer — add Configuration, Possession, RERA No. and the like. Do not repeat the same label twice."
+            label="Property information"
+            addLabel="Add row"
+            hint="Rows of the “Property Information” table — the full detail list, as long as you like: Listing Type, Building Type, City, Micro Market, Locality, Project, Price, Area, Rooms, Bathrooms, Facing, View, Balcony, Power Backup, Flooring, Floor Number, Total Floors, Tower/Block. Do not repeat the same label twice."
             columns={[
               { key: "label", label: "Label (left)", placeholder: "Configuration" },
               { key: "value", label: "Value (right)", placeholder: "3 & 4 BHK" },
             ]}
             defaultValue={property?.specs ?? []}
           />
-          <RepeaterField
+          <AmenityField
             name="amenities"
             label="Amenities"
-            addLabel="Add amenity"
-            hint="Tiles in the “Amenities” grid. The icon is a Font Awesome 5 class and must keep the “fas ” prefix — e.g. fas fa-dumbbell, fas fa-swimming-pool, fas fa-car. A name that is not a real class leaves an empty gold square, so copy it from fontawesome.com/v5/search. Do not repeat the same name twice."
-            columns={[
-              { key: "icon", label: "Icon class", placeholder: "fas fa-dumbbell" },
-              { key: "name", label: "Amenity name", placeholder: "Gymnasium" },
-            ]}
+            hint="Tiles in the “Amenities” grid. Tick the ones this project has — each brings its own icon, so there is no class to type. The arrows set the order they appear in on the page."
             defaultValue={property?.amenities ?? []}
+          />
+          <RepeaterField
+            name="furnishings"
+            label="Furnishing details"
+            addLabel="Add furnishing"
+            hint="What the unit comes with, and how many — the “Furnishing Details” box. Leave the whole thing empty for an unfurnished or bare-shell project and the box does not appear."
+            columns={[
+              { key: "item", label: "Item", placeholder: "Wardrobes" },
+              { key: "count", label: "How many", type: "number", narrow: true, placeholder: "3" },
+            ]}
+            defaultValue={property?.furnishings ?? []}
+          />
+          <RepeaterField
+            name="floorPlans"
+            label="Floor plans"
+            addLabel="Add floor plan"
+            hint="One row per configuration. The page shows them as tabs with the plan image beside the figures, so give every row a different name. Price and area are printed word for word — include the unit."
+            columns={[
+              { key: "name", label: "Configuration", placeholder: "3 BHK + Study" },
+              { key: "area", label: "Area", placeholder: "2,150 sq. ft." },
+              { key: "price", label: "Price", placeholder: "₹ 4.75 Cr*" },
+              { key: "image", label: "Plan image", type: "image" },
+            ]}
+            defaultValue={property?.floorPlans ?? []}
           />
           <RepeaterField
             name="faqs"
@@ -190,7 +222,7 @@ export default async function PropertyEditorPage({
             hint="The drop-down accordion near the bottom of the page. The first one sits open when the page loads, so put the most asked question first. Answers are plain text — no links, no bullet points, no blank lines."
             columns={[
               { key: "question", label: "Question", placeholder: "Is the project RERA approved?" },
-              { key: "answer", label: "Answer", multiline: true, placeholder: "Yes. Contact us for the RERA number and documentation." },
+              { key: "answer", label: "Answer", type: "textarea", placeholder: "Yes. Contact us for the RERA number and documentation." },
             ]}
             defaultValue={property?.faqs ?? []}
           />
@@ -207,6 +239,144 @@ export default async function PropertyEditorPage({
               { key: "email", label: "Email (Email button)", placeholder: "name@eliteproinfra.com" },
             ]}
             defaultValue={property?.experts ?? []}
+          />
+        </section>
+
+        <section className="rounded-xl border border-neutral-200 bg-white p-6">
+          <h2 className="font-bold text-dark-black">Locality &amp; commute</h2>
+          <p className="mb-4 mt-1 text-xs text-neutral-500">
+            What is around the project. The public box groups these into tabs by category,
+            so pick the category from the list rather than typing your own.
+          </p>
+          <RepeaterField
+            name="nearby"
+            label="Nearby landmarks"
+            addLabel="Add landmark"
+            hint="Distance is printed word for word — write “374 m” or “3.11 km”, and keep the unit consistent within a category so the list reads in order."
+            columns={[
+              {
+                key: "category",
+                label: "Category",
+                type: "select",
+                options: nearbyCategoryNames,
+              },
+              { key: "name", label: "Place", placeholder: "Indus Public School" },
+              { key: "distance", label: "Distance", narrow: true, placeholder: "374 m" },
+            ]}
+            defaultValue={property?.nearby ?? []}
+          />
+        </section>
+
+        <section className="rounded-xl border border-neutral-200 bg-white p-6">
+          <h2 className="font-bold text-dark-black">About the project</h2>
+          <p className="mb-4 mt-1 text-xs text-neutral-500">
+            The project snapshot box. Leave every field blank to hide the whole box.
+          </p>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <TextField
+              name="projectStatus"
+              label="Status"
+              defaultValue={property?.projectInfo?.status ?? ""}
+              placeholder="Ready to Move"
+              hint="Under Construction, Ready to Move, New Launch — whatever is true today."
+            />
+            <TextField
+              name="projectSize"
+              label="Project size"
+              defaultValue={property?.projectInfo?.size ?? ""}
+              placeholder="152 units · 3.26 acres"
+              hint="Printed word for word, so write it exactly as it should read."
+            />
+            <TextField
+              name="projectConfigurations"
+              label="Configurations"
+              defaultValue={property?.projectInfo?.configurations ?? ""}
+              placeholder="2, 3 BHK Apartments"
+            />
+            <TextField
+              name="projectPriceRange"
+              label="Price range"
+              defaultValue={property?.projectInfo?.priceRange ?? ""}
+              placeholder="₹ 2.00 Cr - 4.75 Cr"
+            />
+            <TextField
+              name="projectRera"
+              label="RERA number"
+              defaultValue={property?.projectInfo?.rera ?? ""}
+              placeholder="RC/REP/HARERA/GGM/..."
+              hint="Shown as its own row. Blank leaves the row out."
+            />
+          </div>
+          <div className="mt-4">
+            <TextAreaField
+              name="projectHighlights"
+              label="Key features"
+              rows={5}
+              defaultValue={(property?.projectInfo?.highlights ?? []).join("\n")}
+              hint="One per line. Each line becomes a ticked bullet. Blank lines are ignored."
+            />
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-neutral-200 bg-white p-6">
+          <h2 className="font-bold text-dark-black">Videos</h2>
+          <p className="mb-4 mt-1 text-xs text-neutral-500">
+            Walkthroughs shown under the gallery. Empty hides the section.
+          </p>
+          <RepeaterField
+            name="videos"
+            label="Video links"
+            addLabel="Add video"
+            hint="Paste the ordinary YouTube or Vimeo address — the watch?v=… or youtu.be/… link is converted to an embed for you. A link from anywhere else is shown as a button instead of a player."
+            columns={[
+              { key: "title", label: "Title", placeholder: "Project walkthrough" },
+              { key: "url", label: "Video link", placeholder: "https://www.youtube.com/watch?v=..." },
+            ]}
+            defaultValue={property?.videos ?? []}
+          />
+        </section>
+
+        <section className="rounded-xl border border-neutral-200 bg-white p-6">
+          <h2 className="font-bold text-dark-black">Reviews &amp; ratings</h2>
+          <p className="mb-4 mt-1 text-xs text-neutral-500">
+            Buyer reviews you have collected. The overall score and the “What’s good” /
+            “What’s bad” lists are built from the rows below, so there is nothing to total
+            up yourself.
+          </p>
+          <RepeaterField
+            name="reviews"
+            label="Reviews"
+            addLabel="Add review"
+            hint="Rating is 1 to 5 — anything outside that is ignored when the average is worked out. Date is printed word for word (“March 2026”). Only publish a review the person actually gave you."
+            columns={[
+              { key: "name", label: "Reviewer", placeholder: "Krishan Dhankhar" },
+              { key: "rating", label: "Rating (1-5)", type: "number", narrow: true, placeholder: "4" },
+              { key: "date", label: "Date", narrow: true, placeholder: "March 2026" },
+              { key: "good", label: "What’s good", placeholder: "Great connectivity" },
+              { key: "bad", label: "What’s bad", placeholder: "Traffic at peak hours" },
+              { key: "text", label: "Review", type: "textarea", placeholder: "Spacious layout and a well-kept clubhouse…" },
+            ]}
+            defaultValue={property?.reviews ?? []}
+          />
+        </section>
+
+        <section className="rounded-xl border border-neutral-200 bg-white p-6">
+          <h2 className="font-bold text-dark-black">Price trends</h2>
+          <p className="mb-4 mt-1 text-xs text-neutral-500">
+            The rate table. Nothing here is fetched or calculated — every figure is the one
+            you type, so only fill it in with rates you can stand behind.
+          </p>
+          <RepeaterField
+            name="priceTrends"
+            label="Rate by period"
+            addLabel="Add period"
+            hint="Oldest period first reads best. Change is printed as typed — write the sign yourself (“+2.4%”, “-1.1%”); a value starting with “-” is shown in red, anything else in green."
+            columns={[
+              { key: "period", label: "Period", placeholder: "Jan-Mar 2026" },
+              { key: "rate", label: "Rate", placeholder: "₹ 14,550 / sq. ft." },
+              { key: "change", label: "Change", narrow: true, placeholder: "+2.4%" },
+            ]}
+            defaultValue={property?.priceTrends ?? []}
           />
         </section>
 
@@ -231,6 +401,30 @@ export default async function PropertyEditorPage({
               hint="Upload, or type a path to an existing /images/partners/... logo. Shown about 128×80, fitted whole — a wide logo on a transparent background works best."
             />
           </div>
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <TextField
+              name="developerExperience"
+              label="Years of experience"
+              defaultValue={property?.developer?.experience ?? ""}
+              placeholder="12"
+              hint="Printed as “12 Years”, so type the number alone."
+            />
+            <TextField
+              name="developerProjects"
+              label="Total projects"
+              defaultValue={property?.developer?.projects ?? ""}
+              placeholder="65"
+            />
+            <TextField
+              name="developerDelivered"
+              label="Projects delivered"
+              defaultValue={property?.developer?.delivered ?? ""}
+              placeholder="11"
+            />
+          </div>
+          <p className="mt-1 text-xs text-neutral-500">
+            The three stat tiles beside the logo. A tile is left out when its box is blank.
+          </p>
           <div className="mt-4">
             <TextAreaField
               name="developerAbout"

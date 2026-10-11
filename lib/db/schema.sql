@@ -60,6 +60,18 @@ CREATE TABLE IF NOT EXISTS properties (
   experts       JSON         NULL,
   related_ids   JSON         NULL,
   developer     JSON         NULL,
+  -- The detail-page sections modelled on how the big portals lay a listing out.
+  -- Same reasoning as the block above: read and written with the whole listing,
+  -- never queried across, order is the author's. Each is hidden on the public
+  -- page when empty, so a listing that fills none of them is still complete.
+  key_facts     JSON         NULL,
+  furnishings   JSON         NULL,
+  floor_plans   JSON         NULL,
+  nearby        JSON         NULL,
+  project_info  JSON         NULL,
+  videos        JSON         NULL,
+  reviews       JSON         NULL,
+  price_trends  JSON         NULL,
   is_featured   TINYINT(1)   NOT NULL DEFAULT 0,
   is_published  TINYINT(1)   NOT NULL DEFAULT 1,
   sort_order    INT          NOT NULL DEFAULT 0,
@@ -244,6 +256,40 @@ UPDATE IGNORE properties
 UPDATE IGNORE articles
    SET slug = TRIM(BOTH '-' FROM REGEXP_REPLACE(slug, '[^A-Za-z0-9]+', '-'))
  WHERE slug <> TRIM(BOTH '-' FROM REGEXP_REPLACE(slug, '[^A-Za-z0-9]+', '-'));
+
+-- The eight detail-page section columns, added to properties well after the
+-- first release — so CREATE TABLE IF NOT EXISTS above will not reach any
+-- existing deployment and each one needs its own guarded ALTER.
+--
+-- Written as one statement that adds whichever of the eight are missing, rather
+-- than eight copy-pasted stanzas: they are all the same nullable JSON column,
+-- and eight near-identical six-line blocks is how a typo in the fifth one goes
+-- unnoticed. It also means one table rebuild on upgrade instead of eight.
+--
+-- A loop would read better but is not available here: LOOP is only legal inside
+-- a stored program, and db-setup.mjs splits this file on semicolons and sends
+-- each statement separately, so a BEGIN…END block would arrive in pieces.
+--
+-- Every column is nullable with no default, so existing rows read back as an
+-- empty section. Re-running matches nothing and prepares 'DO 0'.
+SET @m := (
+  SELECT IF(COUNT(*) = 0, 'DO 0',
+            CONCAT('ALTER TABLE properties ',
+                   GROUP_CONCAT(CONCAT('ADD COLUMN ', wanted.name, ' JSON NULL') SEPARATOR ', ')))
+    FROM (          SELECT 'key_facts'    AS name
+          UNION ALL SELECT 'furnishings'
+          UNION ALL SELECT 'floor_plans'
+          UNION ALL SELECT 'nearby'
+          UNION ALL SELECT 'project_info'
+          UNION ALL SELECT 'videos'
+          UNION ALL SELECT 'reviews'
+          UNION ALL SELECT 'price_trends') AS wanted
+   WHERE wanted.name NOT IN (SELECT COLUMN_NAME FROM information_schema.COLUMNS
+                              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'properties')
+);
+PREPARE stmt FROM @m;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- The Enquiries inbox reads `ORDER BY created_at DESC LIMIT 200` with no WHERE
 -- clause (listEnquiries in lib/db/queries.ts — the admin's only query against

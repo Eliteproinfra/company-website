@@ -55,6 +55,17 @@ function toDetail(record: PropertyRecord): PropertyDetail {
     beds: record.beds || undefined,
     area: record.area || undefined,
     isFeatured: Boolean(record.is_featured),
+    // Same rule as description/mapUrl above: the page hides each of these
+    // sections when it is empty, and an empty array is what a listing saved
+    // before the section existed reads back as.
+    keyFacts: record.keyFacts,
+    furnishings: record.furnishings,
+    floorPlans: record.floorPlans,
+    nearby: record.nearby,
+    projectInfo: record.projectInfo ?? undefined,
+    videos: record.videos,
+    reviews: record.reviews,
+    priceTrends: record.priceTrends,
   };
 }
 

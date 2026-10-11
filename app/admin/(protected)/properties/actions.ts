@@ -40,10 +40,11 @@ class MalformedField extends Error {
 }
 
 /**
- * The images/specs/amenities/faqs/experts repeaters post their rows as JSON in
- * a hidden input. An empty or absent field is legitimately an empty list; a
- * field that is present but unreadable is a bug, and the two must not be
- * treated the same.
+ * Every repeater on the form — images, specs, amenities, furnishings, floor
+ * plans, nearby landmarks, videos, reviews, price trends, FAQs, experts —
+ * posts its rows as JSON in a hidden input. An empty or absent field is
+ * legitimately an empty list; a field that is present but unreadable is a bug,
+ * and the two must not be treated the same.
  *
  * This used to `return []` on a parse failure, which was silent data loss of
  * the worst kind: the empty array went straight into updateProperty, which
@@ -80,6 +81,17 @@ function readPropertyInput(form: FormData): PropertyInput {
 
   const developerName = str(form, "developerName");
 
+  const projectStatus = str(form, "projectStatus");
+  const projectSize = str(form, "projectSize");
+  const projectConfigurations = str(form, "projectConfigurations");
+  const projectPriceRange = str(form, "projectPriceRange");
+  const projectRera = str(form, "projectRera");
+  // One bullet per line, the way the careers admin takes its lists.
+  const projectHighlights = str(form, "projectHighlights")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
   return {
     slug: str(form, "slug"),
     title: str(form, "title"),
@@ -98,6 +110,31 @@ function readPropertyInput(form: FormData): PropertyInput {
     amenities: parseJsonArray(form.get("amenities"), "Amenities"),
     faqs: parseJsonArray(form.get("faqs"), "FAQs"),
     experts: parseJsonArray(form.get("experts"), "Experts"),
+    keyFacts: parseJsonArray(form.get("keyFacts"), "Key facts"),
+    furnishings: parseJsonArray(form.get("furnishings"), "Furnishing details"),
+    floorPlans: parseJsonArray(form.get("floorPlans"), "Floor plans"),
+    nearby: parseJsonArray(form.get("nearby"), "Nearby landmarks"),
+    videos: parseJsonArray(form.get("videos"), "Videos"),
+    reviews: parseJsonArray(form.get("reviews"), "Reviews"),
+    priceTrends: parseJsonArray(form.get("priceTrends"), "Price trends"),
+    // Stored as one object or not at all, like `developer`: the whole "About
+    // the project" box is hidden when every field of it is blank, and writing
+    // {} instead of null would make the empty box render.
+    projectInfo: projectStatus ||
+    projectSize ||
+    projectConfigurations ||
+    projectPriceRange ||
+    projectRera ||
+    projectHighlights.length
+      ? {
+          status: projectStatus,
+          size: projectSize,
+          configurations: projectConfigurations,
+          priceRange: projectPriceRange,
+          rera: projectRera,
+          highlights: projectHighlights,
+        }
+      : null,
     relatedIds: str(form, "relatedIds")
       .split(",")
       .map((part) => Number(part.trim()))
@@ -107,6 +144,9 @@ function readPropertyInput(form: FormData): PropertyInput {
           name: developerName,
           logo: str(form, "developerLogo"),
           about: str(form, "developerAbout"),
+          experience: str(form, "developerExperience"),
+          projects: str(form, "developerProjects"),
+          delivered: str(form, "developerDelivered"),
         }
       : null,
     isFeatured: form.get("isFeatured") === "on",

@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import Faq from "@/components/home/Faq";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyEnquiryForm from "@/components/properties/PropertyEnquiryForm";
+import PropertyFloorPlans from "@/components/properties/PropertyFloorPlans";
 import PropertyGallery from "@/components/properties/PropertyGallery";
+import PropertyNearby from "@/components/properties/PropertyNearby";
+import PropertyReviews from "@/components/properties/PropertyReviews";
 import Button from "@/components/ui/Button";
 import Separator from "@/components/ui/Separator";
 import {
@@ -13,7 +16,14 @@ import {
   getPropertyBySlug,
   toPropertyItem,
 } from "@/lib/content/properties";
-import type { PropertyDetail } from "@/lib/data/propertyDetails";
+import { amenityCatalog, amenityKey } from "@/lib/data/amenityCatalog";
+import { keyFactIcon } from "@/lib/data/keyFacts";
+import type {
+  PropertyAmenity,
+  PropertyDetail,
+  PropertyDeveloper,
+} from "@/lib/data/propertyDetails";
+import { videoEmbedUrl } from "@/lib/video";
 
 /** Prerenders every listing that exists at build time. A listing added in the
  *  admin afterwards is rendered on first request (dynamicParams defaults to true)
@@ -63,6 +73,72 @@ function CardHeader({ title, subtitle }: { title: string; subtitle: string }) {
       <h2 className="text-[1.05rem] font-extrabold text-dark-black">{title}</h2>
       <p className="mt-1 text-[0.92rem] text-muted">{subtitle}</p>
     </div>
+  );
+}
+
+/**
+ * Amenities under the heading of the catalog group they belong to, in the
+ * catalog's own order, the way the portals present them.
+ *
+ * A name the catalog does not know — one typed in before the picker existed,
+ * or added through "Add your own" — falls into a trailing "Other" group rather
+ * than being dropped, and keeps whatever icon it was saved with.
+ *
+ * A name the catalog does know is drawn with the catalog's icon rather than the
+ * stored one. Listings written before the amenity picker paired the two have
+ * icons that contradict their labels — a swimming pool beside "CCTV
+ * surveillance" — and resolving here fixes every one of them without anyone
+ * having to open and re-save the listing.
+ */
+function groupAmenities(amenities: PropertyAmenity[]) {
+  const groups = amenityCatalog
+    .map((group) => ({
+      title: group.title,
+      items: group.items
+        .filter((item) => amenities.some((a) => amenityKey(a.name) === amenityKey(item.name)))
+        .map((item) => {
+          const saved = amenities.find((a) => amenityKey(a.name) === amenityKey(item.name));
+          // The saved name is kept — only the icon comes from the catalog, so
+          // the page still prints exactly what the admin typed.
+          return { icon: item.icon, name: saved?.name ?? item.name };
+        }),
+    }))
+    .filter((group) => group.items.length > 0);
+
+  const known = new Set(
+    amenityCatalog.flatMap((group) => group.items.map((item) => amenityKey(item.name))),
+  );
+  const other = amenities.filter((a) => !known.has(amenityKey(a.name)));
+  if (other.length) groups.push({ title: "Other", items: other });
+
+  return groups;
+}
+
+/** The three builder tiles under the developer blurb. Each one is left out when
+ *  its figure is blank, and the row disappears when all three are. */
+function DeveloperStats({ developer }: { developer: PropertyDeveloper }) {
+  const stats = (
+    [
+      ["Experience", developer.experience, "Years"],
+      ["Total projects", developer.projects, ""],
+      ["Delivered", developer.delivered, ""],
+    ] as const
+  ).filter(([, value]) => Boolean(value));
+
+  if (!stats.length) return null;
+
+  return (
+    <dl className="mt-4 grid grid-cols-3 gap-3">
+      {stats.map(([label, value, unit]) => (
+        <div key={label} className="rounded-xl border border-black/[0.06] p-3 text-center">
+          <dd className="text-[1.3rem] font-extrabold text-ink">
+            {value}
+            {unit ? <span className="ml-1 text-[0.8rem]">{unit}</span> : null}
+          </dd>
+          <dt className="mt-0.5 text-[0.78rem] text-muted">{label}</dt>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -118,26 +194,51 @@ export default async function PropertyDetailPage({
                   ) : null}
                 </div>
               </div>
-            </Card>
 
-            <Card className="mb-4">
-              <CardHeader title="Property Overview" subtitle="Key facts about this listing" />
-              <div className="p-[18px]">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {property.specs.map((spec) => (
-                    <div
-                      key={spec.label}
-                      className="rounded-xl border border-black/[0.06] bg-white p-3"
-                    >
-                      <div className="text-[0.78rem] font-bold text-muted">{spec.label}</div>
-                      <div className="mt-0.5 text-[0.98rem] font-extrabold text-ink">
-                        {spec.value}
+              {property.keyFacts?.length ? (
+                <div className="mt-4 grid grid-cols-2 gap-3 border-t border-black/[0.06] pt-4 sm:grid-cols-3 lg:grid-cols-4">
+                  {property.keyFacts.map((fact, index) => (
+                    <div key={`${fact.label}-${index}`} className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-gold/10 text-primary-gold">
+                        <i className={keyFactIcon(fact.label)} aria-hidden="true" />
+                      </span>
+                      {/* No truncation: "Ready To Move" and "North East" have
+                          to survive a four-column row, so these wrap instead. */}
+                      <div className="min-w-0">
+                        <div className="text-[0.98rem] font-extrabold leading-tight text-ink">
+                          {fact.value}
+                        </div>
+                        <div className="text-[0.78rem] leading-tight text-muted">{fact.label}</div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              ) : null}
             </Card>
+
+            {property.specs.length ? (
+              <Card className="mb-4">
+                <CardHeader
+                  title="Property Information"
+                  subtitle="Everything on record for this listing"
+                />
+                <div className="p-[18px]">
+                  <dl className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+                    {property.specs.map((spec, index) => (
+                      <div
+                        key={`${spec.label}-${index}`}
+                        className="flex items-baseline justify-between gap-4 border-b border-black/[0.06] py-2.5"
+                      >
+                        <dt className="text-[0.88rem] text-muted">{spec.label}</dt>
+                        <dd className="text-right text-[0.92rem] font-bold text-ink">
+                          {spec.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </Card>
+            ) : null}
 
             {property.description ? (
               <Card className="mb-4">
@@ -148,23 +249,71 @@ export default async function PropertyDetailPage({
               </Card>
             ) : null}
 
+            {property.floorPlans?.length ? (
+              <Card className="mb-4">
+                <CardHeader title="Floor Plans" subtitle="Layouts and pricing per configuration" />
+                <div className="p-[18px]">
+                  <PropertyFloorPlans plans={property.floorPlans} />
+                </div>
+              </Card>
+            ) : null}
+
             {property.amenities.length ? (
               <Card className="mb-4">
                 <CardHeader title="Amenities" subtitle="Facilities available in this project" />
+                <div className="space-y-5 p-[18px]">
+                  {groupAmenities(property.amenities).map((group) => (
+                    <div key={group.title}>
+                      <h3 className="mb-2.5 text-[0.78rem] font-bold uppercase tracking-wide text-muted">
+                        {group.title}
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                        {group.items.map((amenity) => (
+                          <div
+                            key={amenity.name}
+                            className="flex items-center gap-3 rounded-xl border border-black/[0.06] bg-white px-3 py-3"
+                          >
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-gold/10 text-primary-gold">
+                              <i className={amenity.icon} aria-hidden="true" />
+                            </span>
+                            <span className="text-sm font-semibold text-dark-black">
+                              {amenity.name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            ) : null}
+
+            {property.furnishings?.length ? (
+              <Card className="mb-4">
+                <CardHeader title="Furnishing Details" subtitle="What the unit comes with" />
                 <div className="p-[18px]">
-                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                    {property.amenities.map((amenity) => (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                    {property.furnishings.map((furnishing, index) => (
                       <div
-                        key={amenity.name}
-                        className="flex items-center gap-3 rounded-xl border border-black/[0.06] bg-white px-3 py-3"
+                        key={`${furnishing.item}-${index}`}
+                        className="rounded-xl border border-black/[0.06] p-3 text-center"
                       >
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-gold/10 text-primary-gold">
-                          <i className={amenity.icon} aria-hidden="true" />
-                        </span>
-                        <span className="text-sm font-semibold text-dark-black">{amenity.name}</span>
+                        <div className="text-[1.3rem] font-extrabold text-ink">
+                          {furnishing.count || "—"}
+                        </div>
+                        <div className="mt-0.5 text-[0.82rem] text-muted">{furnishing.item}</div>
                       </div>
                     ))}
                   </div>
+                </div>
+              </Card>
+            ) : null}
+
+            {property.nearby?.length ? (
+              <Card className="mb-4">
+                <CardHeader title="Locality & Commute" subtitle="What is around the project" />
+                <div className="p-[18px]">
+                  <PropertyNearby items={property.nearby} />
                 </div>
               </Card>
             ) : null}
@@ -197,6 +346,49 @@ export default async function PropertyDetailPage({
               </Card>
             ) : null}
 
+            {property.projectInfo ? (
+              <Card className="mb-4">
+                <CardHeader
+                  title={`About ${property.title}`}
+                  subtitle="Project snapshot"
+                />
+                <div className="p-[18px]">
+                  <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {(
+                      [
+                        ["Status", property.projectInfo.status],
+                        ["Project size", property.projectInfo.size],
+                        ["Configurations", property.projectInfo.configurations],
+                        ["Price range", property.projectInfo.priceRange],
+                        ["RERA No.", property.projectInfo.rera],
+                      ] as const
+                    )
+                      .filter(([, value]) => Boolean(value))
+                      .map(([label, value]) => (
+                        <div key={label} className="rounded-xl border border-black/[0.06] p-3">
+                          <dt className="text-[0.78rem] font-bold text-muted">{label}</dt>
+                          <dd className="mt-0.5 text-[0.98rem] font-extrabold text-ink">{value}</dd>
+                        </div>
+                      ))}
+                  </dl>
+
+                  {property.projectInfo.highlights.length ? (
+                    <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {property.projectInfo.highlights.map((highlight, index) => (
+                        <li key={`${highlight}-${index}`} className="flex items-start gap-2.5">
+                          <i
+                            className="fas fa-check mt-1 text-sm text-primary-gold"
+                            aria-hidden="true"
+                          />
+                          <span className="text-[0.92rem] text-muted">{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              </Card>
+            ) : null}
+
             {/* Hidden outright when the listing has no developer — the admin stores
                 none at all when the name is left blank. */}
             {property.developer ? (
@@ -220,6 +412,94 @@ export default async function PropertyDetailPage({
                       <p className="mt-2 leading-[1.9] text-muted">{property.developer.about}</p>
                     </div>
                   </div>
+
+                  <DeveloperStats developer={property.developer} />
+                </div>
+              </Card>
+            ) : null}
+
+            {property.videos?.length ? (
+              <Card className="mb-4">
+                <CardHeader title="Videos" subtitle="Walkthroughs and project films" />
+                <div className="grid grid-cols-1 gap-4 p-[18px] md:grid-cols-2">
+                  {property.videos.map((video, index) => {
+                    const embed = videoEmbedUrl(video.url);
+                    return (
+                      <div key={`${video.url}-${index}`}>
+                        {embed ? (
+                          <div className="aspect-video overflow-hidden rounded-xl bg-neutral-100">
+                            <iframe
+                              src={embed}
+                              title={video.title || `Video ${index + 1}`}
+                              loading="lazy"
+                              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              className="h-full w-full border-0"
+                            />
+                          </div>
+                        ) : (
+                          /* Not a YouTube or Vimeo address, so it cannot be framed —
+                             see lib/video.ts. */
+                          <Button href={video.url} variant="outline" iconLeft="fas fa-play">
+                            {video.title || "Watch the video"}
+                          </Button>
+                        )}
+                        {video.title && embed ? (
+                          <p className="mt-2 text-sm font-semibold text-dark-black">
+                            {video.title}
+                          </p>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            ) : null}
+
+            {property.priceTrends?.length ? (
+              <Card className="mb-4">
+                <CardHeader title="Price Trends" subtitle="Rates recorded for this project" />
+                <div className="p-[18px]">
+                  <table className="w-full text-left text-[0.92rem]">
+                    <thead>
+                      <tr className="border-b border-black/[0.06] text-[0.78rem] uppercase tracking-wide text-muted">
+                        <th className="py-2 font-bold">Period</th>
+                        <th className="py-2 font-bold">Rate</th>
+                        <th className="py-2 text-right font-bold">Change</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {property.priceTrends.map((trend, index) => (
+                        <tr
+                          key={`${trend.period}-${index}`}
+                          className="border-b border-black/[0.06] last:border-0"
+                        >
+                          <td className="py-2.5 text-muted">{trend.period}</td>
+                          <td className="py-2.5 font-bold text-ink">{trend.rate}</td>
+                          <td
+                            className={`py-2.5 text-right font-bold ${
+                              trend.change.trim().startsWith("-") ? "text-red-600" : "text-green-600"
+                            }`}
+                          >
+                            {trend.change}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="mt-3 text-xs text-muted">
+                    Figures are indicative and maintained by Elite Pro Infraventure. They are not
+                    a valuation.
+                  </p>
+                </div>
+              </Card>
+            ) : null}
+
+            {property.reviews?.length ? (
+              <Card className="mb-4">
+                <CardHeader title="Reviews & Ratings" subtitle="What buyers tell us" />
+                <div className="p-[18px]">
+                  <PropertyReviews reviews={property.reviews} />
                 </div>
               </Card>
             ) : null}

@@ -10,6 +10,21 @@ import { execute, query, queryOne, type SqlParam } from "@/lib/db/client";
 import { sanitizeArticleHtml } from "@/lib/db/sanitize";
 import { sanitizeSlug, slugify } from "@/lib/slug";
 import type { PropertyBadgeVariant } from "@/lib/types";
+import type {
+  PropertyAmenity,
+  PropertyDeveloper,
+  PropertyExpert,
+  PropertyFaq,
+  PropertyFloorPlan,
+  PropertyFurnishing,
+  PropertyKeyFact,
+  PropertyNearby,
+  PropertyPriceTrend,
+  PropertyProjectInfo,
+  PropertyReview,
+  PropertySpec,
+  PropertyVideo,
+} from "@/lib/data/propertyDetails";
 
 export type ArticleKind = "press" | "blog" | "news";
 
@@ -50,6 +65,14 @@ export type PropertyRow = {
   experts: unknown;
   related_ids: unknown;
   developer: unknown;
+  key_facts: unknown;
+  furnishings: unknown;
+  floor_plans: unknown;
+  nearby: unknown;
+  project_info: unknown;
+  videos: unknown;
+  reviews: unknown;
+  price_trends: unknown;
   is_featured: number;
   is_published: number;
   sort_order: number;
@@ -58,20 +81,44 @@ export type PropertyRow = {
 
 export type PropertyRecord = Omit<
   PropertyRow,
-  "images" | "specs" | "amenities" | "faqs" | "experts" | "related_ids" | "developer"
+  | "images"
+  | "specs"
+  | "amenities"
+  | "faqs"
+  | "experts"
+  | "related_ids"
+  | "developer"
+  | "key_facts"
+  | "furnishings"
+  | "floor_plans"
+  | "nearby"
+  | "project_info"
+  | "videos"
+  | "reviews"
+  | "price_trends"
 > & {
   images: string[];
-  specs: { label: string; value: string }[];
-  amenities: { icon: string; name: string }[];
-  faqs: { question: string; answer: string }[];
-  experts: { name: string; role: string; image: string; phone: string; email: string }[];
+  specs: PropertySpec[];
+  amenities: PropertyAmenity[];
+  faqs: PropertyFaq[];
+  experts: PropertyExpert[];
   relatedIds: number[];
-  developer: { name: string; logo: string; about: string } | null;
+  developer: PropertyDeveloper | null;
+  keyFacts: PropertyKeyFact[];
+  furnishings: PropertyFurnishing[];
+  floorPlans: PropertyFloorPlan[];
+  nearby: PropertyNearby[];
+  projectInfo: PropertyProjectInfo | null;
+  videos: PropertyVideo[];
+  reviews: PropertyReview[];
+  priceTrends: PropertyPriceTrend[];
 };
 
 const PROPERTY_COLUMNS = `id, slug, title, category, badge_variant, badge_text, location,
   price, price_note, beds, area, description, map_url, images, specs, amenities, faqs,
-  experts, related_ids, developer, is_featured, is_published, sort_order, updated_at`;
+  experts, related_ids, developer, key_facts, furnishings, floor_plans, nearby,
+  project_info, videos, reviews, price_trends, is_featured, is_published, sort_order,
+  updated_at`;
 
 function toPropertyRecord(row: PropertyRow): PropertyRecord {
   return {
@@ -83,6 +130,14 @@ function toPropertyRecord(row: PropertyRow): PropertyRecord {
     experts: asJson(row.experts, [] as PropertyRecord["experts"]),
     relatedIds: asJson<number[]>(row.related_ids, []),
     developer: asJson<PropertyRecord["developer"]>(row.developer, null),
+    keyFacts: asJson(row.key_facts, [] as PropertyRecord["keyFacts"]),
+    furnishings: asJson(row.furnishings, [] as PropertyRecord["furnishings"]),
+    floorPlans: asJson(row.floor_plans, [] as PropertyRecord["floorPlans"]),
+    nearby: asJson(row.nearby, [] as PropertyRecord["nearby"]),
+    projectInfo: asJson<PropertyRecord["projectInfo"]>(row.project_info, null),
+    videos: asJson(row.videos, [] as PropertyRecord["videos"]),
+    reviews: asJson(row.reviews, [] as PropertyRecord["reviews"]),
+    priceTrends: asJson(row.price_trends, [] as PropertyRecord["priceTrends"]),
   };
 }
 
@@ -130,6 +185,14 @@ export type PropertyInput = {
   experts: PropertyRecord["experts"];
   relatedIds: number[];
   developer: PropertyRecord["developer"];
+  keyFacts: PropertyRecord["keyFacts"];
+  furnishings: PropertyRecord["furnishings"];
+  floorPlans: PropertyRecord["floorPlans"];
+  nearby: PropertyRecord["nearby"];
+  projectInfo: PropertyRecord["projectInfo"];
+  videos: PropertyRecord["videos"];
+  reviews: PropertyRecord["reviews"];
+  priceTrends: PropertyRecord["priceTrends"];
   isFeatured: boolean;
   isPublished: boolean;
   sortOrder: number;
@@ -158,6 +221,14 @@ function propertyParams(input: PropertyInput, slug: string): SqlParam[] {
     JSON.stringify(input.experts ?? []),
     JSON.stringify(input.relatedIds ?? []),
     JSON.stringify(input.developer ?? null),
+    JSON.stringify(input.keyFacts ?? []),
+    JSON.stringify(input.furnishings ?? []),
+    JSON.stringify(input.floorPlans ?? []),
+    JSON.stringify(input.nearby ?? []),
+    JSON.stringify(input.projectInfo ?? null),
+    JSON.stringify(input.videos ?? []),
+    JSON.stringify(input.reviews ?? []),
+    JSON.stringify(input.priceTrends ?? []),
     input.isFeatured ? 1 : 0,
     input.isPublished ? 1 : 0,
     input.sortOrder,
@@ -172,8 +243,10 @@ export async function createProperty(input: PropertyInput): Promise<{ id: number
     `INSERT INTO properties
       (slug, title, category, badge_variant, badge_text, location, price, price_note,
        beds, area, description, map_url, images, specs, amenities, faqs, experts,
-       related_ids, developer, is_featured, is_published, sort_order)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       related_ids, developer, key_facts, furnishings, floor_plans, nearby,
+       project_info, videos, reviews, price_trends, is_featured, is_published,
+       sort_order)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     propertyParams(input, slug)
   );
   return { id: insertId, slug };
@@ -186,8 +259,9 @@ export async function updateProperty(id: number, input: PropertyInput): Promise<
     `UPDATE properties SET
        slug=?, title=?, category=?, badge_variant=?, badge_text=?, location=?, price=?,
        price_note=?, beds=?, area=?, description=?, map_url=?, images=?, specs=?,
-       amenities=?, faqs=?, experts=?, related_ids=?, developer=?, is_featured=?,
-       is_published=?, sort_order=?
+       amenities=?, faqs=?, experts=?, related_ids=?, developer=?, key_facts=?,
+       furnishings=?, floor_plans=?, nearby=?, project_info=?, videos=?, reviews=?,
+       price_trends=?, is_featured=?, is_published=?, sort_order=?
      WHERE id=?`,
     [...propertyParams(input, slug), id]
   );
