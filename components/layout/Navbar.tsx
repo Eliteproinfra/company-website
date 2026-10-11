@@ -42,12 +42,24 @@ export default function Navbar() {
           {/* width/height are each file's intrinsic size, not a nominal box: the
               two logos have different aspect ratios (845x249 vs 252x81), and the
               CSS sizes by height with `w-auto`. A shared nominal pair would make
-              the computed width disagree with the prop on both. */}
+              the computed width disagree with the prop on both.
+
+              `sizes` is what stops those intrinsic numbers becoming a download
+              size. The image docs are explicit that it is needed when CSS makes
+              an image responsive, and without it Next derives the srcset from
+              `width` alone — so the light logo asked for w=1080 at 1x and
+              w=1920 at 2x, i.e. the whole 17KB source file, to paint a mark
+              136-170px wide. And because this one is preloaded, that download
+              competes with the real LCP on every page of the site. The widths
+              below are the rendered ones: h-10 -> 40px tall -> 40 x 845/249 =
+              136px, h-11 -> 149px, h-[50px] -> 170px. The browser now picks a
+              256px or 384px rendition (4.7KB / 7.3KB). */}
           <Image
             src={solid ? "/images/dark-logo.png" : "/images/Elite-pro-logo.png"}
             alt="Elite Pro Infraventure"
             width={solid ? 252 : 845}
             height={solid ? 81 : 249}
+            sizes="(min-width: 1280px) 170px, (min-width: 768px) 150px, 136px"
             preload
             className="h-10 w-auto md:h-11 xl:h-[50px]"
           />

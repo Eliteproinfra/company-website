@@ -35,14 +35,19 @@ export default function ArticleDetail({
               ) : null}
 
               {/* Press clippings come in every aspect ratio, so render at the
-                  image's own proportions rather than cropping to a fixed box. */}
+                  image's own proportions rather than cropping to a fixed box.
+
+                  `preload`, not the `priority` that used to be here: Next 16
+                  deprecated `priority` in favour of it. This is the LCP element
+                  of an article page — one fixed src, above the fold — which is
+                  exactly what preloading is for. */}
               {article.image ? (
                 <Image
                   src={article.image}
                   alt={article.title}
                   width={article.imageWidth}
                   height={article.imageHeight}
-                  priority
+                  preload
                   sizes="(min-width: 992px) 66vw, 100vw"
                   className="mt-4 h-auto w-full rounded-xl"
                 />

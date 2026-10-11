@@ -18,12 +18,21 @@ export default function PropertyGallery({
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
       <div className="lg:col-span-3">
         <div className="relative h-[260px] overflow-hidden rounded-xl bg-neutral-100 lg:h-[360px]">
+          {/* `loading="eager"` + `fetchPriority="high"` rather than the
+              deprecated `priority` (Next 16 replaced it with `preload`), and
+              deliberately not `preload` either: `main` changes when a thumbnail
+              is picked, and preloading inserts a <link> in the head for each
+              src, so a visitor clicking through the gallery would accumulate
+              preloads for images already on screen. The image docs recommend
+              these two for that reason. The first frame is still the LCP
+              element and still loads eagerly at high priority. */}
           {main ? (
             <Image
               src={main}
               alt={title}
               fill
-              priority
+              loading="eager"
+              fetchPriority="high"
               sizes="(min-width: 1024px) 70vw, 100vw"
               className="object-cover"
             />
