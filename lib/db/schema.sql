@@ -244,3 +244,27 @@ UPDATE IGNORE properties
 UPDATE IGNORE articles
    SET slug = TRIM(BOTH '-' FROM REGEXP_REPLACE(slug, '[^A-Za-z0-9]+', '-'))
  WHERE slug <> TRIM(BOTH '-' FROM REGEXP_REPLACE(slug, '[^A-Za-z0-9]+', '-'));
+
+-- The Enquiries inbox reads `ORDER BY created_at DESC LIMIT 200` with no WHERE
+-- clause (listEnquiries in lib/db/queries.ts — the admin's only query against
+-- this table). idx_enquiries_inbox leads on is_read, and MySQL can only use a
+-- composite index for ordering when every column before the sort column is
+-- pinned by an equality — so with no WHERE at all that index cannot serve this
+-- sort. The query falls back to a full scan plus a filesort of the whole table,
+-- including the TEXT message column, and gets slower with every lead captured.
+--
+-- An index on created_at alone lets the LIMIT stop after 200 index entries.
+-- Additive and online (InnoDB builds a secondary index in place), so it is safe
+-- to re-run and does not rewrite the table. Verify with:
+--   EXPLAIN SELECT id FROM enquiries ORDER BY created_at DESC LIMIT 200;
+-- which should report `idx_enquiries_recent` and no "Using filesort".
+--
+-- idx_enquiries_inbox is deliberately kept: a future "unread only" filter is
+-- exactly the equality-plus-sort shape it was built for.
+SET @m := IF((SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'enquiries'
+    AND INDEX_NAME = 'idx_enquiries_recent') = 0,
+  'ALTER TABLE enquiries ADD INDEX idx_enquiries_recent (created_at)', 'DO 0');
+PREPARE stmt FROM @m;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

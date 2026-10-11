@@ -11,7 +11,7 @@ export default async function AdminDashboard() {
   let dbError: string | null = null;
 
   try {
-    [counts, recent] = await Promise.all([dashboardCounts(), listEnquiries(5)]);
+    [counts, recent] = await Promise.all([dashboardCounts(), listEnquiries({ limit: 5 })]);
   } catch (error) {
     // A missing/incorrect DB config is the likeliest cause and should be
     // actionable on screen rather than a stack trace.

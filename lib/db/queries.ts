@@ -598,14 +598,48 @@ export type EnquiryRow = {
   created_at: string;
 };
 
-export async function listEnquiries(limit = 200) {
-  // MySQL will not accept a bound parameter for LIMIT in a prepared statement,
-  // so it is clamped to a safe integer and interpolated. Never pass raw input.
-  const safeLimit = Math.min(Math.max(Math.trunc(Number(limit) || 0), 1), 1000);
+/** How many enquiries the admin inbox shows per page. */
+export const ENQUIRIES_PER_PAGE = 25;
+
+/**
+ * One page of the inbox, newest first.
+ *
+ * This used to take a bare `limit` defaulting to 200 and return every one of
+ * them, so the page grew without bound: with a 5,000-character message allowed
+ * per lead (the cap in /api/enquiry), 200 rows is up to a megabyte of HTML
+ * rendered on every visit to the page, and past 200 the oldest leads became
+ * simply unreachable through the UI. Paging fixes both.
+ *
+ * `ORDER BY created_at DESC` is served by idx_enquiries_recent — see the
+ * migration at the end of schema.sql for why the older composite index could
+ * not do it.
+ */
+export async function listEnquiries(options: { limit?: number; offset?: number } = {}) {
+  // MySQL will not accept a bound parameter for LIMIT/OFFSET in a prepared
+  // statement, so both are clamped to safe integers and interpolated. Never
+  // pass raw input: these two Math.trunc calls are the only thing between a
+  // query string and the SQL text.
+  const safeLimit = Math.min(Math.max(Math.trunc(Number(options.limit) || ENQUIRIES_PER_PAGE), 1), 200);
+  const safeOffset = Math.min(Math.max(Math.trunc(Number(options.offset) || 0), 0), 100_000);
+
   return query<EnquiryRow>(
     `SELECT id, source, name, email, phone, message, extra, is_read, created_at
-       FROM enquiries ORDER BY created_at DESC LIMIT ${safeLimit}`
+       FROM enquiries ORDER BY created_at DESC, id DESC
+      LIMIT ${safeLimit} OFFSET ${safeOffset}`
   );
+}
+
+/** Totals for the inbox header and the pager. One round trip, not two. */
+export async function countEnquiries(): Promise<{ total: number; unread: number }> {
+  const row = await queryOne<{ total: number; unread: number }>(
+    "SELECT COUNT(*) AS total, SUM(is_read = 0) AS unread FROM enquiries"
+  );
+  return {
+    total: Number(row?.total ?? 0),
+    // SUM() returns NULL over an empty table, and MySQL hands DECIMAL back as
+    // a string — so this is coerced rather than trusted.
+    unread: Number(row?.unread ?? 0),
+  };
 }
 
 export async function createEnquiry(input: {
