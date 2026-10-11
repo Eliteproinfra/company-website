@@ -431,6 +431,53 @@ tight. Zones are in `/etc/nginx/conf.d/elitepro-ratelimit.conf`.
 grep "limiting requests" /var/log/nginx/eliteproinfra.error.log | tail
 ```
 
+**Nobody is getting 429 and you expected them to** — check that the site
+config actually contains `limit_req`, not just that the zones exist. A
+`limit_req_zone` in conf.d declares a bucket and throttles nothing on its own;
+only a `limit_req` inside a `location` enforces it. This was the state of the
+instance until the four `location =` blocks were added to
+[`nginx-aws.conf`](nginx-aws.conf): the zones were installed and counted into,
+while `/api/enquiry`, `/api/career-application`, `/admin/login` and
+`/api/admin/upload` were all unthrottled.
+```bash
+# Should list four location blocks, one per limited endpoint.
+grep -c limit_req /etc/nginx/sites-available/eliteproinfra   # expect 4
+sudo nginx -t && sudo systemctl reload nginx
+# Then confirm enforcement end to end (the 7th request inside a minute 429s):
+for i in $(seq 1 8); do
+  curl -s -o /dev/null -w "%{http_code} " -X POST https://eliteproinfra.com/api/enquiry \
+    -H 'Content-Type: application/json' -d '{"source":"ratelimit-check","honeypot":"x"}'
+done; echo
+# honeypot:"x" is used deliberately — the route returns ok without sending mail
+# or storing a lead, so the check costs nothing but still passes through nginx.
+```
+`nginx -t` fails with "unknown limit_req_zone" if the conf.d file is missing;
+a failed test means the reload is refused and the running config is untouched.
+
+**Assets are downloading uncompressed** — check `Content-Encoding` on a
+stylesheet, not just on the HTML. The HTML comes from Node, which gzips it
+itself; `/_next/static/` is an nginx `alias` served off disk, so it is only
+compressed if the site config says so. Debian's stock `nginx.conf` has
+`gzip on` with `gzip_types text/html` only, which looks like compression is
+enabled while CSS and JS go out raw. Measured on the October 2026 build:
+994.7 KB of JS+CSS raw vs 288.5 KB gzipped, i.e. **706 KB (71%) per cold
+visit**.
+```bash
+# Expect: content-encoding: gzip on BOTH of these.
+curl -sI -H 'Accept-Encoding: gzip' https://eliteproinfra.com/ | grep -i content-encoding
+curl -s  -H 'Accept-Encoding: gzip' https://eliteproinfra.com/ \
+  | grep -o '/_next/static/chunks/[^"]*\.css' | head -1 \
+  | xargs -I{} curl -sI -H 'Accept-Encoding: gzip' https://eliteproinfra.com{} \
+  | grep -i 'content-encoding\|content-length'
+```
+The `gzip` block is in [`nginx-aws.conf`](nginx-aws.conf) (and kept identical
+in `nginx-production.conf`). Install and reload as above.
+
+> **nginx config is not deployed by CI.** `deploy.yml` ships the application
+> release only; `/etc/nginx/` is never touched. Both the compression block and
+> the `limit_req` blocks therefore take effect only after someone installs the
+> file and reloads nginx — pushing to `main` will not do it.
+
 **Instagram section shows a fallback panel** — the token expired (60 days) or
 Meta blocked the app. It degrades gracefully and never breaks the page.
 Refresh with `npm run instagram:token`.
@@ -442,11 +489,24 @@ Refresh with `npm run instagram:token`.
 Pre-existing issues, outside the scope of the migration, recorded so they are
 not rediscovered as surprises.
 
-1. **The admin CMS is not wired to the public site.** Every public page reads
-   `lib/data/*.ts`; only `/admin` reads MySQL. Content edited in the admin is
-   saved to the database but **will not appear on the site**. The admin actions
-   already call `revalidatePath`, so the remaining work is switching the page
-   components over to the query layer.
+1. ~~**The admin CMS is not wired to the public site.**~~ **Resolved** — this
+   gap is no longer accurate and was corrected during the October 2026 audit.
+   The CMS-backed public pages (home, `/properties` and its detail route,
+   `/insights-blog`, `/media-press`, `/news-updates` and their detail routes via
+   `components/insights/articlePage.tsx`, `/awards`, `/careers`, and the three
+   `/about/*` team pages) all read through `lib/content/*`, which queries MySQL
+   and falls back to `lib/data/*` when the database is unconfigured, empty or
+   unreachable. The admin actions' `revalidatePath` calls therefore do publish.
+
+   The remaining `lib/data` imports in those pages are not CMS content: the
+   `articleHref` helper, the careers culture/gallery copy, and type-only
+   imports. `/leadership` is static by design — the founders are not a CMS
+   type; `team_members` (sales / leasing / CRM) is what the admin manages.
+
+   Note the fallback's one real consequence: a build that cannot reach MySQL
+   still succeeds and prerenders the **static** catalogue, so the SSG output
+   silently reflects `lib/data` rather than the database. Check
+   `/health` after a deploy — it reports `database: "error"` when this happens.
 
 2. **No Content-Security-Policy.** The site loads Google Fonts, embeds a Google
    Maps iframe, pulls Instagram CDN images and inlines schema.org JSON-LD. A
