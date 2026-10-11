@@ -439,7 +439,17 @@ instance until the four `location =` blocks were added to
 [`nginx-aws.conf`](nginx-aws.conf): the zones were installed and counted into,
 while `/api/enquiry`, `/api/career-application`, `/admin/login` and
 `/api/admin/upload` were all unthrottled.
+**Merge the blocks, do not copy the file.** `deploy/nginx-aws.conf` has not
+been through certbot or cutover; the live file has. Copying it over would drop
+certbot's 443 server block, and until October 2026 it would also have reverted
+`server_name` to `new.eliteproinfra.com` and restored a `robots.txt` override
+returning `Disallow: /` — i.e. deindexed the site. Both are fixed in the repo
+now, but the rule stands: take the `gzip` and `limit_req` blocks across by
+hand, into the **443** server block.
+
 ```bash
+sudo cp /etc/nginx/sites-available/eliteproinfra{,.bak-$(date +%F)}
+sudo nano /etc/nginx/sites-available/eliteproinfra   # paste the two blocks
 # Should list four location blocks, one per limited endpoint.
 grep -c limit_req /etc/nginx/sites-available/eliteproinfra   # expect 4
 sudo nginx -t && sudo systemctl reload nginx
