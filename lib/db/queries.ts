@@ -8,6 +8,7 @@
 import "server-only";
 import { execute, query, queryOne, type SqlParam } from "@/lib/db/client";
 import { sanitizeArticleHtml } from "@/lib/db/sanitize";
+import { reorderedIds } from "@/lib/reorder";
 import { sanitizeSlug, slugify } from "@/lib/slug";
 import type { PropertyBadgeVariant } from "@/lib/types";
 import type {
@@ -646,12 +647,65 @@ export async function listAwards(options: { includeUnpublished?: boolean } = {})
   );
 }
 
+/** One past the last award's position, for a new row that should land at the
+ *  end. Without this a new award takes sort_order 0 and jumps to the *front*
+ *  of a gallery whose rows were numbered from 0 upwards by the seed. */
+export async function nextAwardSortOrder(): Promise<number> {
+  const row = await queryOne<{ next: number | null }>(
+    "SELECT MAX(sort_order) + 1 AS next FROM awards"
+  );
+  return row?.next ?? 0;
+}
+
 export async function createAward(image: string, caption: string, sortOrder: number) {
   const { insertId } = await execute(
     "INSERT INTO awards (image, caption, sort_order) VALUES (?,?,?)",
     [image, caption, sortOrder]
   );
   return insertId;
+}
+
+export type AwardInput = {
+  image: string;
+  caption: string;
+  sortOrder: number;
+  isPublished: boolean;
+};
+
+export async function updateAward(id: number, input: AwardInput): Promise<void> {
+  await execute(
+    "UPDATE awards SET image=?, caption=?, sort_order=?, is_published=? WHERE id=?",
+    [input.image, input.caption, input.sortOrder, input.isPublished ? 1 : 0, id]
+  );
+}
+
+/**
+ * Moves one award one place up or down the gallery.
+ *
+ * Renumbers every row rather than swapping the pair's two sort_order values,
+ * because they are frequently equal: createAward defaults to 0, so a gallery
+ * can easily be a dozen rows all at 0 whose order comes from the `id ASC`
+ * tiebreak in listAwards. Swapping two zeroes would do nothing at all, and the
+ * admin would click the arrow and watch the row not move.
+ *
+ * One statement, so the gallery is never left half-renumbered.
+ */
+export async function moveAward(id: number, direction: -1 | 1): Promise<void> {
+  const rows = await query<{ id: number }>(
+    "SELECT id FROM awards ORDER BY sort_order ASC, id ASC"
+  );
+
+  const next = reorderedIds(rows.map((row) => row.id), id, direction);
+  if (!next) return;
+
+  // UPDATE … CASE id WHEN ? THEN ? … so the whole reorder lands at once.
+  const cases = next.map(() => "WHEN ? THEN ?").join(" ");
+  const params: SqlParam[] = next.flatMap((awardId, index) => [awardId, index]);
+  await execute(
+    `UPDATE awards SET sort_order = CASE id ${cases} ELSE sort_order END
+      WHERE id IN (${next.map(() => "?").join(",")})`,
+    [...params, ...next]
+  );
 }
 
 export async function deleteAward(id: number): Promise<void> {
