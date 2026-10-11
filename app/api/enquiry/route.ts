@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { captureEnquiry } from "@/lib/enquiries";
 import { sendMail, escapeHtml } from "@/lib/mailer";
+import {
+  MAX_FIELD_LENGTH,
+  MAX_SOURCE_LENGTH,
+  looksLikeEmail,
+} from "@/lib/forms/validate";
 
 type EnquiryBody = {
   source?: string;
@@ -18,7 +23,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not read your submission." }, { status: 400 });
   }
 
-  const { source, fields, honeypot } = body ?? {};
+  const { fields, honeypot } = body ?? {};
+
+  // `source` is sent by the client like everything else here, and it went
+  // straight into the mail subject unbounded while the DB column silently
+  // truncated it to 120. A scripted post could therefore put a megabyte of
+  // text into a header. Capped to the column's own width so the stored row and
+  // the notification now say the same thing.
+  const source =
+    typeof body?.source === "string" ? body.source.slice(0, MAX_SOURCE_LENGTH).trim() : "";
 
   if (honeypot) {
     // Bot filled in a field that's hidden from real users — silently pretend success.
@@ -35,12 +48,13 @@ export async function POST(request: Request) {
 
   // The forms cap a message at 500 words; 5,000 characters is comfortably above that in any
   // language and still keeps a scripted post from filling the Enquiries inbox with an essay.
-  if (entries.some(([, value]) => String(value).length > 5000)) {
+  if (entries.some(([, value]) => String(value).length > MAX_FIELD_LENGTH)) {
     return NextResponse.json({ error: "Your message is too long. Please shorten it and try again." }, { status: 400 });
   }
 
   const emailEntry = entries.find(([key]) => key.toLowerCase().includes("email"));
   const nameEntry = entries.find(([key]) => key.toLowerCase().includes("name"));
+  const replyTo = String(emailEntry?.[1] ?? "").trim();
 
   const html = `
     <h2>New website enquiry${source ? ` — ${escapeHtml(source)}` : ""}</h2>
@@ -57,13 +71,23 @@ export async function POST(request: Request) {
   `;
 
   // Stored before the email is attempted, so an SMTP outage cannot lose the lead.
-  const { stored } = await captureEnquiry(source ?? "", entries as [string, string][]);
+  const { stored } = await captureEnquiry(source, entries as [string, string][]);
 
   try {
     await sendMail({
-      subject: `New enquiry${source ? ` — ${source}` : ""} from ${nameEntry?.[1] ?? "website visitor"}`,
+      // The name is capped too: it comes from the same submission and the
+      // field limit above allows 5,000 characters, which is not a subject line.
+      subject: `New enquiry${source ? ` — ${source}` : ""} from ${
+        String(nameEntry?.[1] ?? "").slice(0, MAX_SOURCE_LENGTH).trim() || "website visitor"
+      }`,
       html,
-      replyTo: emailEntry?.[1],
+      // Only when it is actually an address. A typo'd "email" field used to go
+      // into Reply-To as-is, and nodemailer rejects a malformed address by
+      // throwing — which, because the lead was already stored, was swallowed
+      // into an `ok` response and the notification simply never arrived. The
+      // address is still shown in the table above either way, so dropping a
+      // broken Reply-To loses nothing.
+      replyTo: replyTo && looksLikeEmail(replyTo) ? replyTo : undefined,
     });
     return NextResponse.json({ ok: true });
   } catch (error) {
