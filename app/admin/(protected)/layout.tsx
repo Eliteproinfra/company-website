@@ -6,6 +6,10 @@ import { Suspense } from "react";
 import { getSession } from "@/lib/auth/session";
 import { logoutAction } from "../login/actions";
 import { AdminSidebarNav, AdminMobileNav, type AdminNavItem } from "@/components/admin/AdminNav";
+import AdminScrollReset from "@/components/admin/AdminScrollReset";
+
+/** The scrolling pane, named so AdminScrollReset can find it. */
+const ADMIN_SCROLL_ID = "admin-content";
 
 export const metadata: Metadata = {
   title: { default: "Admin", template: "%s | Elite Pro Admin" },
@@ -79,9 +83,27 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { user } = session;
 
   return (
-    <div className="flex min-h-screen bg-neutral-100">
-      <aside className="hidden w-64 shrink-0 flex-col bg-dark-black lg:flex">
-        <div className="border-b border-white/10 px-6 py-5">
+    /**
+     * A viewport-height shell, not a page that grows: the sidebar, the top bar
+     * and the mobile nav stay put and only <main> scrolls. The editor forms are
+     * long enough that scrolling the whole document put "Sign out" and the
+     * section links off-screen exactly when they were wanted.
+     *
+     * h-dvh behind a support query, matching HeroVideo and AboutHero: on mobile
+     * Safari 100vh is the height with the browser chrome hidden, so h-screen
+     * alone would push the bottom nav under the address bar.
+     *
+     * `fixed inset-0` rather than a plain full-height block. globals.css sets
+     * `body { overflow-x: hidden }`, which makes overflow-y compute to `auto`
+     * and leaves the document with a scrollable range even when nothing is
+     * visibly overflowing: a wheel did nothing, but any window.scrollTo — an
+     * in-page anchor, the browser restoring a position on Back — slid the whole
+     * shell up and showed blank space under it. Out of flow, there is nothing
+     * for the document to scroll.
+     */
+    <div className="fixed inset-0 flex h-screen overflow-hidden bg-neutral-100 supports-[height:100dvh]:h-dvh">
+      <aside className="hidden h-full w-64 shrink-0 flex-col bg-dark-black lg:flex">
+        <div className="shrink-0 border-b border-white/10 px-6 py-5">
           <Link href="/admin" className="block">
             {/* The light mark — the sidebar is dark-black. */}
             <Image
@@ -99,7 +121,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Suspense fallback={<div className="flex-1 p-4" aria-hidden="true" />}>
           <AdminSidebarNav items={NAV} />
         </Suspense>
-        <div className="border-t border-white/10 p-4">
+        <div className="shrink-0 border-t border-white/10 p-4">
           <Link
             href="/"
             className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
@@ -110,8 +132,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-neutral-200 bg-white px-6 py-4">
+      <div className="flex h-full min-w-0 flex-1 flex-col">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-neutral-200 bg-white px-6 py-4">
           <div className="lg:hidden">
             <Link href="/admin" className="flex items-center gap-2">
               {/* The dark mark — this bar is white, unlike the sidebar. */}
@@ -140,12 +162,23 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </header>
 
-        {/* Horizontal scroll is contained here so wide tables never make the
-            whole page scroll sideways. */}
-        <main className="min-w-0 flex-1 overflow-x-auto p-6">{children}</main>
+        {/* The only scrolling element. Horizontal scroll is contained here too,
+            so wide tables never make the whole page scroll sideways. */}
+        <main id={ADMIN_SCROLL_ID} className="min-w-0 flex-1 overflow-auto p-6">
+          {children}
+        </main>
+
+        {/* Next resets window scroll on navigation, which does nothing when the
+            document itself never scrolls — without this, opening a listing from
+            halfway down the list would start halfway down the form. */}
+        <Suspense fallback={null}>
+          <AdminScrollReset targetId={ADMIN_SCROLL_ID} />
+        </Suspense>
 
         <Suspense fallback={null}>
-          <AdminMobileNav items={NAV} />
+          <div className="shrink-0">
+            <AdminMobileNav items={NAV} />
+          </div>
         </Suspense>
       </div>
     </div>

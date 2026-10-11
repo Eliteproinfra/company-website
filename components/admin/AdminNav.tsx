@@ -51,7 +51,9 @@ export function AdminSidebarNav({ items }: { items: AdminNavItem[] }) {
   const isActive = useActiveMatcher();
 
   return (
-    <nav className="flex-1 space-y-1 p-4" aria-label="Admin sections">
+    /* Scrolls on its own: the sidebar is pinned to the viewport height, so a
+       short screen has to be able to reach the last section. */
+    <nav className="flex-1 space-y-1 overflow-y-auto p-4" aria-label="Admin sections">
       {items.map((item) => {
         const active = isActive(item.href, item.exact);
         return (
