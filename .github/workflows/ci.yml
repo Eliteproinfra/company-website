@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   verify:
-    name: Lint, typecheck, build
+    name: Lint, typecheck, test, build
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -47,6 +47,15 @@ jobs:
         # typecheck script runs before tsc. Without it tsc cannot see the
         # generated route types.
         run: npm run typecheck
+
+      - name: Unit tests
+        # node:test via --experimental-transform-types, so there is no test
+        # framework to install — the same loader the db:seed script already
+        # uses (scripts/alias-register.mjs) resolves the "@/" alias.
+        # Runs before the build: these are pure functions, they finish in under
+        # a second, and a broken HTML sanitiser should not wait on a 3-minute
+        # build to be reported.
+        run: npm test
 
       - name: Production build
         run: npm run build
