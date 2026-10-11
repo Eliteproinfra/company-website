@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitEnquiry, submitErrorMessage } from "@/lib/forms/submitEnquiry";
 
 /**
  * Live contact.php `#contactForm` inside `.form-container` (#f9f9f9, 50px padding, 10px radius,
@@ -188,16 +189,15 @@ export default function EnquiryForm() {
           }
         });
         try {
-          const res = await fetch("/api/enquiry", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ source: "Contact Page", honeypot: data.get("company-website"), fields }),
+          await submitEnquiry({
+            source: "Contact Page",
+            honeypot: String(data.get("company-website") ?? ""),
+            fields,
           });
-          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
           setStatus("success");
         } catch (error) {
           setStatus("error");
-          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+          setErrorMessage(submitErrorMessage(error));
         }
       }}
       className="h-full rounded-[10px] bg-leader-profile p-8 shadow-contact-form sm:p-[50px]"

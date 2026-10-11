@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { submitEnquiry, submitErrorMessage } from "@/lib/forms/submitEnquiry";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -16,6 +17,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 export default function NewsletterForm() {
   const isHome = usePathname() === "/";
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   return (
     <div className={clsx("mt-6", isHome && "rounded-lg bg-copyright-bg p-4")}>
@@ -28,20 +30,20 @@ export default function NewsletterForm() {
           onSubmit={async (event) => {
             event.preventDefault();
             setStatus("submitting");
+            setErrorMessage("");
             const data = new FormData(event.currentTarget);
             try {
-              const res = await fetch("/api/enquiry", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  source: "Newsletter Signup",
-                  fields: { Email: data.get("email"), Type: "Newsletter subscription" },
-                }),
+              await submitEnquiry({
+                source: "Newsletter Signup",
+                fields: {
+                  Email: String(data.get("email") ?? ""),
+                  Type: "Newsletter subscription",
+                },
               });
-              if (!res.ok) throw new Error();
               setStatus("success");
-            } catch {
+            } catch (error) {
               setStatus("error");
+              setErrorMessage(submitErrorMessage(error));
             }
           }}
         >
@@ -70,7 +72,7 @@ export default function NewsletterForm() {
           </div>
           {status === "error" ? (
             <p role="alert" className="mt-2 text-sm text-red-400">
-              Couldn&apos;t subscribe right now &mdash; please try again.
+              {errorMessage}
             </p>
           ) : null}
         </form>

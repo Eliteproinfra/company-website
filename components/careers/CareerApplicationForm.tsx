@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitErrorMessage, submitFormData } from "@/lib/forms/submitEnquiry";
 
 /** Live `.career-apply-input`: 12px radius, rgba(0,0,0,.12) border; focus -> rgba(212,175,55,.65)
  *  border with a 0 0 0 .22rem rgba(212,175,55,.18) ring. The form sits in the white
@@ -45,12 +46,11 @@ export default function CareerApplicationForm() {
         const form = event.currentTarget;
         const data = new FormData(form);
         try {
-          const res = await fetch("/api/career-application", { method: "POST", body: data });
-          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
+          await submitFormData("/api/career-application", data);
           setStatus("success");
         } catch (error) {
           setStatus("error");
-          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+          setErrorMessage(submitErrorMessage(error));
         }
       }}
       className="rounded-[18px] border border-black/[0.06] bg-white p-8 shadow-card-lg sm:p-12"

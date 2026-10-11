@@ -8,6 +8,7 @@ import {
   defaultCountry,
   validatePhoneNumber,
 } from "@/lib/data/countryCodes";
+import { submitEnquiry, submitErrorMessage } from "@/lib/forms/submitEnquiry";
 
 const inputClass =
   "rounded-md border-0 bg-bs-light px-3 py-3.5 text-bs-dark placeholder:text-bs-muted focus:outline-none";
@@ -85,25 +86,20 @@ export default function HomeEnquiryForm() {
         setErrorMessage("");
         const data = new FormData(form);
         try {
-          const res = await fetch("/api/enquiry", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              source: "Homepage",
-              fields: {
-                Name: data.get("name"),
-                Email: data.get("email"),
-                Phone: check.e164,
-                Interest: data.get("interest"),
-                Message: message.trim(),
-              },
-            }),
+          await submitEnquiry({
+            source: "Homepage",
+            fields: {
+              Name: String(data.get("name") ?? ""),
+              Email: String(data.get("email") ?? ""),
+              Phone: check.e164,
+              Interest: String(data.get("interest") ?? ""),
+              Message: message.trim(),
+            },
           });
-          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
           setStatus("success");
         } catch (error) {
           setStatus("error");
-          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+          setErrorMessage(submitErrorMessage(error));
         }
       }}
       className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2"

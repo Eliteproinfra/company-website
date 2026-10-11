@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitEnquiry, submitErrorMessage } from "@/lib/forms/submitEnquiry";
 
 const inputClass =
   "w-full rounded-lg border border-white/25 bg-transparent px-3 py-2 text-sm text-white placeholder:text-white/60 focus:border-primary-gold focus:outline-none focus:ring-1 focus:ring-primary-gold";
@@ -45,28 +46,21 @@ export default function PropertyEnquiryForm({ propertyTitle }: { propertyTitle: 
           setErrorMessage("");
           const data = new FormData(event.currentTarget);
           try {
-            const res = await fetch("/api/enquiry", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                source: `Property Enquiry — ${propertyTitle}`,
-                honeypot: String(data.get("company") ?? ""),
-                fields: {
-                  Property: propertyTitle,
-                  Name: String(data.get("name") ?? ""),
-                  Phone: String(data.get("phone") ?? ""),
-                  Email: String(data.get("email") ?? ""),
-                  Message: String(data.get("message") ?? ""),
-                },
-              }),
+            await submitEnquiry({
+              source: `Property Enquiry — ${propertyTitle}`,
+              honeypot: String(data.get("company") ?? ""),
+              fields: {
+                Property: propertyTitle,
+                Name: String(data.get("name") ?? ""),
+                Phone: String(data.get("phone") ?? ""),
+                Email: String(data.get("email") ?? ""),
+                Message: String(data.get("message") ?? ""),
+              },
             });
-            if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
             setStatus("success");
           } catch (error) {
             setStatus("error");
-            setErrorMessage(
-              error instanceof Error ? error.message : "Something went wrong. Please try again."
-            );
+            setErrorMessage(submitErrorMessage(error));
           }
         }}
         className="space-y-3"

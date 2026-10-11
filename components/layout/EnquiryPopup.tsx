@@ -8,6 +8,7 @@ import {
   defaultCountry,
   validatePhoneNumber,
 } from "@/lib/data/countryCodes";
+import { submitEnquiry, submitErrorMessage } from "@/lib/forms/submitEnquiry";
 
 /**
  * A site-wide lead-capture modal that opens on a timer and keeps coming back.
@@ -227,21 +228,16 @@ export default function EnquiryPopup() {
 
                 const data = new FormData(form);
                 try {
-                  const res = await fetch("/api/enquiry", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      source: `Popup — ${pathname}`.slice(0, SOURCE_MAX),
-                      honeypot: data.get("company-website"),
-                      fields: {
-                        Name: String(data.get("name") ?? ""),
-                        Email: String(data.get("email") ?? ""),
-                        Phone: check.e164,
-                        Interest: String(data.get("interest") ?? ""),
-                      },
-                    }),
+                  await submitEnquiry({
+                    source: `Popup — ${pathname}`.slice(0, SOURCE_MAX),
+                    honeypot: String(data.get("company-website") ?? ""),
+                    fields: {
+                      Name: String(data.get("name") ?? ""),
+                      Email: String(data.get("email") ?? ""),
+                      Phone: check.e164,
+                      Interest: String(data.get("interest") ?? ""),
+                    },
                   });
-                  if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
                   setStatus("success");
                   // Stop the reopen cycle for the rest of the visit.
                   convertedRef.current = true;
@@ -252,9 +248,7 @@ export default function EnquiryPopup() {
                   }
                 } catch (error) {
                   setStatus("error");
-                  setErrorMessage(
-                    error instanceof Error ? error.message : "Something went wrong. Please try again."
-                  );
+                  setErrorMessage(submitErrorMessage(error));
                 }
               }}
             >

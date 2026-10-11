@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitEnquiry, submitErrorMessage } from "@/lib/forms/submitEnquiry";
 
 const inputClasses =
   "h-[58px] rounded-[10px] border border-white/[0.18] border-b-2 border-b-white/35 bg-white/[0.06] px-4 text-white placeholder:text-white/65 focus:border-primary-gold focus:outline-none";
@@ -27,19 +28,14 @@ export default function PMLeadForm() {
         setErrorMessage("");
         const data = new FormData(event.currentTarget);
         try {
-          const res = await fetch("/api/enquiry", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              source: "Property Management",
-              fields: { Name: data.get("name"), Phone: data.get("phone") },
-            }),
+          await submitEnquiry({
+            source: "Property Management",
+            fields: { Name: String(data.get("name") ?? ""), Phone: String(data.get("phone") ?? "") },
           });
-          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
           setStatus("success");
         } catch (error) {
           setStatus("error");
-          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+          setErrorMessage(submitErrorMessage(error));
         }
       }}
       className="grid grid-cols-1 gap-4 md:grid-cols-3"

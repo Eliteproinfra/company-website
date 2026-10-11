@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useState } from "react";
+import { submitEnquiry, submitErrorMessage } from "@/lib/forms/submitEnquiry";
 
 type Field = { id: string; label: string; type: string; placeholder: string };
 
@@ -114,16 +115,11 @@ export default function ServiceLeadForm({
           values[field.label] = String(data.get(field.id) ?? "");
         });
         try {
-          const res = await fetch("/api/enquiry", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ source, fields: values }),
-          });
-          if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
+          await submitEnquiry({ source, fields: values });
           setStatus("success");
         } catch (error) {
           setStatus("error");
-          setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+          setErrorMessage(submitErrorMessage(error));
         }
       }}
       className={clsx(

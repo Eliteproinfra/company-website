@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { applyPoints, type JobListing } from "@/lib/data/careers";
+import { submitErrorMessage, submitFormData } from "@/lib/forms/submitEnquiry";
 
 /**
  * Live `.career-apply-modal`: 18px-radius white dialog; header `linear-gradient(135deg,
@@ -103,13 +104,12 @@ export default function ApplyModal({ job, onClose }: { job: JobListing | null; o
               const data = new FormData(event.currentTarget);
               data.set("jobTitle", job.title);
               try {
-                const res = await fetch("/api/career-application", { method: "POST", body: data });
-                if (!res.ok) throw new Error((await res.json()).error || "Submission failed");
+                await submitFormData("/api/career-application", data);
                 setStatus("success");
                 setMessage("Application submitted. Our HR team will be in touch.");
               } catch (error) {
                 setStatus("error");
-                setMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+                setMessage(submitErrorMessage(error));
               }
             }}
           >
