@@ -10,7 +10,15 @@ export default function ArticleCard({ title, date, excerpt, href, image }: Artic
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-md bg-white shadow-bs-sm transition-all duration-300 hover:-translate-y-[5px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)]">
       <Link href={href} className="relative block h-[250px] w-full overflow-hidden" tabIndex={-1}>
-        <Image src={image} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+        {/* The press creatives are 1080x1350 posters with the logo, headline and the
+            spokesperson's face in the top third; a centred crop cuts all three off. */}
+        <Image
+          src={image}
+          alt=""
+          fill
+          sizes="(min-width: 768px) 33vw, 100vw"
+          className="object-cover object-top"
+        />
       </Link>
       <div className="flex flex-1 flex-col p-6">
         <p className="text-sm text-bs-muted">

@@ -84,7 +84,7 @@ export default function ArticleDetail({
                             alt={item.title}
                             fill
                             sizes="82px"
-                            className="object-cover"
+                            className="object-cover object-top"
                           />
                         ) : null}
                       </div>
