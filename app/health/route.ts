@@ -32,9 +32,15 @@ async function checkDatabase(): Promise<DatabaseStatus> {
   try {
     await query("SELECT 1");
     return "ok";
-  } catch {
+  } catch (error) {
     // The reason is deliberately not returned to the caller — it would expose
     // the host, port and user from the connection string. It is logged instead.
+    //
+    // It genuinely is now: this block claimed to log and did not, so the only
+    // record of a failing health check was a 503 with "database":"error" and
+    // nothing anywhere saying why. That is the one moment the reason matters,
+    // and CloudWatch ships this stream (deploy/AWS.md §12).
+    console.error("[health] database check failed:", error);
     return "error";
   }
 }

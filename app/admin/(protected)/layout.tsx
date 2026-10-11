@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getSession } from "@/lib/auth/session";
 import { logoutAction } from "../login/actions";
 import { AdminSidebarNav, AdminMobileNav, type AdminNavItem } from "@/components/admin/AdminNav";
 
@@ -34,14 +34,49 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // THE security boundary. proxy.ts only checks that a cookie exists; this
   // validates the session against MySQL on every single request, so a revoked
   // or expired session stops working immediately.
-  const user = await getCurrentUser();
+  const session = await getSession();
 
-  if (!user) {
+  if (session.status === "anonymous") {
     // The login route renders its own standalone page and is excluded from this
     // layout by the route structure, so reaching here unauthenticated is always
     // a redirect.
     redirect("/admin/login");
   }
+
+  // The session could not be checked at all, which is not the same as being
+  // signed out and must not be shown as one. Access is still denied — nothing
+  // below this point renders — but the operator is told what is actually wrong
+  // instead of getting the bare 500 this used to produce.
+  if (session.status === "unavailable") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-neutral-100 p-6">
+        <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-8 text-center">
+          <div
+            className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-xl text-red-600"
+            aria-hidden="true"
+          >
+            <i className="fas fa-database" />
+          </div>
+          <h1 className="mt-4 text-lg font-bold text-dark-black">Admin unavailable</h1>
+          <p className="mt-2 text-sm text-neutral-600">
+            The database could not be reached, so your sign-in could not be verified. The public
+            site is unaffected — it serves published content without the database.
+          </p>
+          <p className="mt-4 rounded-lg bg-neutral-50 px-3 py-2 text-left font-mono text-xs text-neutral-500">
+            {/* The driver's message — host, port, refused — which is what makes
+                this diagnosable. Safe to show: reaching this page at all
+                required a 64-character session cookie. */}
+            {session.reason}
+          </p>
+          <p className="mt-4 text-xs text-neutral-500">
+            Check <code className="font-semibold">/health</code> and the DB_* settings, then reload.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  const { user } = session;
 
   return (
     <div className="flex min-h-screen bg-neutral-100">

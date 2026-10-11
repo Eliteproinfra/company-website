@@ -43,11 +43,11 @@ function createPool(): mysql.Pool {
 }
 
 export function db(): mysql.Pool {
-  if (process.env.NODE_ENV === "production") {
-    // One pool per process; no global caching needed outside dev.
-    globalThis.__elitePool ??= createPool();
-    return globalThis.__elitePool;
-  }
+  // One pool per process. Caching on globalThis is what makes that true in dev
+  // too, where a hot reload re-evaluates this module and would otherwise leave
+  // the previous pool's connections open until MySQL refused new ones. The
+  // production and development paths were written out separately and did
+  // exactly the same thing, so there is one.
   globalThis.__elitePool ??= createPool();
   return globalThis.__elitePool;
 }

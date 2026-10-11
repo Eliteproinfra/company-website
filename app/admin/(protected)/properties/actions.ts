@@ -27,14 +27,46 @@ async function requireUser() {
 /** Taken from the category list so a category added there is accepted here too. */
 const BADGE_VARIANTS: PropertyBadgeVariant[] = categories.map((category) => category.variant);
 
-function parseJsonArray<T>(value: FormDataEntryValue | null): T[] {
-  if (typeof value !== "string" || !value.trim()) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? (parsed as T[]) : [];
-  } catch {
-    return [];
+/**
+ * Thrown when a repeater's hidden JSON field arrives unreadable. Carries the
+ * field name so the admin is told which section failed rather than just that
+ * something did.
+ */
+class MalformedField extends Error {
+  constructor(readonly field: string) {
+    super(`The "${field}" field could not be read.`);
+    this.name = "MalformedField";
   }
+}
+
+/**
+ * The images/specs/amenities/faqs/experts repeaters post their rows as JSON in
+ * a hidden input. An empty or absent field is legitimately an empty list; a
+ * field that is present but unreadable is a bug, and the two must not be
+ * treated the same.
+ *
+ * This used to `return []` on a parse failure, which was silent data loss of
+ * the worst kind: the empty array went straight into updateProperty, which
+ * overwrites the column unconditionally, so a truncated or corrupted payload
+ * wiped every photo and amenity off a published listing — and the admin was
+ * redirected to "Saved." with no indication anything had gone wrong and no way
+ * to get the images back. Refusing the write is always better than destroying
+ * a row to keep a form submission looking successful.
+ */
+function parseJsonArray<T>(value: FormDataEntryValue | null, field: string): T[] {
+  if (typeof value !== "string" || !value.trim()) return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new MalformedField(field);
+  }
+  // Valid JSON of the wrong shape ("{}", "null", a bare string) is just as
+  // wrong as unparseable JSON, and used to fall into the same silent [].
+  if (!Array.isArray(parsed)) throw new MalformedField(field);
+
+  return parsed as T[];
 }
 
 function str(form: FormData, key: string): string {
@@ -61,11 +93,11 @@ function readPropertyInput(form: FormData): PropertyInput {
     area: str(form, "area"),
     description: str(form, "description"),
     mapUrl: str(form, "mapUrl"),
-    images: parseJsonArray<string>(form.get("images")),
-    specs: parseJsonArray(form.get("specs")),
-    amenities: parseJsonArray(form.get("amenities")),
-    faqs: parseJsonArray(form.get("faqs")),
-    experts: parseJsonArray(form.get("experts")),
+    images: parseJsonArray<string>(form.get("images"), "Images"),
+    specs: parseJsonArray(form.get("specs"), "Specifications"),
+    amenities: parseJsonArray(form.get("amenities"), "Amenities"),
+    faqs: parseJsonArray(form.get("faqs"), "FAQs"),
+    experts: parseJsonArray(form.get("experts"), "Experts"),
     relatedIds: str(form, "relatedIds")
       .split(",")
       .map((part) => Number(part.trim()))
@@ -103,7 +135,26 @@ export async function savePropertyAction(formData: FormData): Promise<void> {
   await requireUser();
 
   const idValue = String(formData.get("id") ?? "");
-  const input = readPropertyInput(formData);
+
+  // Read before writing anything. A MalformedField here means the submission
+  // cannot be trusted to describe the listing, so nothing is saved and the
+  // admin goes back to the form with the offending section named — the
+  // alternative, which this used to do, was to save it with that section
+  // blanked out.
+  let input: PropertyInput;
+  try {
+    input = readPropertyInput(formData);
+  } catch (error) {
+    if (error instanceof MalformedField) {
+      console.error(`[admin] refused a property save: ${error.message}`);
+      redirect(
+        `/admin/properties/${idValue || "new"}?error=${encodeURIComponent(
+          `${error.message} Nothing was saved — reload the page and try again.`
+        )}`
+      );
+    }
+    throw error;
+  }
 
   if (!input.title) {
     redirect(`/admin/properties/${idValue || "new"}?error=Title+is+required`);
