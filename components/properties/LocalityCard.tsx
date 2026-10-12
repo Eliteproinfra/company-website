@@ -1,8 +1,16 @@
+import Link from "next/link";
+import { localityHref } from "@/lib/data/localities";
 import type { LocalityItem } from "@/lib/types";
 
-export default function LocalityCard({ icon, name, area }: LocalityItem) {
+/** Links to /properties filtered to this locality — the card has always shown a
+ *  pointer cursor, so it read as clickable before it was one. */
+export default function LocalityCard({ icon, name, area }: Pick<LocalityItem, "icon" | "name" | "area">) {
   return (
-    <div className="flex cursor-pointer items-center justify-between rounded-lg border-l-4 border-l-transparent bg-white p-5 shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all duration-300 hover:translate-x-1 hover:border-l-primary-gold">
+    <Link
+      href={localityHref(name)}
+      aria-label={`Properties in ${name}, ${area}`}
+      className="flex cursor-pointer items-center justify-between rounded-lg border-l-4 border-l-transparent bg-white p-5 shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all duration-300 hover:translate-x-1 hover:border-l-primary-gold"
+    >
       <div className="flex items-center gap-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-tint text-primary-gold">
           <i className={icon} aria-hidden="true" />
@@ -13,6 +21,6 @@ export default function LocalityCard({ icon, name, area }: LocalityItem) {
         </div>
       </div>
       <i className="fas fa-chevron-right text-sm text-muted-4" aria-hidden="true" />
-    </div>
+    </Link>
   );
 }

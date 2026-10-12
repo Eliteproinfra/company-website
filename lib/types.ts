@@ -83,6 +83,13 @@ export type LocalityItem = {
   icon: string;
   name: string;
   area: string;
+  /** The listing `location` this locality sits in. */
+  city: string;
+  /** The names a listing's copy uses for this locality — the card's own label is
+   *  abbreviated ("Golf Course Rd"), the descriptions spell it out. */
+  keywords: string[];
+  /** Inclusive sector range, for a locality that is defined by one. */
+  sectors?: [number, number];
 };
 
 export type CategoryItem = {
@@ -122,6 +129,9 @@ export type PropertyItem = {
    *  the server — the homepage's developer logos filter the grid on it. Absent
    *  when the listing matches no partner. */
   developerSlug?: string;
+  /** `?locality=` slugs this listing files under, resolved once on the server
+   *  from its description — the "Top Localities" cards filter the grid on it. */
+  localities?: string[];
 };
 
 export type ProcessStepItem = {

@@ -52,7 +52,7 @@ export default async function PropertiesPage() {
                   <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {localities.map((locality, index) => (
                       <Reveal key={locality.name} delay={delaySequence[index % delaySequence.length]}>
-                        <LocalityCard {...locality} />
+                        <LocalityCard icon={locality.icon} name={locality.name} area={locality.area} />
                       </Reveal>
                     ))}
                   </div>

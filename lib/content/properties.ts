@@ -20,6 +20,7 @@ import { cache } from "react";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { listProperties, type PropertyRecord } from "@/lib/db/queries";
 import { propertyDetails, type PropertyDetail } from "@/lib/data/propertyDetails";
+import { localitiesInText } from "@/lib/data/localities";
 import { partnerForListing, partnerSlug } from "@/lib/data/partners";
 import type { SignatureProject } from "@/lib/data/signatureProjects";
 import type { PropertyItem } from "@/lib/types";
@@ -116,6 +117,12 @@ export function toPropertyItem(property: PropertyDetail): PropertyItem {
     price: property.price,
     href: `/properties/${property.slug}`,
     developerSlug: partner && partnerSlug(partner.name),
+    localities: localitiesInText(
+      [property.title, property.description ?? "", ...property.specs.map((spec) => spec.value)].join(
+        "\n"
+      ),
+      property.location
+    ),
   };
 }
 

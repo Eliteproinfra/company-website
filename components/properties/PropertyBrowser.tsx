@@ -9,16 +9,22 @@ import PropertyCard from "@/components/properties/PropertyCard";
 import PropertySearchFilter from "@/components/properties/PropertySearchFilter";
 import Pagination from "@/components/properties/Pagination";
 import { typeFromCategorySlug, typeToVariant } from "@/lib/data/categories";
+import { localityFromSlug, localitySlug } from "@/lib/data/localities";
 import { partnerFromSlug, partnerSlug } from "@/lib/data/partners";
+import { parseBudget, priceInRupees } from "@/lib/price";
 import type { PropertyItem } from "@/lib/types";
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 const PAGE_SIZE = 9;
 
-function priceRank(price: string): number {
-  const match = price.replace(/,/g, "").match(/[\d.]+/);
-  if (!match) return Number.POSITIVE_INFINITY; // "On Request" / "Price on Request" sort last
-  return parseFloat(match[0]);
+/** "On Request" / "Price on Request" sort last, whichever way the list runs. */
+function byPrice(a: PropertyItem, b: PropertyItem, direction: 1 | -1): number {
+  const priceA = priceInRupees(a.price);
+  const priceB = priceInRupees(b.price);
+  if (priceA === undefined || priceB === undefined) {
+    return Number(priceA === undefined) - Number(priceB === undefined);
+  }
+  return (priceA - priceB) * direction;
 }
 
 export default function PropertyBrowser({
@@ -62,8 +68,15 @@ export default function PropertyBrowser({
    *  "View all properties" link out of it. */
   const developer = partnerFromSlug(searchParams.get("developer"));
 
+  /** `?locality=golf-course-rd`, set by the "Top Localities" cards. Like the
+   *  developer it has no control in the search box, so it holds until the
+   *  visitor follows "View all properties" out of it. */
+  const locality = localityFromSlug(searchParams.get("locality"));
+
   const [chosenLocation, setChosenLocation] = useState<string | null>(null);
   const [chosenType, setChosenType] = useState<string | null>(null);
+  /** The budget as typed; empty is "any". Kept as text so the box can show it back. */
+  const [budget, setBudget] = useState("");
   const [sort, setSort] = useState<"recommended" | "low-high" | "high-low">("recommended");
   const [page, setPage] = useState(1);
 
@@ -80,29 +93,49 @@ export default function PropertyBrowser({
       const slug = partnerSlug(developer.name);
       list = list.filter((property) => property.developerSlug === slug);
     }
+    if (locality) {
+      const slug = localitySlug(locality.name);
+      list = list.filter((property) => property.localities?.includes(slug));
+    }
     if (location !== locations[0]) {
       list = list.filter((property) => property.location === location);
     }
     if (type !== types[0]) {
       list = list.filter((property) => property.badgeVariant === typeToVariant[type]);
     }
+    // The budget is a ceiling on the starting price. A listing priced "On
+    // Request" states no figure to hold against it, so it drops out rather than
+    // being passed off as within budget.
+    const maxPrice = parseBudget(budget);
+    if (maxPrice !== undefined) {
+      list = list.filter((property) => {
+        const price = priceInRupees(property.price);
+        return price !== undefined && price <= maxPrice;
+      });
+    }
     if (sort === "low-high") {
-      list = [...list].sort((a, b) => priceRank(a.price) - priceRank(b.price));
+      list = [...list].sort((a, b) => byPrice(a, b, 1));
     } else if (sort === "high-low") {
-      list = [...list].sort((a, b) => priceRank(b.price) - priceRank(a.price));
+      list = [...list].sort((a, b) => byPrice(a, b, -1));
     }
     return list;
-  }, [properties, developer, location, type, sort, locations, types]);
+  }, [properties, developer, locality, location, type, budget, sort, locations, types]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  function applyFilters(nextLocation: string, nextType: string) {
+  function applyFilters(nextLocation: string, nextType: string, nextBudget: string) {
     setChosenLocation(nextLocation);
     setChosenType(nextType);
+    setBudget(nextBudget);
     setPage(1);
+    // The grid sits below the locality and category rows, so without this a
+    // Search changes nothing the visitor can see.
+    document.getElementById("listings")?.scrollIntoView({ behavior: "smooth" });
   }
+
+  const scope = developer ?? locality;
 
   return (
     <>
@@ -113,11 +146,12 @@ export default function PropertyBrowser({
             // boxes show the filter actually in force — including the one a
             // ?category= link arrived with. After a Search the drafts already
             // equal the applied values, so nothing the user picked is lost.
-            key={`${location}|${type}`}
+            key={`${location}|${type}|${budget}`}
             locations={locations}
             types={types}
             initialLocation={location}
             initialType={type}
+            initialBudget={budget}
             showBudget
             onSearch={applyFilters}
           />
@@ -126,15 +160,19 @@ export default function PropertyBrowser({
 
       {between}
 
-      <section className="bg-white py-20">
+      <section id="listings" className="scroll-mt-24 bg-white py-20">
         <div className="container">
           <div className="mb-10 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div>
               <h2 className="text-3xl font-bold text-dark-black">
-                {developer ? `${developer.name} Projects` : "Featured Collection"}
+                {developer
+                  ? `${developer.name} Projects`
+                  : locality
+                    ? `Properties in ${locality.name}`
+                    : "Featured Collection"}
               </h2>
               <Separator align="left" width={80} className="mt-4" />
-              {developer && (
+              {scope && (
                 <Link
                   href="/properties"
                   className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary-gold"
@@ -180,10 +218,18 @@ export default function PropertyBrowser({
                   </a>{" "}
                   and we&apos;ll share what&apos;s available.
                 </>
+              ) : locality ? (
+                <>
+                  We have no {locality.name} listings online that match right now —{" "}
+                  <a href="/contact" className="font-semibold text-primary-gold">
+                    get in touch
+                  </a>{" "}
+                  and we&apos;ll share what&apos;s available there.
+                </>
               ) : (
                 <>
-                  No properties match your filters right now — try a different location or type,
-                  or{" "}
+                  No properties match your filters right now — try a different location, type or
+                  budget, or{" "}
                   <a href="/contact" className="font-semibold text-primary-gold">
                     get in touch
                   </a>{" "}
