@@ -6,6 +6,7 @@ import { getPropertyById } from "@/lib/db/queries";
 import { savePropertyAction } from "../actions";
 import AdminNotice from "@/components/admin/AdminNotice";
 import AmenityField from "@/components/admin/AmenityField";
+import EditorForm from "@/components/admin/EditorForm";
 import { ImageField, ImageListField } from "@/components/admin/ImageField";
 import RepeaterField from "@/components/admin/RepeaterField";
 import {
@@ -47,7 +48,7 @@ export default async function PropertyEditorPage({
 
       <AdminNotice error={error} />
 
-      <form action={savePropertyAction} className="space-y-6">
+      <EditorForm action={savePropertyAction} className="space-y-6">
         <input type="hidden" name="id" value={isNew ? "new" : String(property?.id)} />
 
         <section className="rounded-xl border border-neutral-200 bg-white p-6">
@@ -494,7 +495,7 @@ export default async function PropertyEditorPage({
             Cancel
           </Link>
         </div>
-      </form>
+      </EditorForm>
     </div>
   );
 }

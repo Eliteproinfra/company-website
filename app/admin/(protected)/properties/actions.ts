@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import type { EditorFormState } from "@/components/admin/EditorForm";
 import { categories } from "@/lib/data/categories";
 import {
   createProperty,
@@ -171,33 +172,47 @@ function revalidateProperties(...slugs: (string | undefined | null)[]) {
   }
 }
 
-export async function savePropertyAction(formData: FormData): Promise<void> {
+/**
+ * A refusal is RETURNED, never redirected to.
+ *
+ * This used to `redirect()` back to the editor with `?error=…`, which re-renders
+ * the page from the server and so discarded everything the editor holds in React
+ * state: every uploaded photo, every repeater row, every amenity. For a new
+ * listing those rebuild from an empty `defaultValue`, so one refused save threw
+ * away an afternoon's work and, from down at the Gallery section, looked exactly
+ * like the image upload had silently failed. Returning the message instead keeps
+ * the page mounted — see components/admin/EditorForm.
+ *
+ * Success still redirects: there is nothing left to preserve once the row is
+ * written, and the listing page is where the author wants to end up.
+ */
+export async function savePropertyAction(
+  _state: EditorFormState,
+  formData: FormData
+): Promise<EditorFormState> {
   await requireUser();
 
   const idValue = String(formData.get("id") ?? "");
 
   // Read before writing anything. A MalformedField here means the submission
   // cannot be trusted to describe the listing, so nothing is saved and the
-  // admin goes back to the form with the offending section named — the
-  // alternative, which this used to do, was to save it with that section
-  // blanked out.
+  // admin is told which section failed — the alternative, which this used to
+  // do, was to save it with that section blanked out.
   let input: PropertyInput;
   try {
     input = readPropertyInput(formData);
   } catch (error) {
     if (error instanceof MalformedField) {
       console.error(`[admin] refused a property save: ${error.message}`);
-      redirect(
-        `/admin/properties/${idValue || "new"}?error=${encodeURIComponent(
-          `${error.message} Nothing was saved — reload the page and try again.`
-        )}`
-      );
+      return {
+        error: `${error.message} Nothing was saved, and nothing on this page has been lost — fix that section and save again.`,
+      };
     }
     throw error;
   }
 
   if (!input.title) {
-    redirect(`/admin/properties/${idValue || "new"}?error=Title+is+required`);
+    return { error: "Title is required." };
   }
 
   let written: string;
@@ -205,7 +220,9 @@ export async function savePropertyAction(formData: FormData): Promise<void> {
 
   if (idValue && idValue !== "new") {
     const id = Number(idValue);
-    if (!Number.isInteger(id) || id <= 0) redirect("/admin/properties?error=Invalid+id");
+    if (!Number.isInteger(id) || id <= 0) {
+      return { error: "That listing id is not valid. Reload the page and try again." };
+    }
     // Read before writing so a renamed listing can clear its old URL.
     previousSlug = (await getPropertyById(id))?.slug;
     ({ slug: written } = await updateProperty(id, input));
