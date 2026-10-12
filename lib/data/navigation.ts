@@ -49,8 +49,8 @@ export const navItems: NavItem[] = [
     href: "/media-press",
     children: [
       { label: "Media & Press", href: "/media-press" },
-      { label: "Insights & Blogs", href: "/insights-blog" },
-      { label: "News & Updates", href: "/news-updates" },
+      // { label: "Insights & Blogs", href: "/insights-blog" },
+      // { label: "News & Updates", href: "/news-updates" },
       { label: "Life at Elite Pro Infra", href: "/life-at-elite" },
       { label: "Awards & Recognitions", href: "/awards" },
     ],
