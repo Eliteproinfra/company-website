@@ -13,43 +13,11 @@ import { randomBytes } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getCurrentUser } from "@/lib/auth/session";
-import { uploadsRoot } from "@/lib/uploads";
+import { isHeif, sniffExtension, uploadsRoot } from "@/lib/uploads";
 
 export const runtime = "nodejs";
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
-
-/**
- * Magic-byte signatures. The declared MIME type and filename are ignored.
- *
- * Every extension returned here needs an entry in UPLOAD_CONTENT_TYPES, or
- * app/uploads/[...path] will refuse to serve what this route just wrote.
- */
-function sniffExtension(buffer: Buffer): string | null {
-  if (buffer.length < 12) return null;
-
-  // JPEG: FF D8 FF
-  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return "jpg";
-  // PNG: 89 50 4E 47 0D 0A 1A 0A
-  if (buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
-    return "png";
-  }
-  // GIF87a / GIF89a
-  if (buffer.subarray(0, 6).toString("ascii").match(/^GIF8[79]a$/)) return "gif";
-  // WEBP: "RIFF" .... "WEBP"
-  if (
-    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
-    buffer.subarray(8, 12).toString("ascii") === "WEBP"
-  ) {
-    return "webp";
-  }
-  // AVIF / HEIF: "ftyp" brand at offset 4
-  if (buffer.subarray(4, 8).toString("ascii") === "ftyp") {
-    const brand = buffer.subarray(8, 12).toString("ascii");
-    if (brand.startsWith("avif") || brand.startsWith("avis")) return "avif";
-  }
-  return null;
-}
 
 /**
  * A correct magic header is not enough. A *polyglot* — a real image with script
@@ -128,6 +96,22 @@ export async function POST(request: Request) {
   const buffer = Buffer.from(await file.arrayBuffer());
   const extension = sniffExtension(buffer);
   if (!extension) {
+    // A HEIC is a real photo, not an attack, and `accept="image/*"` lets the
+    // file picker offer one — so it gets a refusal that can be acted on rather
+    // than being lumped in with .php below. It is refused rather than stored
+    // because Chrome, Firefox and Edge cannot display HEIC: the upload would
+    // succeed and the listing would show a broken image. Converting it here
+    // would need an image codec this project deliberately does not carry.
+    if (isHeif(buffer)) {
+      return NextResponse.json(
+        {
+          error:
+            "This is an iPhone HEIC photo, which browsers cannot display. Re-save it as JPEG and upload that — on the iPhone, Settings → Camera → Formats → Most Compatible shoots JPEG from then on.",
+        },
+        { status: 415 }
+      );
+    }
+
     // Anything that is not a recognised image is rejected outright — this is
     // what stops a .php (or a polyglot PDF/JPEG dropper) being written to disk.
     return NextResponse.json(
@@ -156,8 +140,22 @@ export async function POST(request: Request) {
   ).padStart(2, "0")}-${randomBytes(8).toString("hex")}.${extension}`;
 
   const targetDir = path.join(uploadsRoot(), folder);
-  await mkdir(targetDir, { recursive: true });
-  await writeFile(path.join(targetDir, filename), buffer);
+  try {
+    await mkdir(targetDir, { recursive: true });
+    await writeFile(path.join(targetDir, filename), buffer);
+  } catch (error) {
+    // In production public/uploads is a symlink to shared/uploads (deploy/AWS
+    // .md). If that target goes missing, fills up, or stops being writable by
+    // the PM2 user, every upload fails right here. Letting it throw hands the
+    // caller Next's own 500, which is not JSON — and the admin then showed the
+    // resulting parse error instead of anything about the disk. Say what
+    // happened and keep the driver's reason in the server log.
+    console.error("[admin] upload could not be written to disk", error);
+    return NextResponse.json(
+      { error: "The image could not be saved on the server. Please tell the site administrator." },
+      { status: 500 }
+    );
+  }
 
   return NextResponse.json({ url: `/uploads/${folder}/${filename}` });
 }
