@@ -132,7 +132,8 @@ export function ImageField({
           className={`${adminInputClass} min-w-0 flex-1`}
         />
         <label
-          className={`shrink-0 cursor-pointer rounded-lg border border-neutral-200 font-semibold text-dark-black hover:bg-neutral-50 ${
+          // `relative` is load-bearing — see the note on the gallery's Upload.
+          className={`relative shrink-0 cursor-pointer rounded-lg border border-neutral-200 font-semibold text-dark-black hover:bg-neutral-50 ${
             compact ? "px-3 py-2 text-xs" : "px-4 py-2.5 text-sm"
           }`}
         >
@@ -213,7 +214,14 @@ export function ImageListField({
           >
             Add path
           </button>
-          <label className="cursor-pointer rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold hover:bg-neutral-50">
+          {/* `relative` is load-bearing. The sr-only input is position:absolute,
+              and without a positioned label its containing block is the admin
+              shell (`fixed inset-0`), outside the scrolling <main>. It then sits
+              at its unscrolled offset — hundreds of pixels below the shell —
+              and when the click focuses it the browser scrolls the shell to
+              reveal it: overflow-hidden still scrolls programmatically. The
+              whole panel slid up and left a blank grey page. */}
+          <label className="relative cursor-pointer rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold hover:bg-neutral-50">
             {busy ? "Uploading…" : "Upload"}
             <input
               type="file"

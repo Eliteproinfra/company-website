@@ -169,7 +169,9 @@ export default function RepeaterField<T extends Record<string, string>>({
                               onChange={(event) => update(index, column.key, event.target.value)}
                               className={`${adminInputClass} min-w-0 flex-1`}
                             />
-                            <label className="shrink-0 cursor-pointer rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-xs font-semibold text-dark-black hover:bg-neutral-50">
+                            {/* `relative` keeps the sr-only input inside the label —
+                                see the gallery's Upload in ImageField. */}
+                            <label className="relative shrink-0 cursor-pointer rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-xs font-semibold text-dark-black hover:bg-neutral-50">
                               {busyCell === `${index}-${column.key}` ? "Uploading…" : "Upload"}
                               <input
                                 type="file"

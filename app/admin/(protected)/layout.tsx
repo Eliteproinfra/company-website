@@ -100,8 +100,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
      * in-page anchor, the browser restoring a position on Back — slid the whole
      * shell up and showed blank space under it. Out of flow, there is nothing
      * for the document to scroll.
+     *
+     * `overflow-clip`, not `overflow-hidden`: a hidden box is still a scroll
+     * container, so focusing anything positioned past its edge scrolled the
+     * shell itself and blanked the panel (the Upload buttons did exactly
+     * this). A clipped box cannot be scrolled at all.
      */
-    <div className="fixed inset-0 flex h-screen overflow-hidden bg-neutral-100 supports-[height:100dvh]:h-dvh">
+    <div className="fixed inset-0 flex h-screen overflow-clip bg-neutral-100 supports-[height:100dvh]:h-dvh">
       <aside className="hidden h-full w-64 shrink-0 flex-col bg-dark-black lg:flex">
         <div className="shrink-0 border-b border-white/10 px-6 py-5">
           <Link href="/admin" className="block">
