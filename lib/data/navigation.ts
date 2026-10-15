@@ -11,16 +11,16 @@ export const navItems: NavItem[] = [
     children: [
       { label: "Our Story & Journey", href: "/about" },
       { label: "Leadership", href: "/leadership" },
-      { label: "Social Commitment (CSR)", href: "/social-commitment" },
-      {
-        label: "Our Management",
-        href: "/about/sales-portfolio-management",
-        children: [
-          { label: "Sales Portfolio management", href: "/about/sales-portfolio-management" },
-          { label: "Leasing Portfolio management", href: "/about/leasing-portfolio-management" },
-          { label: "CRM & Marketing", href: "/about/crm-marketing" },
-        ],
-      },
+      // { label: "Social Commitment (CSR)", href: "/social-commitment" },
+      // {
+      //   label: "Our Management",
+      //   href: "/about/sales-portfolio-management",
+      //   children: [
+      //     { label: "Sales Portfolio management", href: "/about/sales-portfolio-management" },
+      //     { label: "Leasing Portfolio management", href: "/about/leasing-portfolio-management" },
+      //     { label: "CRM & Marketing", href: "/about/crm-marketing" },
+      //   ],
+      // },
     ],
   },
   {
