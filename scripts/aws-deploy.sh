@@ -186,6 +186,14 @@ if [ "$OK" -ne 1 ]; then
   fail "health check did not pass for $SHORT"
 fi
 
+# The image optimizer keeps its output in .next/cache/images, which lives in
+# shared/next-cache and so outlives the release. An image replaced under the
+# same filename would keep serving its old optimized copy until the TTL ran
+# out. Cleared only after the new release is serving, so the old one cannot
+# refill it with its own copies of the images.
+step "Clearing the optimized image cache"
+rm -rf "$APP_ROOT/shared/next-cache/images"
+
 # ------------------------------------------------------------------- prune
 step "Pruning old releases (keeping $KEEP_RELEASES)"
 CURRENT_REAL="$(readlink -f "$APP_ROOT/current")"
