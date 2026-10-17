@@ -42,7 +42,7 @@ export default function LeadershipPage() {
             <div className="mt-8 border-l-4 border-leader-gold bg-leader-quote p-8 text-left shadow-card-lg">
               <p className="text-muted-2">
                 Real estate is not just about bricks and mortar; it is about dreams, aspirations, and
-                legacy. At Elite Pro Infra, we don&apos;t just facilitate transactions; we build
+                legacy. At Elite Pro Infra, we don&apos;t just show properties; we build
                 enduring relationships founded on transparency, integrity, and deep market
                 intelligence.
               </p>

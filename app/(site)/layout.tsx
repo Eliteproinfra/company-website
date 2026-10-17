@@ -1,6 +1,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import EnquiryPopup from "@/components/layout/EnquiryPopup";
+import MetaPixel from "@/components/layout/MetaPixel";
 
 const siteDescription =
   "Elite Pro Infraventure is a premier real estate consultancy firm dedicated to providing exceptional service and expertise in the property market.";
@@ -54,6 +55,7 @@ export default function SiteLayout({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
+      <MetaPixel />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary-gold focus:px-4 focus:py-2 focus:font-semibold focus:text-dark-black"

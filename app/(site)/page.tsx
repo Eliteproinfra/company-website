@@ -25,7 +25,6 @@ import { partners } from "@/lib/data/partners";
 import { presenceBanners } from "@/lib/data/presence";
 
 import { reviews, googleRating } from "@/lib/data/reviews";
-import { socialLinks } from "@/lib/data/social";
 import { homeFaqs } from "@/lib/data/faq";
 import { whyChooseStats, transactionStats } from "@/lib/data/stats";
 
@@ -37,21 +36,6 @@ const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 /** Half of a `.container` two-column `lg:grid-cols-2` row with `gap-12` (48px). */
 const HALF_ROW_LG_SIZES =
   "(max-width: 575px) 100vw, (max-width: 767px) 492px, (max-width: 991px) 672px, (max-width: 1199px) 432px, (max-width: 1399px) 522px, 612px";
-
-const contactDetails = [
-  { icon: "fas fa-phone", title: "Call Us", value: "+91 9968686868", href: "tel:+919968686868" },
-  {
-    icon: "fas fa-envelope",
-    title: "Email Us",
-    value: "info@eliteproinfra.com",
-    href: "mailto:info@eliteproinfra.com",
-  },
-  {
-    icon: "fas fa-map-marker-alt",
-    title: "Visit Us",
-    value: "3rd Floor, Golf View Corporate Tower A, Golf Course Road, Sector 42, Gurgaon 122002",
-  },
-];
 
 /*
  * Section backgrounds follow the live index.php top to bottom (values from its style.css
@@ -101,7 +85,7 @@ export default async function Home() {
               </h2>
               <div className="mt-5 space-y-4 text-muted">
                 <p>
-                  At ElitePro Infra, we believe real estate is more than just transaction it&rsquo;s
+                  At ElitePro Infra, we believe real estate is more than just buying and selling it&rsquo;s
                   about building wealth, elevating lifestyles, and creating enduring value.
                 </p>
                 <p>
@@ -261,7 +245,9 @@ export default async function Home() {
             title="Elite Developer Partners"
             description="Collaborating with the industry's finest A+ developers"
           />
-          <PartnersMarquee partners={partners} />
+          {/* Vatika stays in `partners` so its listings still match a developer
+              on /properties; it is only left out of the homepage logo strip. */}
+          <PartnersMarquee partners={partners.filter((partner) => partner.name !== "Vatika")} />
         </div>
       </section>
 
@@ -415,74 +401,37 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Contact CTA — live `#contact`: dark gradient section, frosted rgba(255,255,255,.03)
-          panel, gold-gradient info side with white icon circles, white form side. */}
+      {/* Contact CTA — a single centred form card on the dark gradient: gold hairline
+          border, soft gold glows behind it, and dark glass inputs (see HomeEnquiryForm). */}
       <section className="relative overflow-hidden bg-dark-gradient py-20 text-white">
-        <i
-          className="far fa-building absolute right-0 top-0 hidden p-12 text-[10em] text-white opacity-10 lg:block"
+        <div
+          className="pointer-events-none absolute -left-32 top-10 h-80 w-80 rounded-full bg-primary-gold/20 blur-[120px]"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-primary-gold/15 blur-[120px]"
           aria-hidden="true"
         />
         <div className="container relative z-[1]">
-          <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] shadow-bs-lg backdrop-blur-[10px] lg:grid-cols-12">
-            <div className="relative overflow-hidden bg-primary-gold p-12 text-white lg:col-span-5">
-              <div className="absolute inset-0 bg-gold-panel" aria-hidden="true" />
+          <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-br from-primary-gold/70 via-white/10 to-primary-gold/40 p-px shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
+            <div className="relative overflow-hidden rounded-3xl bg-[#111111]/95 px-6 py-10 backdrop-blur-[10px] sm:px-10 lg:px-14 lg:py-14">
               <i
-                className="fas fa-comments absolute bottom-0 right-0 translate-x-[20%] translate-y-[20%] text-[10em] text-white opacity-25"
+                className="fas fa-paper-plane pointer-events-none absolute -right-6 -top-6 rotate-12 text-[9em] text-primary-gold opacity-[0.06]"
                 aria-hidden="true"
               />
-              <div className="relative z-[1] flex h-full flex-col justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-white">Get in Touch</h2>
-                  <p className="mt-4 opacity-90">
-                    Ready to start your real estate journey? Our team of experts is here to guide
-                    you through every step.
-                  </p>
-                  <ul className="mt-10 space-y-6">
-                    {contactDetails.map((detail) => (
-                      <li key={detail.title} className="flex items-start gap-3">
-                        <span className="flex h-[45px] w-[45px] shrink-0 items-center justify-center rounded-full bg-white text-primary-gold shadow-bs-sm">
-                          <i className={detail.icon} aria-hidden="true" />
-                        </span>
-                        <div>
-                          <p className="font-bold text-white">{detail.title}</p>
-                          {detail.href ? (
-                            <a href={detail.href} className="text-sm text-white opacity-90">
-                              {detail.value}
-                            </a>
-                          ) : (
-                            <p className="text-sm opacity-90">{detail.value}</p>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-10 border-t border-white/20 pt-6">
-                  <h3 className="mb-3 text-sm font-bold uppercase tracking-[2px] text-white">
-                    Follow Us
-                  </h3>
-                  <div className="flex gap-4">
-                    {socialLinks.map((social) => (
-                      <a
-                        key={social.label}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={social.label}
-                        className="text-lg text-white transition-transform hover:scale-110"
-                      >
-                        <i className={social.icon} aria-hidden="true" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
+              <div className="relative text-center">
+                <p className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[4px] text-primary-gold">
+                  <span className="h-px w-8 bg-primary-gold" aria-hidden="true" />
+                  Let&apos;s Talk
+                  <span className="h-px w-8 bg-primary-gold" aria-hidden="true" />
+                </p>
+                <h3 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
+                  Send us a <span className="text-primary-gold">Message</span>
+                </h3>
+                <p className="mx-auto mt-3 max-w-xl text-white/60">
+                  Fill out the form below and we&apos;ll get back to you shortly.
+                </p>
               </div>
-            </div>
-            <div className="bg-white p-10 text-dark-black lg:col-span-7 lg:p-12">
-              <h3 className="text-2xl font-bold text-dark-black">Send us a Message</h3>
-              <p className="mt-2 text-bs-muted">
-                Fill out the form below and we&apos;ll get back to you shortly.
-              </p>
               <HomeEnquiryForm />
             </div>
           </div>

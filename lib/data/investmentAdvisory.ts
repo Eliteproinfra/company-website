@@ -36,7 +36,7 @@ export const investmentServices: IconTextItem[] = [
     icon: "fas fa-earth-asia",
     title: "NRI Advisory",
     description:
-      "Specialized services for Non-Resident Indians looking to invest in the Indian real estate market, ensuring compliance and seamless transactions.",
+      "Specialized services for Non-Resident Indians looking to invest in the Indian real estate market, ensuring compliance and a seamless experience.",
   },
   {
     icon: "fas fa-calculator",
@@ -47,8 +47,8 @@ export const investmentServices: IconTextItem[] = [
 ];
 
 export const investmentStats: Stat[] = [
-  { value: "500+", label: "Transactions Closed" },
-  { value: "₹200 Cr+", label: "Value Transacted" },
+  { value: "500+", label: "Investors Advised" },
+  { value: "₹200 Cr+", label: "Investments Guided" },
   { value: "150+", label: "Corporate Clients" },
   { value: "15+", label: "Years Experience" },
 ];
@@ -70,12 +70,12 @@ export const investmentProcess: ProcessStepItem[] = [
     number: "03",
     title: "Negotiation & Due Diligence",
     description:
-      "Our experts handle the negotiation process to secure the best terms. We coordinate all aspects of due diligence, legal review, and compliance to ensure a smooth transaction.",
+      "Our experts handle the negotiation process to secure the best terms. We coordinate all aspects of due diligence, legal review, and compliance to ensure a smooth process.",
   },
   {
     number: "04",
-    title: "Execution & Post-Transaction Support",
+    title: "Execution & Post-Purchase Support",
     description:
-      "We ensure a seamless closing process. Beyond the transaction, we offer ongoing asset management support and strategic advice for future growth or exit.",
+      "We ensure a seamless closing process. Beyond the purchase, we offer ongoing asset management support and strategic advice for future growth or exit.",
   },
 ];

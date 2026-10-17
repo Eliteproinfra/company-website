@@ -10,8 +10,21 @@ import {
 } from "@/lib/data/countryCodes";
 import { submitEnquiry, submitErrorMessage } from "@/lib/forms/submitEnquiry";
 
+// Dark glass fields for the homepage's dark contact card; focus lights a gold ring.
 const inputClass =
-  "rounded-md border-0 bg-bs-light px-3 py-3.5 text-bs-dark placeholder:text-bs-muted focus:outline-none";
+  "rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-white placeholder:text-white/40 transition-all duration-200 hover:border-white/20 focus:border-primary-gold focus:bg-white/[0.07] focus:shadow-[0_0_0_4px_rgba(212,175,55,0.15)] focus:outline-none [&>option]:bg-[#111111] [&>option]:text-white";
+
+/** Positions a gold icon inside a field; the field itself needs `pl-11`. */
+function FieldIcon({ icon, top = false }: { icon: string; top?: boolean }) {
+  return (
+    <i
+      className={`${icon} pointer-events-none absolute left-4 text-sm text-primary-gold/80 ${
+        top ? "top-[1.15rem]" : "top-1/2 -translate-y-1/2"
+      }`}
+      aria-hidden="true"
+    />
+  );
+}
 
 const MESSAGE_WORD_LIMIT = 500;
 
@@ -40,12 +53,12 @@ export default function HomeEnquiryForm() {
 
   if (status === "success") {
     return (
-      <div className="mt-6 rounded-lg border border-primary-gold/30 bg-primary-gold/5 p-8 text-center">
+      <div className="relative mt-10 rounded-2xl border border-primary-gold/30 bg-primary-gold/5 p-8 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-gold/10 text-xl text-primary-gold">
           <i className="fas fa-check" aria-hidden="true" />
         </div>
-        <h4 className="mt-4 font-bold text-dark-black">Thank you for reaching out</h4>
-        <p className="mt-2 text-sm text-muted">
+        <h4 className="mt-4 font-bold text-white">Thank you for reaching out</h4>
+        <p className="mt-2 text-sm text-white/60">
           We&apos;ve received your enquiry and will get back to you shortly.
         </p>
         <button
@@ -102,30 +115,36 @@ export default function HomeEnquiryForm() {
           setErrorMessage(submitErrorMessage(error));
         }
       }}
-      className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2"
+      className="relative mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2"
     >
-      <label htmlFor="home-name" className="sr-only">
-        Your Name
-      </label>
-      <input
-        id="home-name"
-        name="name"
-        type="text"
-        placeholder="Your Name"
-        required
-        className={inputClass}
-      />
-      <label htmlFor="home-email" className="sr-only">
-        Your Email
-      </label>
-      <input
-        id="home-email"
-        name="email"
-        type="email"
-        placeholder="Your Email"
-        required
-        className={inputClass}
-      />
+      <div className="relative">
+        <label htmlFor="home-name" className="sr-only">
+          Your Name
+        </label>
+        <FieldIcon icon="fas fa-user" />
+        <input
+          id="home-name"
+          name="name"
+          type="text"
+          placeholder="Your Name"
+          required
+          className={`${inputClass} w-full pl-11`}
+        />
+      </div>
+      <div className="relative">
+        <label htmlFor="home-email" className="sr-only">
+          Your Email
+        </label>
+        <FieldIcon icon="fas fa-envelope" />
+        <input
+          id="home-email"
+          name="email"
+          type="email"
+          placeholder="Your Email"
+          required
+          className={`${inputClass} w-full pl-11`}
+        />
+      </div>
       <div>
         <div className="flex gap-2">
           <label htmlFor="home-country" className="sr-only">
@@ -150,58 +169,65 @@ export default function HomeEnquiryForm() {
           <label htmlFor="home-phone" className="sr-only">
             Phone Number
           </label>
-          <input
-            id="home-phone"
-            name="phone"
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            placeholder="Phone Number"
-            required
-            value={phone}
-            onChange={(event) => {
-              setPhone(toPhoneDigits(event.target.value));
-              if (phoneError) setPhoneError("");
-            }}
-            onBlur={(event) => {
-              const value = event.target.value.trim();
-              if (!value) return;
-              const check = validatePhoneNumber(country, value);
-              setPhoneError(check.ok ? "" : check.error);
-            }}
-            aria-invalid={phoneError ? true : undefined}
-            aria-describedby={phoneError ? "home-phone-error" : undefined}
-            className={`${inputClass} min-w-0 flex-1`}
-          />
+          <div className="relative min-w-0 flex-1">
+            <FieldIcon icon="fas fa-phone" />
+            <input
+              id="home-phone"
+              name="phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              placeholder="Phone Number"
+              required
+              value={phone}
+              onChange={(event) => {
+                setPhone(toPhoneDigits(event.target.value));
+                if (phoneError) setPhoneError("");
+              }}
+              onBlur={(event) => {
+                const value = event.target.value.trim();
+                if (!value) return;
+                const check = validatePhoneNumber(country, value);
+                setPhoneError(check.ok ? "" : check.error);
+              }}
+              aria-invalid={phoneError ? true : undefined}
+              aria-describedby={phoneError ? "home-phone-error" : undefined}
+              className={`${inputClass} w-full pl-11`}
+            />
+          </div>
         </div>
         {phoneError ? (
-          <p id="home-phone-error" role="alert" className="mt-1.5 text-sm font-semibold text-red-600">
+          <p id="home-phone-error" role="alert" className="mt-1.5 text-sm font-semibold text-red-400">
             {phoneError}
           </p>
         ) : null}
       </div>
-      <label htmlFor="home-interest" className="sr-only">
-        Interested In
-      </label>
-      <select
-        id="home-interest"
-        name="interest"
-        defaultValue=""
-        required
-        className={`${inputClass} text-bs-muted`}
-      >
-        <option value="" disabled>
-          Select Interest
-        </option>
-        <option value="residential">Residential</option>
-        <option value="commercial">Commercial</option>
-        <option value="investment">Investment</option>
-        <option value="consulting">Consulting</option>
-      </select>
-      <div className="sm:col-span-2">
+      <div className="relative self-start">
+        <label htmlFor="home-interest" className="sr-only">
+          Interested In
+        </label>
+        <FieldIcon icon="fas fa-building" />
+        <select
+          id="home-interest"
+          name="interest"
+          defaultValue=""
+          required
+          className={`${inputClass} w-full pl-11 invalid:text-white/40`}
+        >
+          <option value="" disabled>
+            Select Interest
+          </option>
+          <option value="residential">Residential</option>
+          <option value="commercial">Commercial</option>
+          <option value="investment">Investment</option>
+          <option value="consulting">Consulting</option>
+        </select>
+      </div>
+      <div className="relative sm:col-span-2">
         <label htmlFor="home-message" className="sr-only">
           Your Message
         </label>
+        <FieldIcon icon="fas fa-comment-dots" top />
         <textarea
           id="home-message"
           name="message"
@@ -211,13 +237,13 @@ export default function HomeEnquiryForm() {
           onChange={(event) => setMessage(event.target.value)}
           aria-invalid={messageTooLong ? true : undefined}
           aria-describedby="home-message-count"
-          className={`w-full ${inputClass}`}
+          className={`${inputClass} block w-full resize-none pl-11`}
         />
         <p
           id="home-message-count"
           aria-live="polite"
           className={`mt-1.5 text-right text-sm ${
-            messageTooLong ? "font-semibold text-red-600" : "text-muted"
+            messageTooLong ? "font-semibold text-red-400" : "text-white/40"
           }`}
         >
           {messageTooLong
@@ -226,14 +252,14 @@ export default function HomeEnquiryForm() {
         </p>
       </div>
       {status === "error" ? (
-        <p role="alert" className="sm:col-span-2 text-sm font-semibold text-red-600">
+        <p role="alert" className="sm:col-span-2 text-sm font-semibold text-red-400">
           {errorMessage}
         </p>
       ) : null}
       <Button
         type="submit"
         iconRight="fas fa-paper-plane"
-        className="sm:col-span-2"
+        className="mx-auto w-full sm:col-span-2 sm:w-auto sm:min-w-[280px]"
         disabled={status === "submitting" || messageTooLong}
       >
         {status === "submitting" ? "Sending…" : "Send Enquiry"}

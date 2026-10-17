@@ -14,7 +14,7 @@ export const presenceBanners: PresenceBanner[] = [
     image: "/images/presence/presence-india.webp",
     alt:
       "Night map of India marking ElitePro Infra's Gurugram head office and its " +
-      "offices in Sonipat, Noida and Goa.",
+      "offices in Panipat, Noida and Goa.",
     title: "Pan-India Presence",
     description:
       "We actively operate across 20+ major cities in India, supported by a strong regional " +
@@ -23,8 +23,8 @@ export const presenceBanners: PresenceBanner[] = [
   {
     image: "/images/presence/presence-world.webp",
     alt:
-      "Night map of the world marking ElitePro Infra's three markets — India, Dubai and " +
-      "Singapore — joined by flight paths.",
+      "Night map of the world marking ElitePro Infra's two markets, India and Dubai, " +
+      "joined by a flight path.",
     title: "Global Presence",
     description:
       "Our footprint extends across key international markets, enabling us to serve global " +

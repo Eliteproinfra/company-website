@@ -12,12 +12,12 @@ export const whyChooseStats: Stat[] = [
   { icon: "fas fa-file-signature", value: "100%", label: "Transparent Deals" },
 ];
 
-// Homepage "Transaction Stats" banner
+// Homepage stats banner
 export const transactionStats: Stat[] = [
-  { value: "38,750+", label: "Transactions" },
-  { value: "1 Lakh CR+", label: "Worth Property Sold" },
+  { value: "38,750+", label: "Clients Advised" },
+  { value: "1 Lakh CR+", label: "Property Value Guided" },
   { value: "150+", label: "Projects Onboard" },
-  { value: "55 Million", label: "sq.ft. Area Sold" },
+  { value: "55 Million", label: "sq.ft. Area Advised" },
 ];
 
 // Leadership page team stats

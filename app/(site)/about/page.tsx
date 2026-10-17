@@ -7,7 +7,7 @@ import VisionMissionCard from "@/components/about/VisionMissionCard";
 import AboutHero from "@/components/about/AboutHero";
 import EssenceCard from "@/components/about/EssenceCard";
 import JourneyTimeline from "@/components/about/JourneyTimeline";
-import { leaders } from "@/lib/data/leadership";
+import OurStory from "@/components/about/OurStory";
 
 export const metadata: Metadata = {
   title: "Our Story & Journey",
@@ -71,7 +71,7 @@ const timeline = [
     icon: "fas fa-building",
     title: "14 Years of Excellence. One Trusted Name.",
     description:
-      "From a single vision to a global presence, we’ve delivered thousands of successful transactions and ₹1 Lakh Cr+ in property value. We build lasting relationships and create real wealth.",
+      "From a single vision to a global presence, we’ve guided thousands of clients and ₹1 Lakh Cr+ in property value. We build lasting relationships and create real wealth.",
   },
 ];
 
@@ -96,7 +96,7 @@ const coreValues = [
   {
     icon: "fas fa-shield-halved",
     title: "Integrity",
-    description: "We uphold the highest standards of honesty in every transaction.",
+    description: "We uphold the highest standards of honesty in every client interaction.",
   },
   {
     icon: "fas fa-award",
@@ -137,7 +137,7 @@ export default function AboutPage() {
               More Than Just Real Estate
             </h2>
             <p className="mt-5 text-muted">
-              We believe that every property transaction is the beginning of a new chapter. Our
+              We believe that every property decision is the beginning of a new chapter. Our
               story is written in the satisfaction of our clients and the skylines we help shape.
             </p>
             <p className="mt-4 text-muted">
@@ -183,45 +183,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Leadership */}
-      <section className="bg-white py-20">
-        <div className="container">
-          <SectionHeading eyebrow="Our Leadership" title="The Force Behind The Vision" />
-          <div className="space-y-16">
-            {leaders.map((leader, index) => (
-              <Reveal
-                key={leader.name}
-                direction={index % 2 === 0 ? "right" : "left"}
-                className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12"
-              >
-                <div
-                  className={`relative h-[380px] overflow-hidden rounded-[10px] bg-copyright-bg shadow-[0_10px_30px_rgba(0,0,0,0.1)] lg:col-span-5 ${
-                    index % 2 === 1 ? "lg:order-2" : ""
-                  }`}
-                >
-                  <Image
-                    src={leader.photo}
-                    alt={leader.name}
-                    fill
-                    sizes="(min-width: 992px) 40vw, 100vw"
-                    className="object-cover object-top"
-                  />
-                </div>
-                <div className="lg:col-span-7">
-                  <h3 className="text-3xl font-bold text-bs-dark sm:text-4xl lg:text-[3rem]">{leader.name}</h3>
-                  <div className="mb-3 mt-2 h-1 w-20 bg-primary-gold" />
-                  <p className="font-semibold text-dark-black">{leader.title}</p>
-                  {(leader.storyBio ?? [leader.bio]).map((paragraph) => (
-                    <p key={paragraph.slice(0, 40)} className="mt-4 text-dark-black">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Our Story & Journey — replaces the old leadership block */}
+      <OurStory />
 
       {/* Core Values — live `.value-card.bg-light.rounded-3.shadow-sm.border.transition-hover` */}
       <section className="bg-white py-20">

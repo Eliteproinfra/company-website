@@ -75,6 +75,11 @@ const contactItems = [
     href: "https://maps.app.goo.gl/Urz5goXdpGSANVGi6",
     label: "3rd Floor, Golf View Corporate Tower A, Golf Course Road, Sector 42, Gurgaon 122002",
   },
+  {
+    icon: "fas fa-map-marker-alt",
+    href: "https://maps.app.goo.gl/zz1A7LMtp39ohTDd6",
+    label: "7th Floor, M3M Urbana Premium , Golf Course Extension Road, Sector 66, Gurgaon 122102",
+  },
   { icon: "fas fa-phone", href: "tel:+919968686868", label: "+91 9968686868" },
   { icon: "fas fa-envelope", href: "mailto:info@eliteproinfra.com", label: "info@eliteproinfra.com" },
   { icon: "fas fa-globe", href: "https://www.eliteproinfra.com", label: "www.eliteproinfra.com" },

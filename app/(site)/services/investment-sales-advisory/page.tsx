@@ -16,7 +16,7 @@ import {
 export const metadata: Metadata = {
   title: "Investment Sales Advisory",
   description:
-    "Maximizing Value. Minimizing Risk. Data-driven strategies and expert guidance to help you navigate complex real estate transactions with confidence.",
+    "Maximizing Value. Minimizing Risk. Data-driven strategies and expert guidance to help you navigate complex real estate decisions with confidence.",
 };
 
 const serviceDelays = [0, 100, 200, 300, 400, 500] as const;
@@ -34,7 +34,7 @@ export default function InvestmentSalesAdvisoryPage() {
             Minimizing Risk.
           </>
         }
-        description="Data-driven strategies and expert guidance to help you navigate complex real estate transactions with confidence."
+        description="Data-driven strategies and expert guidance to help you navigate complex real estate decisions with confidence."
         primaryCta={{ label: "Schedule Consultation", href: "#consultation" }}
         secondaryCta={{ label: "Explore Services", href: "#services" }}
         overlay="bg-linear-to-r from-black/80 to-black/40"
