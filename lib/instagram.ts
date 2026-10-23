@@ -32,6 +32,9 @@ const PERMALINK_HOSTS = ["instagram.com"];
 const THUMBNAIL_HOSTS = ["cdninstagram.com", "fbcdn.net", "instagram.com"];
 
 const MAX_CAPTION_LENGTH = 200;
+/** Leading caption characters that must match for two posts to count as one
+ *  re-uploaded reel. Long enough that distinct reels never collide. */
+const CAPTION_MATCH_LENGTH = 100;
 
 export type InstagramFeedStatus =
   /** Fresh data from the API. */
@@ -112,6 +115,16 @@ function parseHttpsUrl(value: unknown, hosts: string[]): string | null {
   return allowed ? url.toString() : null;
 }
 
+/** Instagram CDN URLs are signed, with the expiry as hex Unix seconds in `oe`.
+ *  Past it the CDN answers 403, so a cached feed outliving its URLs must not
+ *  be rendered as broken images. URLs without `oe` are assumed fine. */
+function isSignedUrlExpired(value: string | null): boolean {
+  if (!value) return false;
+  const oe = new URL(value).searchParams.get("oe");
+  if (!oe || !/^[0-9a-f]+$/i.test(oe)) return false;
+  return Number.parseInt(oe, 16) * 1000 <= Date.now();
+}
+
 function sanitizeCaption(value: unknown): string | null {
   if (typeof value !== "string") return null;
   // Collapse newlines/runs of whitespace and drop control characters, so a
@@ -164,11 +177,12 @@ function normalize(raw: unknown): InstagramReel[] {
     // The poster frame is mandatory: it renders first, it is what a card falls
     // back to, and it keeps the section useful even with no playable video.
     const thumbnailUrl = parseHttpsUrl(entry.thumbnail_url, THUMBNAIL_HOSTS);
-    if (!thumbnailUrl) continue;
+    if (!thumbnailUrl || isSignedUrlExpired(thumbnailUrl)) continue;
 
     // `media_url` on a VIDEO is a direct MP4. Optional by design — a card with
     // no usable video stays on its poster frame instead of being dropped.
-    const videoUrl = parseHttpsUrl(entry.media_url, THUMBNAIL_HOSTS);
+    const mediaUrl = parseHttpsUrl(entry.media_url, THUMBNAIL_HOSTS);
+    const videoUrl = isSignedUrlExpired(mediaUrl) ? null : mediaUrl;
 
     const { label, time } = formatPostedOn(entry.timestamp);
     seen.add(id);
@@ -186,7 +200,22 @@ function normalize(raw: unknown): InstagramReel[] {
     });
   }
 
-  return withTime.sort((a, b) => b.time - a.time).map((entry) => entry.reel);
+  // A reel re-uploaded (say, to fix a typo in the video) comes back as a new
+  // post with its own id and permalink, so the id check above misses it. Same
+  // caption opening = same reel for display purposes; keep the newest upload.
+  // Only the opening is compared because a re-upload often gains or loses a
+  // trailing tag line ("[ Experion 88 A, Investment, … ]").
+  const seenCaptions = new Set<string>();
+  return withTime
+    .sort((a, b) => b.time - a.time)
+    .map((entry) => entry.reel)
+    .filter((reel) => {
+      if (!reel.caption) return true;
+      const key = reel.caption.toLowerCase().slice(0, CAPTION_MATCH_LENGTH);
+      if (seenCaptions.has(key)) return false;
+      seenCaptions.add(key);
+      return true;
+    });
 }
 
 /** Resolves the API promise, or rejects once REQUEST_TIMEOUT_MS is up, so a
@@ -337,6 +366,15 @@ export async function getLatestInstagramReels(limit = 3): Promise<InstagramFeedR
 
     const items = normalize(data).slice(0, limit);
     if (items.length === 0) {
+      // Media came back but every URL had expired: Next's fetch cache is still
+      // serving a response the API can no longer refresh, almost always
+      // because the token died. Say so instead of reporting an empty account.
+      if (Array.isArray(data) && data.length > 0) {
+        console.warn(
+          "[instagram] cached feed has only expired CDN URLs and could not be refreshed — check the access token (an expired one must be regenerated in the Meta App Dashboard)."
+        );
+        return { items: [], status: "auth-error" };
+      }
       return { items: [], status: "empty" };
     }
 
@@ -352,8 +390,9 @@ export async function getLatestInstagramReels(limit = 3): Promise<InstagramFeedR
       `[instagram] ${describe(status)}`,
       error instanceof Error ? error.message : error
     );
-    if (lastGoodFeed?.length) {
-      return { items: lastGoodFeed.slice(0, limit), status: "stale" };
+    const stillServable = lastGoodFeed?.filter((reel) => !isSignedUrlExpired(reel.thumbnailUrl));
+    if (stillServable?.length) {
+      return { items: stillServable.slice(0, limit), status: "stale" };
     }
     return { items: [], status };
   }

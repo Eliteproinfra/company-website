@@ -322,6 +322,28 @@ sudo -u elite -H pm2 reload eliteproinfra --update-env
 sudo /var/www/eliteproinfra/shared/aws-restore.sh --uploads backups/2026/10/uploads-….tar.gz
 ```
 
+### Instagram token
+
+Refreshed weekly (Monday 03:15 IST) by `elitepro-instagram-token.timer`, which
+runs `shared/aws-instagram-token.sh`: Parameter Store → refresh → verify →
+Parameter Store → `render-env.sh` → PM2 reload. Each run publishes
+`ElitePro/Website InstagramTokenRefreshOk` (1/0); the
+`elitepro-web-instagram-token` alarm fires on a 0.
+
+A token can only be refreshed while still valid. If it lapses anyway, generate a
+new one in the Meta App Dashboard (Instagram → API setup with Instagram login →
+Generate token), `put-parameter` it as in §5, render and reload.
+
+The script and units are **root-owned and installed by hand**, not by the
+deploy (which runs as `elite`). After changing them:
+```bash
+sudo install -o root -g root -m 750 scripts/aws-instagram-token.sh /var/www/eliteproinfra/shared/
+sudo install -o root -g root -m 644 deploy/elitepro-instagram-token.{service,timer} /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now elitepro-instagram-token.timer
+sudo systemctl start elitepro-instagram-token.service   # run now
+journalctl -u elitepro-instagram-token.service -n 20
+```
+
 ### Full rebuild from nothing
 
 1. Launch a t3.medium Ubuntu 24.04 instance with `elitepro-web-prod-instance-role`.

@@ -1,0 +1,13 @@
+[Unit]
+Description=Refresh the Elite Pro website Instagram token weekly
+
+[Timer]
+# Tokens live 60 days; weekly leaves ~8 retries before one can lapse.
+# Monday 03:15 IST, after the 02:30 backup.
+OnCalendar=Mon *-*-* 03:15:00
+# If the instance was off, run as soon as it is back.
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

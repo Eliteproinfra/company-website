@@ -60,6 +60,9 @@ endpoint.searchParams.set("access_token", token);
 const response = await fetch(endpoint, { headers: { accept: "application/json" } });
 const body = await response.text();
 
+// Exit by setting exitCode and letting the script end, not process.exit():
+// exiting while fetch's handles are still closing trips a libuv assertion on
+// Windows ("!(handle->flags & UV_HANDLE_CLOSING)").
 if (!response.ok) {
   let message = `HTTP ${response.status}`;
   try {
@@ -73,15 +76,15 @@ if (!response.ok) {
     "\nIf the token has already expired, generate a new one in the Meta app dashboard:\n" +
       "  developers.facebook.com > your app > Instagram > API setup with Instagram login > Generate token"
   );
-  process.exit(1);
+  process.exitCode = 1;
+} else {
+  const { access_token: newToken, expires_in: expiresIn } = JSON.parse(body);
+  const days = Math.round((expiresIn ?? 0) / 86400);
+
+  console.log(`New token valid for ~${days} days:\n`);
+  console.log(newToken);
+  console.log(
+    "\nPaste it into INSTAGRAM_ACCESS_TOKEN in .env.local here AND on the server\n" +
+      "(then `pm2 restart` / redeploy so the running process picks it up)."
+  );
 }
-
-const { access_token: newToken, expires_in: expiresIn } = JSON.parse(body);
-const days = Math.round((expiresIn ?? 0) / 86400);
-
-console.log(`New token valid for ~${days} days:\n`);
-console.log(newToken);
-console.log(
-  "\nPaste it into INSTAGRAM_ACCESS_TOKEN in .env.local here AND on the server\n" +
-    "(then `pm2 restart` / redeploy so the running process picks it up)."
-);

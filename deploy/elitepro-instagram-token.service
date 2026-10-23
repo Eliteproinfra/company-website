@@ -1,0 +1,10 @@
+[Unit]
+Description=Elite Pro website Instagram token refresh (Parameter Store -> .env.local)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/var/www/eliteproinfra/shared/aws-instagram-token.sh
+TimeoutStartSec=300
