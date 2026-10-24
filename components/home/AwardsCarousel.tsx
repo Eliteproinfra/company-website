@@ -60,7 +60,7 @@ export default function AwardsCarousel({ awards }: { awards: Award[] }) {
           >
             <Image
               src={image}
-              alt={caption || "Elite Pro Infraventure award recognition"}
+              alt={caption || "ElitePro Infra award recognition"}
               width={400}
               height={400}
               sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"

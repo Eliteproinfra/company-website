@@ -6,7 +6,7 @@ import { getTeam } from "@/lib/content/teams";
 
 export const metadata: Metadata = {
   title: "Sales Portfolio Management",
-  description: "Meet Our Champions — the dedicated sales professionals behind Elite Pro Infraventure's record-breaking sales.",
+  description: "Meet Our Champions — the dedicated sales professionals behind ElitePro Infra's record-breaking sales.",
 };
 
 export default async function SalesPortfolioManagementPage() {

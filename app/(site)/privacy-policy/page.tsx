@@ -3,7 +3,7 @@ import PageHero from "@/components/ui/PageHero";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How Elite Pro Infraventure collects, uses, and protects your information.",
+  description: "How ElitePro Infra collects, uses, and protects your information.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
         <div className="container">
           <div className="mx-auto max-w-4xl rounded-md bg-white p-6 text-bs-muted shadow-bs-sm lg:p-12">
             <p>
-              This Privacy Policy explains how Elite Pro Infraventure collects, uses, and protects
+              This Privacy Policy explains how ElitePro Infra collects, uses, and protects
               information when you use our website and services.
             </p>
 

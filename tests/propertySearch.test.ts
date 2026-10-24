@@ -9,8 +9,42 @@
  */
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { stageFromText } from "@/lib/data/categories";
 import { localitiesInText } from "@/lib/data/localities";
 import { parseBudget, priceInRupees } from "@/lib/price";
+
+describe("stageFromText", () => {
+  const now = new Date(2026, 9, 24);
+
+  it("reads the stage the admin's Status names", () => {
+    assert.equal(stageFromText("Ready To Move", now), "ready-to-move");
+    assert.equal(stageFromText("Under Construction", now), "under-construction");
+    assert.equal(stageFromText("New Launch", now), "new-launch");
+    assert.equal(stageFromText("Pre-Launch", now), "new-launch");
+    assert.equal(stageFromText("Nearing Possession", now), "nearing-possession");
+  });
+
+  it("calls a possession date within a year Nearing Possession", () => {
+    assert.equal(stageFromText("Under Construction Dec 2026", now), "nearing-possession");
+    assert.equal(stageFromText("Possession: March, 2027", now), "nearing-possession");
+    assert.equal(stageFromText("Q3 2027", now), "nearing-possession");
+  });
+
+  it("calls a later possession date Under Construction", () => {
+    assert.equal(stageFromText("Under Construction Dec 2027", now), "under-construction");
+    assert.equal(stageFromText("Possession 2029", now), "under-construction");
+  });
+
+  it("lets a past possession date fall back to the Status", () => {
+    assert.equal(stageFromText("Under Construction Jan 2025", now), "under-construction");
+    assert.equal(stageFromText("Jan 2025", now), undefined);
+  });
+
+  it("has no stage for a blank Status", () => {
+    assert.equal(stageFromText("", now), undefined);
+    assert.equal(stageFromText(undefined, now), undefined);
+  });
+});
 
 describe("priceInRupees", () => {
   it("reads crore and lakh in the spellings the catalogue uses", () => {

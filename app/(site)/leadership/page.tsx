@@ -8,7 +8,7 @@ import { leadershipStats } from "@/lib/data/stats";
 export const metadata: Metadata = {
   title: "Leadership",
   description:
-    "Architects of Trust & Excellence — meet the founders and leadership team driving Elite Pro Infraventure.",
+    "Architects of Trust & Excellence — meet the founders and leadership team driving ElitePro Infra.",
 };
 
 const delaySequence = [0, 100, 200] as const;

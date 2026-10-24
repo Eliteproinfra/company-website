@@ -24,7 +24,7 @@ function jobPostingSchema(job: JobListing) {
     employmentType: job.type.toUpperCase().replace(" ", "_"),
     hiringOrganization: {
       "@type": "Organization",
-      name: "Elite Pro Infraventure",
+      name: "ElitePro Infra",
       sameAs: "https://eliteproinfra.com",
       logo: "https://eliteproinfra.com/images/Elite-pro-logo.png",
     },

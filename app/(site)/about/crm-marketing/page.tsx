@@ -7,7 +7,7 @@ import { getTeam } from "@/lib/content/teams";
 export const metadata: Metadata = {
   title: "CRM & Marketing",
   description:
-    "CRM & Accounts — ensuring seamless operations and client satisfaction at Elite Pro Infraventure.",
+    "CRM & Accounts — ensuring seamless operations and client satisfaction at ElitePro Infra.",
 };
 
 export default async function CrmMarketingPage() {

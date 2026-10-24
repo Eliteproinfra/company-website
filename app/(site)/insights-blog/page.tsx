@@ -7,7 +7,7 @@ import { articleHref } from "@/lib/data/articles";
 
 export const metadata: Metadata = {
   title: "Insights & Blogs",
-  description: "Real estate market insights, project spotlights, and investment guidance from Elite Pro Infraventure.",
+  description: "Real estate market insights, project spotlights, and investment guidance from ElitePro Infra.",
 };
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;

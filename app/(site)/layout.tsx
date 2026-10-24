@@ -4,7 +4,7 @@ import EnquiryPopup from "@/components/layout/EnquiryPopup";
 import MetaPixel from "@/components/layout/MetaPixel";
 
 const siteDescription =
-  "Elite Pro Infraventure is a premier real estate consultancy firm dedicated to providing exceptional service and expertise in the property market.";
+  "ElitePro Infra is a premier real estate consultancy firm dedicated to providing exceptional service and expertise in the property market.";
 
 /**
  * The public site's chrome. It lives here rather than in the root layout so the
@@ -14,7 +14,7 @@ const siteDescription =
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
-  name: "Elite Pro Infraventure",
+  name: "ElitePro Infra",
   alternateName: "Elite Pro Infra",
   url: "https://eliteproinfra.com",
   logo: "https://eliteproinfra.com/images/Elite-pro-logo.png",

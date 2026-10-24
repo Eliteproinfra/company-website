@@ -150,7 +150,7 @@ export default function PropertyManagementPage() {
             <Reveal direction="left" className="hidden lg:block">
               <Image
                 src="/images/team-image.jpeg"
-                alt="The Elite Pro Infraventure property management team"
+                alt="The ElitePro Infra property management team"
                 width={800}
                 height={900}
                 className="h-full w-full rounded-2xl object-cover opacity-75"

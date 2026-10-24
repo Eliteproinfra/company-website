@@ -98,7 +98,7 @@ export default function AwardLightbox({
       >
         <Image
           src={images[index]}
-          alt={`Elite Pro Infraventure award recognition ${index + 1} of ${images.length}`}
+          alt={`ElitePro Infra award recognition ${index + 1} of ${images.length}`}
           fill
           sizes="(min-width: 896px) 896px, 100vw"
           className="object-contain"

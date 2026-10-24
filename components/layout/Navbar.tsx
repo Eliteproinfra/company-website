@@ -56,7 +56,7 @@ export default function Navbar() {
               256px or 384px rendition (4.7KB / 7.3KB). */}
           <Image
             src={solid ? "/images/dark-logo.png" : "/images/Elite-pro-logo.png"}
-            alt="Elite Pro Infraventure"
+            alt="ElitePro Infra"
             width={solid ? 252 : 845}
             height={solid ? 81 : 249}
             sizes="(min-width: 1280px) 170px, (min-width: 768px) 150px, 136px"

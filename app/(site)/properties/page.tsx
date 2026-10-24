@@ -6,7 +6,7 @@ import PropertyBrowser from "@/components/properties/PropertyBrowser";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
 import { getPropertyListItems } from "@/lib/content/properties";
-import { categories, propertyTypeOptions } from "@/lib/data/categories";
+import { categories, propertyStatusOptions, propertyTypeOptions } from "@/lib/data/categories";
 import { localities } from "@/lib/data/localities";
 
 export const metadata: Metadata = {
@@ -44,6 +44,7 @@ export default async function PropertiesPage() {
           properties={properties}
           locations={["All Locations", "Delhi", "Dubai", "Faridabad", "Gurgaon", "Manesar", "Noida"]}
           types={propertyTypeOptions}
+          statuses={propertyStatusOptions}
           between={
             <>
               <section className="bg-white py-12">

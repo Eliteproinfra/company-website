@@ -7,7 +7,7 @@ import { articleHref } from "@/lib/data/articles";
 
 export const metadata: Metadata = {
   title: "Media & Press",
-  description: "Press coverage and media mentions featuring Elite Pro Infraventure.",
+  description: "Press coverage and media mentions featuring ElitePro Infra.",
 };
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;

@@ -43,7 +43,7 @@ export async function generateMetadata({
 
   const description =
     property.description ||
-    `${property.title} — ${property.category} project in ${property.location}. Price ${property.price}. Get floor plans, pricing and site-visit assistance from Elite Pro Infraventure.`;
+    `${property.title} — ${property.category} project in ${property.location}. Price ${property.price}. Get floor plans, pricing and site-visit assistance from ElitePro Infra.`;
 
   return {
     title: property.title,
@@ -488,7 +488,7 @@ export default async function PropertyDetailPage({
                     </tbody>
                   </table>
                   <p className="mt-3 text-xs text-muted">
-                    Figures are indicative and maintained by Elite Pro Infraventure. They are not
+                    Figures are indicative and maintained by ElitePro Infra. They are not
                     a valuation.
                   </p>
                 </div>

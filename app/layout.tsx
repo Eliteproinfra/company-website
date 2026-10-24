@@ -18,13 +18,13 @@ const playfair = Playfair_Display({
 });
 
 const siteDescription =
-  "Elite Pro Infraventure is a premier real estate consultancy firm dedicated to providing exceptional service and expertise in the property market.";
+  "ElitePro Infra is a premier real estate consultancy firm dedicated to providing exceptional service and expertise in the property market.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://eliteproinfra.com"),
   title: {
-    default: "Elite Pro Infraventure | Premium Real Estate in Gurgaon & NCR",
-    template: "%s | Elite Pro Infraventure",
+    default: "ElitePro Infra | Premium Real Estate in Gurgaon & NCR",
+    template: "%s | ElitePro Infra",
   },
   description: siteDescription,
   verification: {
@@ -32,21 +32,21 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "Elite Pro Infraventure",
-    title: "Elite Pro Infraventure | Premium Real Estate in Gurgaon & NCR",
+    siteName: "ElitePro Infra",
+    title: "ElitePro Infra | Premium Real Estate in Gurgaon & NCR",
     description: siteDescription,
     images: [
       {
         url: "/images/hero-founders.png",
         width: 2560,
         height: 1440,
-        alt: "Elite Pro Infraventure",
+        alt: "ElitePro Infra",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Elite Pro Infraventure | Premium Real Estate in Gurgaon & NCR",
+    title: "ElitePro Infra | Premium Real Estate in Gurgaon & NCR",
     description: siteDescription,
     images: ["/images/hero-founders.png"],
   },

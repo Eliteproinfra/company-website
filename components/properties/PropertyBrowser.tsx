@@ -6,9 +6,11 @@ import { useMemo, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
 import Separator from "@/components/ui/Separator";
 import PropertyCard from "@/components/properties/PropertyCard";
-import PropertySearchFilter from "@/components/properties/PropertySearchFilter";
+import PropertySearchFilter, {
+  type SearchFilters,
+} from "@/components/properties/PropertySearchFilter";
 import Pagination from "@/components/properties/Pagination";
-import { typeFromCategorySlug, typeToVariant } from "@/lib/data/categories";
+import { typeFromCategorySlug, typeToStage, typeToVariant } from "@/lib/data/categories";
 import { localityFromSlug, localitySlug } from "@/lib/data/localities";
 import { partnerFromSlug, partnerSlug } from "@/lib/data/partners";
 import { parseBudget, priceInRupees } from "@/lib/price";
@@ -27,15 +29,41 @@ function byPrice(a: PropertyItem, b: PropertyItem, direction: 1 | -1): number {
   return (priceA - priceB) * direction;
 }
 
+/** A figure with a unit in the search box ("under 80 Lakhs", "2 Cr") — read as a
+ *  budget ceiling. A bare number is left as text, so a sector or tower number can
+ *  still be searched for. */
+const QUERY_BUDGET = /(?:under|below|upto|up to|within|max)?\s*\d+(?:\.\d+)?\s*(?:crores?|cr|lakhs?|lacs?|l)\b/i;
+
+/** Words that describe the search rather than a listing, so they would otherwise
+ *  filter out everything ("flats under 80 lakhs" names no listing). */
+const QUERY_FILLER = new Set([
+  "a", "an", "the", "in", "at", "near", "for", "of", "and", "with", "budget",
+  "flat", "flats", "apartment", "apartments", "home", "homes", "house", "houses",
+  "property", "properties", "project", "projects",
+]);
+
+/** Splits the search box into a budget (when it names one) and the words to match. */
+function parseQuery(query: string): { budget?: number; words: string[] } {
+  const budgetMatch = query.match(QUERY_BUDGET);
+  const rest = budgetMatch ? query.replace(budgetMatch[0], " ") : query;
+  const words = rest
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word && !QUERY_FILLER.has(word));
+  return { budget: budgetMatch ? parseBudget(budgetMatch[0]) : undefined, words };
+}
+
 export default function PropertyBrowser({
   properties,
   locations,
   types,
+  statuses,
   between,
 }: {
   properties: PropertyItem[];
   locations: string[];
   types: string[];
+  statuses: string[];
   /** Sections rendered between the search filter and the listing (live: localities + categories). */
   between?: React.ReactNode;
 }) {
@@ -75,8 +103,11 @@ export default function PropertyBrowser({
 
   const [chosenLocation, setChosenLocation] = useState<string | null>(null);
   const [chosenType, setChosenType] = useState<string | null>(null);
-  /** The budget as typed; empty is "any". Kept as text so the box can show it back. */
+  const [status, setStatus] = useState(statuses[0]);
+  /** The budget preset, e.g. "2 Cr"; empty is "any". */
   const [budget, setBudget] = useState("");
+  /** The search box as typed; kept as text so the box can show it back. */
+  const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"recommended" | "low-high" | "high-low">("recommended");
   const [page, setPage] = useState(1);
 
@@ -103,10 +134,30 @@ export default function PropertyBrowser({
     if (type !== types[0]) {
       list = list.filter((property) => property.badgeVariant === typeToVariant[type]);
     }
-    // The budget is a ceiling on the starting price. A listing priced "On
+    if (status in typeToStage) {
+      list = list.filter((property) => property.stage === typeToStage[status]);
+    }
+    const parsedQuery = parseQuery(query);
+    if (parsedQuery.words.length > 0) {
+      list = list.filter((property) => {
+        const haystack = [
+          property.title,
+          property.location,
+          property.badgeText,
+          property.beds,
+          property.developerSlug,
+          ...(property.localities ?? []),
+        ]
+          .join(" ")
+          .toLowerCase();
+        return parsedQuery.words.every((word) => haystack.includes(word));
+      });
+    }
+    // The budget is a ceiling on the starting price — the preset if one is
+    // picked, else a figure typed into the search box. A listing priced "On
     // Request" states no figure to hold against it, so it drops out rather than
     // being passed off as within budget.
-    const maxPrice = parseBudget(budget);
+    const maxPrice = parseBudget(budget) ?? parsedQuery.budget;
     if (maxPrice !== undefined) {
       list = list.filter((property) => {
         const price = priceInRupees(property.price);
@@ -119,16 +170,18 @@ export default function PropertyBrowser({
       list = [...list].sort((a, b) => byPrice(a, b, -1));
     }
     return list;
-  }, [properties, developer, locality, location, type, budget, sort, locations, types]);
+  }, [properties, developer, locality, location, type, status, budget, query, sort, locations, types]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  function applyFilters(nextLocation: string, nextType: string, nextBudget: string) {
-    setChosenLocation(nextLocation);
-    setChosenType(nextType);
-    setBudget(nextBudget);
+  function applyFilters(filters: SearchFilters) {
+    setChosenLocation(filters.location);
+    setChosenType(filters.type);
+    setStatus(filters.status);
+    setBudget(filters.budget);
+    setQuery(filters.query);
     setPage(1);
     // The grid sits below the locality and category rows, so without this a
     // Search changes nothing the visitor can see.
@@ -139,20 +192,20 @@ export default function PropertyBrowser({
 
   return (
     <>
-      <section className="relative z-10 bg-white">
+      {/* No background here: the filter's negative margin collapses through this
+          section, so a fill would paint over the bottom of the hero. */}
+      <section className="relative z-10">
         <div className="container">
           <PropertySearchFilter
             // Remounting on an applied change re-seeds the two dropdowns, so the
             // boxes show the filter actually in force — including the one a
             // ?category= link arrived with. After a Search the drafts already
             // equal the applied values, so nothing the user picked is lost.
-            key={`${location}|${type}|${budget}`}
+            key={`${location}|${type}|${status}|${budget}|${query}`}
             locations={locations}
             types={types}
-            initialLocation={location}
-            initialType={type}
-            initialBudget={budget}
-            showBudget
+            statuses={statuses}
+            initial={{ location, type, status, budget, query }}
             onSearch={applyFilters}
           />
         </div>

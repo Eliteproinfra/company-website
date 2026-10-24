@@ -7,7 +7,7 @@ import { cultureItems, momentsGallery, csrInitiatives, joinBenefits } from "@/li
 
 export const metadata: Metadata = {
   title: "Life at Elite Pro Infra",
-  description: "Where Passion Meets Purpose — culture, celebrations, and community at Elite Pro Infraventure.",
+  description: "Where Passion Meets Purpose — culture, celebrations, and community at ElitePro Infra.",
 };
 
 const delaySequence = [0, 100, 200, 300] as const;

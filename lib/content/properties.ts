@@ -20,6 +20,7 @@ import { cache } from "react";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { listProperties, type PropertyRecord } from "@/lib/db/queries";
 import { propertyDetails, type PropertyDetail } from "@/lib/data/propertyDetails";
+import { stageFromText } from "@/lib/data/categories";
 import { localitiesInText } from "@/lib/data/localities";
 import { partnerForListing, partnerSlug } from "@/lib/data/partners";
 import type { SignatureProject } from "@/lib/data/signatureProjects";
@@ -122,6 +123,16 @@ export function toPropertyItem(property: PropertyDetail): PropertyItem {
         "\n"
       ),
       property.location
+    ),
+    // Read together so a Status of "Under Construction" still picks up a
+    // possession date from the key facts and can come out Nearing Possession.
+    stage: stageFromText(
+      [
+        property.projectInfo?.status,
+        ...(property.keyFacts ?? [])
+          .filter((fact) => /possession|status/i.test(fact.label))
+          .map((fact) => fact.value),
+      ].join(" ")
     ),
   };
 }

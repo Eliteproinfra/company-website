@@ -113,7 +113,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             {/* The light mark — the sidebar is dark-black. */}
             <Image
               src="/images/Elite-pro-logo.png"
-              alt="Elite Pro Infraventure"
+              alt="ElitePro Infra"
               width={845}
               height={249}
               className="h-8 w-auto object-contain"
@@ -144,7 +144,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {/* The dark mark — this bar is white, unlike the sidebar. */}
               <Image
                 src="/images/dark-logo.png"
-                alt="Elite Pro Infraventure"
+                alt="ElitePro Infra"
                 width={252}
                 height={81}
                 className="h-7 w-auto object-contain"

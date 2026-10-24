@@ -12,7 +12,7 @@ import OurStory from "@/components/about/OurStory";
 export const metadata: Metadata = {
   title: "Our Story & Journey",
   description:
-    "More Than Just Real Estate — 14 years of excellence, one trusted name. Discover Elite Pro Infraventure's journey, mission, vision, and core values.",
+    "More Than Just Real Estate — 14 years of excellence, one trusted name. Discover ElitePro Infra's journey, mission, vision, and core values.",
 };
 
 const essence = [

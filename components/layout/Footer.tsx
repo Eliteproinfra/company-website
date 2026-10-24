@@ -137,13 +137,13 @@ export default async function Footer() {
             <div className="md:col-span-2 lg:col-span-4">
               <Image
                 src="/images/Elite-pro-logo.png"
-                alt="Elite Pro Infraventure"
+                alt="ElitePro Infra"
                 width={845}
                 height={249}
                 className="mb-6 h-[70px] w-auto rounded-lg p-2 opacity-90"
               />
               <p className="text-[0.95rem] leading-[1.8] text-white">
-                Elite Pro Infraventure is one of India&apos;s leading real estate advisory firms,
+                ElitePro Infra is one of India&apos;s leading real estate advisory firms,
                 guiding investors, homebuyers, and businesses toward secure, profitable
                 opportunities since 2012.
               </p>

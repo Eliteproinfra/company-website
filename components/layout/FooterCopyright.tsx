@@ -28,7 +28,7 @@ export default function FooterCopyright() {
       )}
     >
       <div className="container flex flex-col items-center justify-between gap-3 text-center md:flex-row md:text-left">
-        <p>&copy; {new Date().getFullYear()} Elite Pro Infraventure. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} ElitePro Infra. All rights reserved.</p>
         <ul className="flex items-center gap-6">
           {legalLinks.map((link) => (
             <li key={link.href}>

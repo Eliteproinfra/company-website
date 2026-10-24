@@ -8,7 +8,7 @@ import { pillars, philosophyImages } from "@/lib/data/socialCommitment";
 export const metadata: Metadata = {
   title: "Social Commitment",
   description:
-    "Building Beyond Business — Elite Pro Infraventure's commitment to women empowerment, skill development, and community welfare.",
+    "Building Beyond Business — ElitePro Infra's commitment to women empowerment, skill development, and community welfare.",
 };
 
 const delaySequence = [0, 100, 200] as const;

@@ -31,7 +31,7 @@ export default async function AdminLoginPage({
       <div className="relative mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-6 py-8 lg:px-10 lg:py-10">
         <Image
           src="/images/Elite-pro-logo.png"
-          alt="Elite Pro Infraventure"
+          alt="ElitePro Infra"
           width={845}
           height={249}
           className="h-10 w-auto self-center object-contain sm:h-12 lg:self-start"

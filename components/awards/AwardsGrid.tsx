@@ -27,7 +27,7 @@ export default function AwardsGrid({ awards }: { awards: Award[] }) {
           >
             <Image
               src={image}
-              alt={caption || "Elite Pro Infraventure award recognition"}
+              alt={caption || "ElitePro Infra award recognition"}
               width={300}
               height={280}
               sizes="(min-width: 992px) 25vw, (min-width: 768px) 33vw, (min-width: 576px) 50vw, 100vw"

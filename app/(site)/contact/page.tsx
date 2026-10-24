@@ -11,7 +11,7 @@ import { offices } from "@/lib/data/offices";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with Elite Pro Infraventure for real estate advisory, property management, and NRI investment services.",
+    "Get in touch with ElitePro Infra for real estate advisory, property management, and NRI investment services.",
 };
 
 const contactInfo = [

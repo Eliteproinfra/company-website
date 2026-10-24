@@ -132,7 +132,16 @@ export type PropertyItem = {
   /** `?locality=` slugs this listing files under, resolved once on the server
    *  from its description — the "Top Localities" cards filter the grid on it. */
   localities?: string[];
+  /** Construction stage read from the listing's Status (or Possession key fact),
+   *  for the Construction Status filter. Absent when neither says. */
+  stage?: PropertyStage;
 };
+
+export type PropertyStage =
+  | "ready-to-move"
+  | "under-construction"
+  | "new-launch"
+  | "nearing-possession";
 
 export type ProcessStepItem = {
   number: string;

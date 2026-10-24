@@ -3,7 +3,7 @@ import PageHero from "@/components/ui/PageHero";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
-  description: "The terms and conditions governing use of the Elite Pro Infraventure website and services.",
+  description: "The terms and conditions governing use of the ElitePro Infra website and services.",
 };
 
 export default function TermsConditionsPage() {
@@ -21,7 +21,7 @@ export default function TermsConditionsPage() {
         <div className="container">
           <div className="mx-auto max-w-4xl rounded-md bg-white p-6 text-bs-muted shadow-bs-sm lg:p-12">
             <p>
-              These Terms &amp; Conditions govern your use of the Elite Pro Infraventure website
+              These Terms &amp; Conditions govern your use of the ElitePro Infra website
               and services. By using this website, you agree to these terms.
             </p>
 
@@ -41,7 +41,7 @@ export default function TermsConditionsPage() {
 
             <h2 className="mt-10 text-2xl font-bold text-dark-black">Intellectual Property</h2>
             <p className="mt-4">
-              All website content, branding, and assets are owned by Elite Pro Infraventure or
+              All website content, branding, and assets are owned by ElitePro Infra or
               used with permission. Users cannot copy, reproduce, or redistribute content without
               written consent.
             </p>
@@ -54,7 +54,7 @@ export default function TermsConditionsPage() {
 
             <h2 className="mt-10 text-2xl font-bold text-dark-black">Third-Party Links</h2>
             <p className="mt-4">
-              The website may contain links to external sites. Elite Pro Infraventure assumes no
+              The website may contain links to external sites. ElitePro Infra assumes no
               responsibility for their content or privacy policies.
             </p>
 
