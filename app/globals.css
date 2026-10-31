@@ -105,6 +105,7 @@
   --animate-marquee: marquee 30s linear infinite;
   --animate-marquee-reverse: marquee-reverse 34s linear infinite;
   --animate-shine: shine 4s ease-in-out infinite;
+  --animate-tile-swap: tile-swap 0.9s ease-out both; /* AwardsMosaic incoming poster */
   /* Dashes travelling along the world map's India-to-market arcs. The offset
      is two dash periods (6 + 7), so the loop has no visible seam. */
   --animate-map-arc: map-arc-flow 2.2s linear infinite;
@@ -149,6 +150,16 @@
     }
     100% {
       background-position: -200% 0;
+    }
+  }
+  @keyframes tile-swap {
+    from {
+      opacity: 0;
+      transform: scale(1.12);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
   @keyframes map-arc-flow {
@@ -235,12 +246,13 @@
   background-image: radial-gradient(circle at top left, rgb(212 175 55 / 0.16), #111827);
 }
 
-/* .why-choose section */
+/* Home "Why Choose Elite Pro?": near-black with a gold bloom behind the photo
+   and a fainter one under the stat grid, so the section reads as lit, not flat. */
 @utility bg-why-choose {
-  background-color: #f7f7f9;
+  background-color: #0b0b0d;
   background-image:
-    radial-gradient(1200px 1200px at 10% 10%, rgb(212 175 55 / 0.08), transparent 40%),
-    radial-gradient(1000px 800px at 90% 20%, rgb(197 160 40 / 0.08), transparent 50%);
+    radial-gradient(700px 520px at 18% 30%, rgb(212 175 55 / 0.14), transparent 65%),
+    radial-gradient(800px 600px at 92% 85%, rgb(197 160 40 / 0.08), transparent 60%);
 }
 
 /* Overlay div over #global / #faq background images */
@@ -279,15 +291,6 @@
     radial-gradient(85% 60% at 50% 4%, rgb(212 175 55 / 0.13), transparent 62%),
     radial-gradient(70% 50% at 50% 104%, rgb(212 175 55 / 0.08), transparent 60%),
     radial-gradient(120% 95% at 50% 25%, #10213c 0%, #091425 48%, #04070e 100%);
-}
-
-/* Home `.stats-section`: 80% black over the Unsplash towers photo, fixed */
-@utility bg-stats-section {
-  background-image:
-    linear-gradient(rgb(0 0 0 / 0.8), rgb(0 0 0 / 0.8)),
-    url("/images/bg/skyline-towers.jpg");
-  background-size: cover;
-  background-attachment: fixed;
 }
 
 /* Home `#global` inline background (the rgba(10,10,10,.85) overlay is a separate div) */

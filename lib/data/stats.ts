@@ -2,27 +2,19 @@ import type { Stat } from "@/lib/types";
 
 // Homepage "Why Choose Elite Pro?"
 export const whyChooseStats: Stat[] = [
-  { icon: "fas fa-users", value: "32000+", label: "Trusted Investors & Buyers" },
-  { icon: "fas fa-user-tie", value: "350+", label: "Professionals" },
-  { icon: "fas fa-sitemap", value: "15000+", label: "Brokers | Global Network" },
-  { icon: "fas fa-map-marked-alt", value: "20+", label: "States Covered" },
+  { icon: "fas fa-trophy", value: "15+", label: "Years of Experience" },
+  { icon: "fas fa-user-tie", value: "150+", label: "Professionals" },
+  { icon: "fas fa-award", value: "100+", label: "Industry Awards" },
+  { icon: "fas fa-building", value: "180+", label: "Projects Onboard" },
   { icon: "fas fa-headset", value: "Dedicated", label: "CRM Team" },
   { icon: "fas fa-handshake", value: "100+", label: "A Grade Developer Partners" },
-  { icon: "fas fa-trophy", value: "14", label: "Years of Trusted Excellence" },
   { icon: "fas fa-file-signature", value: "100%", label: "Transparent Deals" },
-];
-
-// Homepage stats banner
-export const transactionStats: Stat[] = [
-  { value: "38,750+", label: "Clients Advised" },
-  { value: "1 Lakh CR+", label: "Property Value Guided" },
-  { value: "150+", label: "Projects Onboard" },
-  { value: "55 Million", label: "sq.ft. Area Advised" },
+  { icon: "fas fa-users", value: "700+", label: "Investors Advised" },
 ];
 
 // Leadership page team stats
 export const leadershipStats: Stat[] = [
-  { value: "100+", label: "Professionals" },
+  { value: "150+", label: "Professionals" },
   { value: "15+", label: "Years Experience" },
 ];
 

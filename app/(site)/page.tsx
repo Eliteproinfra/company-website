@@ -8,6 +8,7 @@ import CompactFeatureCard from "@/components/home/CompactFeatureCard";
 import StatIconCard from "@/components/home/StatIconCard";
 import SignatureProjectsGrid from "@/components/home/SignatureProjectsGrid";
 import AwardsCarousel from "@/components/home/AwardsCarousel";
+import AwardsMosaic from "@/components/home/AwardsMosaic";
 import PartnersMarquee from "@/components/home/PartnersMarquee";
 import InsightsHubTabs from "@/components/home/InsightsHubTabs";
 import HomeEnquiryForm from "@/components/home/HomeEnquiryForm";
@@ -26,7 +27,7 @@ import { presenceBanners } from "@/lib/data/presence";
 
 import { reviews, googleRating } from "@/lib/data/reviews";
 import { homeFaqs } from "@/lib/data/faq";
-import { whyChooseStats, transactionStats } from "@/lib/data/stats";
+import { whyChooseStats } from "@/lib/data/stats";
 
 const delaySequence = [0, 100, 200, 300, 400, 500] as const;
 
@@ -137,18 +138,58 @@ export default async function Home() {
       </section>
 
       {/* Why Choose Elite Pro? */}
-      <section className="bg-why-choose py-16 md:py-20">
+      <section className="relative overflow-hidden bg-why-choose py-20 text-white md:py-24">
         <div className="container">
-          <SectionHeading
-            title="Why Choose Elite Pro?"
-            description="Premium expertise backed by scale and trusted relationships."
-          />
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {whyChooseStats.map((stat, index) => (
-              <Reveal key={stat.label} delay={delaySequence[index % delaySequence.length]}>
-                <StatIconCard {...stat} />
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-14">
+            <Reveal direction="right" className="relative lg:col-span-5">
+              {/* Gold hairline frame offset behind the photo, echoing "Who We Are". */}
+              <div
+                className="absolute -inset-3 hidden rounded-[28px] border border-primary-gold/40 sm:block"
+                aria-hidden="true"
+              />
+              <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-[0_30px_70px_rgba(0,0,0,0.6)]">
+                <AwardsMosaic awards={awards} />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black via-black/75 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 p-6 sm:p-8">
+                  <p className="text-xs font-bold uppercase tracking-[3px] text-primary-gold">
+                    Since 2012
+                  </p>
+                  <p className="mt-2 text-xl font-bold leading-snug sm:text-2xl">
+                    Advisory built on trust, transparency and results.
+                  </p>
+                </div>
+              </div>
+              <div className="absolute -right-3 top-8 hidden items-center gap-3 rounded-2xl bg-gold-gradient px-5 py-4 text-ink shadow-btn-gold sm:flex lg:-right-8">
+                <i className="fas fa-award text-3xl" aria-hidden="true" />
+                <div>
+                  <p className="text-2xl font-extrabold leading-none">100+</p>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-[1px]">Industry Awards</p>
+                </div>
+              </div>
+            </Reveal>
+
+            <div className="lg:col-span-7">
+              <Reveal direction="left">
+                <p className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[4px] text-primary-gold">
+                  <span className="h-px w-8 bg-primary-gold" aria-hidden="true" />
+                  The Elite Pro Advantage
+                </p>
+                <h2 className="mt-4 text-3xl font-bold sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+                  Why Choose <span className="text-primary-gold">Elite Pro?</span>
+                </h2>
+                <p className="mt-4 max-w-xl text-white/65">
+                  Premium expertise backed by scale and trusted relationships. A seasoned team,
+                  India&apos;s leading developers and complete transparency at every step.
+                </p>
               </Reveal>
-            ))}
+              <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {whyChooseStats.map((stat, index) => (
+                  <Reveal key={stat.label} delay={delaySequence[index % delaySequence.length]}>
+                    <StatIconCard {...stat} />
+                  </Reveal>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -180,18 +221,6 @@ export default async function Home() {
               ))}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Transaction Stats */}
-      <section className="bg-stats-section py-14 text-white">
-        <div className="container grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
-          {transactionStats.map((stat) => (
-            <div key={stat.label}>
-              <p className="text-3xl font-bold text-primary-gold sm:text-4xl">{stat.value}</p>
-              <p className="mt-2 text-sm text-white sm:text-base">{stat.label}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -311,7 +340,7 @@ export default async function Home() {
             <Reveal direction="left" className="relative">
               <div className="relative z-[2] h-[420px] w-full overflow-hidden rounded-2xl shadow-bs-lg">
                 <Image
-                  src="/images/secure-ecosystem.webp"
+                  src="/images/nri-global-reach.webp"
                   alt="Premium residence serving NRI investors worldwide"
                   fill
                   sizes={HALF_ROW_LG_SIZES}

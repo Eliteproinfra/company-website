@@ -11,7 +11,10 @@ import { navItems } from "@/lib/data/navigation";
 import MobileNavMenu from "./MobileNavMenu";
 import NavDropdown from "./NavDropdown";
 
-const SOLID_NAV_SECTIONS = ["/properties", "/media-press", "/insights-blog", "/news-updates"];
+const PHONE_HREF = "tel:+919968686868";
+const PHONE_LABEL = "+91 9968686868";
+
+const SOLID_NAV_SECTIONS =["/properties", "/media-press", "/insights-blog", "/news-updates"];
 
 /**
  * Live `.navbar.fixed-top`: transparent with a 1px rgba(255,255,255,.1) bottom border and
@@ -77,27 +80,79 @@ export default function Navbar() {
                 Contact Us
               </Button>
             </li>
+            <li className="ml-2">
+              {/* At 1280px the number would wrap Media & Insights / NRI Corner onto two lines. */}
+              <PhoneLink solid={solid} numberClassName="hidden min-[1400px]:flex" />
+            </li>
           </ul>
         </nav>
 
-        {/* Live `.mobile-nav-toggle`: rgba(255,255,255,.28) border, 12px radius, white icon;
-            `.navbar.scrolled` -> rgba(17,24,39,.18) border, rgba(255,255,255,.85) fill, #111827 icon. */}
-        <button
-          type="button"
-          onClick={() => setMobileOpen(true)}
-          aria-expanded={mobileOpen}
-          aria-controls="mobile-nav-menu"
-          aria-label="Toggle navigation menu"
-          className={clsx(
-            "inline-flex items-center justify-center rounded-xl border px-3 py-2.5 transition-colors focus-visible:outline-none focus-visible:shadow-input-focus xl:hidden",
-            solid ? "border-ink/[0.18] bg-white/85 text-ink" : "border-white/[0.28] text-white"
-          )}
-        >
-          <i className="fas fa-bars text-[1.1rem]" aria-hidden="true" />
-        </button>
+        <div className="flex items-center gap-3 xl:hidden">
+          <PhoneLink solid={solid} />
+          {/* Live `.mobile-nav-toggle`: rgba(255,255,255,.28) border, 12px radius, white icon;
+              `.navbar.scrolled` -> rgba(17,24,39,.18) border, rgba(255,255,255,.85) fill, #111827 icon. */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav-menu"
+            aria-label="Toggle navigation menu"
+            className={clsx(
+              "inline-flex items-center justify-center rounded-xl border px-3 py-2.5 transition-colors focus-visible:outline-none focus-visible:shadow-input-focus",
+              solid ? "border-ink/[0.18] bg-white/85 text-ink" : "border-white/[0.28] text-white"
+            )}
+          >
+            <i className="fas fa-bars text-[1.1rem]" aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       <MobileNavMenu open={mobileOpen} onClose={() => setMobileOpen(false)} />
     </header>
+  );
+}
+
+/**
+ * Pill with a pulsing gold call badge and a "Call Us" caption over the number: frosted glass
+ * over the transparent hero, a gold-tinted outline once the navbar turns solid. By default the
+ * caption + number hide below `sm` (badge only) to leave room for the logo.
+ */
+function PhoneLink({
+  solid,
+  numberClassName = "hidden sm:flex",
+}: {
+  solid: boolean;
+  numberClassName?: string;
+}) {
+  return (
+    <a
+      href={PHONE_HREF}
+      aria-label={`Call us on ${PHONE_LABEL}`}
+      className={clsx(
+        "group inline-flex items-center gap-2 rounded-full border p-1 whitespace-nowrap transition-all duration-300 hover:-translate-y-px hover:border-primary-gold hover:shadow-[0_6px_20px_rgba(212,175,55,0.35)]",
+        solid
+          ? "border-primary-gold/40 bg-gold-tint text-black"
+          : "border-white/25 bg-white/10 text-white backdrop-blur-md"
+      )}
+    >
+      <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
+        <span
+          className="absolute inset-0 animate-ping rounded-full bg-primary-gold/50 [animation-duration:2s] motion-reduce:hidden"
+          aria-hidden="true"
+        />
+        <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-[#f3d77a] via-primary-gold to-[#a8841f] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+          <i
+            className="fas fa-phone-volume text-[0.9rem] transition-transform duration-300 group-hover:-rotate-12 group-hover:scale-110"
+            aria-hidden="true"
+          />
+        </span>
+      </span>
+      <span className={clsx(numberClassName, "flex-col pr-3 leading-tight")}>
+        <span className="text-[0.62rem] font-bold uppercase tracking-[2px] text-primary-gold">
+          Call Us
+        </span>
+        <span className="text-sm font-bold tracking-wide">{PHONE_LABEL}</span>
+      </span>
+    </a>
   );
 }

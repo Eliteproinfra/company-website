@@ -16,7 +16,7 @@ const panelClasses =
 
 export default function NavDropdown({ item, solid = false }: { item: NavItem; solid?: boolean }) {
   const triggerClasses = clsx(
-    "relative px-3 py-2 text-sm font-medium uppercase tracking-[1px] transition-colors",
+    "relative px-2.5 py-2 text-sm font-medium uppercase tracking-[1px] transition-colors",
     solid ? "text-black" : "text-white"
   );
 

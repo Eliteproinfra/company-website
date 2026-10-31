@@ -4,7 +4,6 @@ export type NavLeaf = { label: string; href: string; children?: NavLeaf[] };
 export type NavItem = { label: string; href?: string; children?: NavLeaf[] };
 
 export const navItems: NavItem[] = [
-  { label: "Home", href: "/" },
   {
     label: "About",
     href: "/about",

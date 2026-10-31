@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 /** Mirrors the live site's navbar script, which adds `.scrolled` once `scrollY > 50`. */
-export function useScrolled(threshold = 50) {
+export function useScrolled(threshold = 10) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {

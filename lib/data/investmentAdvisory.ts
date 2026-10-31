@@ -47,7 +47,7 @@ export const investmentServices: IconTextItem[] = [
 ];
 
 export const investmentStats: Stat[] = [
-  { value: "500+", label: "Investors Advised" },
+  { value: "700+", label: "Investors Advised" },
   { value: "₹200 Cr+", label: "Investments Guided" },
   { value: "150+", label: "Corporate Clients" },
   { value: "15+", label: "Years Experience" },
