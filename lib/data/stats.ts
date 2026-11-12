@@ -9,7 +9,7 @@ export const whyChooseStats: Stat[] = [
   { icon: "fas fa-headset", value: "Dedicated", label: "CRM Team" },
   { icon: "fas fa-handshake", value: "100+", label: "A Grade Developer Partners" },
   { icon: "fas fa-file-signature", value: "100%", label: "Transparent Deals" },
-  { icon: "fas fa-users", value: "700+", label: "Investors Advised" },
+  { icon: "fas fa-users", value: "10K", label: "Investors Advised" },
 ];
 
 // Leadership page team stats
