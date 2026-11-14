@@ -66,6 +66,7 @@ export type PropertyRow = {
   experts: unknown;
   related_ids: unknown;
   developer: unknown;
+  developer_id: number | null;
   key_facts: unknown;
   furnishings: unknown;
   floor_plans: unknown;
@@ -117,9 +118,9 @@ export type PropertyRecord = Omit<
 
 const PROPERTY_COLUMNS = `id, slug, title, category, badge_variant, badge_text, location,
   price, price_note, beds, area, description, map_url, images, specs, amenities, faqs,
-  experts, related_ids, developer, key_facts, furnishings, floor_plans, nearby,
-  project_info, videos, reviews, price_trends, is_featured, is_published, sort_order,
-  updated_at`;
+  experts, related_ids, developer, developer_id, key_facts, furnishings, floor_plans,
+  nearby, project_info, videos, reviews, price_trends, is_featured, is_published,
+  sort_order, updated_at`;
 
 function toPropertyRecord(row: PropertyRow): PropertyRecord {
   return {
@@ -186,6 +187,8 @@ export type PropertyInput = {
   experts: PropertyRecord["experts"];
   relatedIds: number[];
   developer: PropertyRecord["developer"];
+  /** The `developers` row `developer` was copied from, or null for none. */
+  developerId: number | null;
   keyFacts: PropertyRecord["keyFacts"];
   furnishings: PropertyRecord["furnishings"];
   floorPlans: PropertyRecord["floorPlans"];
@@ -222,6 +225,7 @@ function propertyParams(input: PropertyInput, slug: string): SqlParam[] {
     JSON.stringify(input.experts ?? []),
     JSON.stringify(input.relatedIds ?? []),
     JSON.stringify(input.developer ?? null),
+    input.developerId,
     JSON.stringify(input.keyFacts ?? []),
     JSON.stringify(input.furnishings ?? []),
     JSON.stringify(input.floorPlans ?? []),
@@ -244,10 +248,10 @@ export async function createProperty(input: PropertyInput): Promise<{ id: number
     `INSERT INTO properties
       (slug, title, category, badge_variant, badge_text, location, price, price_note,
        beds, area, description, map_url, images, specs, amenities, faqs, experts,
-       related_ids, developer, key_facts, furnishings, floor_plans, nearby,
-       project_info, videos, reviews, price_trends, is_featured, is_published,
+       related_ids, developer, developer_id, key_facts, furnishings, floor_plans,
+       nearby, project_info, videos, reviews, price_trends, is_featured, is_published,
        sort_order)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     propertyParams(input, slug)
   );
   return { id: insertId, slug };
@@ -260,8 +264,8 @@ export async function updateProperty(id: number, input: PropertyInput): Promise<
     `UPDATE properties SET
        slug=?, title=?, category=?, badge_variant=?, badge_text=?, location=?, price=?,
        price_note=?, beds=?, area=?, description=?, map_url=?, images=?, specs=?,
-       amenities=?, faqs=?, experts=?, related_ids=?, developer=?, key_facts=?,
-       furnishings=?, floor_plans=?, nearby=?, project_info=?, videos=?, reviews=?,
+       amenities=?, faqs=?, experts=?, related_ids=?, developer=?, developer_id=?,
+       key_facts=?, furnishings=?, floor_plans=?, nearby=?, project_info=?, videos=?, reviews=?,
        price_trends=?, is_featured=?, is_published=?, sort_order=?
      WHERE id=?`,
     [...propertyParams(input, slug), id]
@@ -627,6 +631,121 @@ export async function updateTeamMember(id: number, input: TeamMemberInput): Prom
 
 export async function deleteTeamMember(id: number): Promise<void> {
   await execute("DELETE FROM team_members WHERE id = ?", [id]);
+}
+
+// ------------------------------------------------------------- developers ---
+
+export type DeveloperRow = {
+  id: number;
+  name: string;
+  logo: string;
+  about: string | null;
+  experience: string;
+  projects: string;
+  delivered: string;
+  /** How many listings point at this developer. */
+  property_count: number;
+};
+
+const DEVELOPER_COLUMNS = `d.id, d.name, d.logo, d.about, d.experience, d.projects, d.delivered,
+  (SELECT COUNT(*) FROM properties p WHERE p.developer_id = d.id) AS property_count`;
+
+export async function listDevelopers() {
+  return query<DeveloperRow>(`SELECT ${DEVELOPER_COLUMNS} FROM developers d ORDER BY d.name ASC`);
+}
+
+export async function getDeveloperById(id: number) {
+  return queryOne<DeveloperRow>(`SELECT ${DEVELOPER_COLUMNS} FROM developers d WHERE d.id = ?`, [
+    id,
+  ]);
+}
+
+export type DeveloperInput = {
+  name: string;
+  logo: string;
+  about: string;
+  experience: string;
+  projects: string;
+  delivered: string;
+};
+
+/** The shape copied onto a listing's `developer` column. */
+export function developerSnapshot(input: DeveloperInput | DeveloperRow): PropertyDeveloper {
+  return {
+    name: input.name,
+    logo: input.logo,
+    about: input.about ?? "",
+    experience: input.experience,
+    projects: input.projects,
+    delivered: input.delivered,
+  };
+}
+
+function developerParams(input: DeveloperInput): SqlParam[] {
+  return [input.name, input.logo, input.about, input.experience, input.projects, input.delivered];
+}
+
+/** Thrown when a name is already taken (names are unique, ignoring case). */
+export class DuplicateDeveloperName extends Error {
+  constructor(name: string) {
+    super(`A developer called “${name}” already exists.`);
+    this.name = "DuplicateDeveloperName";
+  }
+}
+
+function isDuplicateKey(error: unknown) {
+  return (error as { code?: string })?.code === "ER_DUP_ENTRY";
+}
+
+export async function createDeveloper(input: DeveloperInput): Promise<number> {
+  try {
+    const { insertId } = await execute(
+      `INSERT INTO developers (name, logo, about, experience, projects, delivered)
+       VALUES (?,?,?,?,?,?)`,
+      developerParams(input)
+    );
+    return insertId;
+  } catch (error) {
+    if (isDuplicateKey(error)) throw new DuplicateDeveloperName(input.name);
+    throw error;
+  }
+}
+
+/**
+ * Saves the developer AND rewrites the copy held by every listing linked to it,
+ * so a corrected logo or stat shows on all of them. Returns those listings'
+ * slugs for the caller to revalidate.
+ */
+export async function updateDeveloper(id: number, input: DeveloperInput): Promise<string[]> {
+  try {
+    await execute(
+      `UPDATE developers SET name=?, logo=?, about=?, experience=?, projects=?, delivered=?
+       WHERE id=?`,
+      [...developerParams(input), id]
+    );
+  } catch (error) {
+    if (isDuplicateKey(error)) throw new DuplicateDeveloperName(input.name);
+    throw error;
+  }
+  await execute("UPDATE properties SET developer = ? WHERE developer_id = ?", [
+    JSON.stringify(developerSnapshot(input)),
+    id,
+  ]);
+  const rows = await query<{ slug: string }>(
+    "SELECT slug FROM properties WHERE developer_id = ?",
+    [id]
+  );
+  return rows.map((row) => row.slug);
+}
+
+/** Refuses (returns false) while any listing still uses the developer. */
+export async function deleteDeveloper(id: number): Promise<boolean> {
+  const { affectedRows } = await execute(
+    `DELETE FROM developers WHERE id = ?
+       AND NOT EXISTS (SELECT 1 FROM properties WHERE developer_id = ?)`,
+    [id, id]
+  );
+  return affectedRows > 0;
 }
 
 // ----------------------------------------------------------------- awards ---

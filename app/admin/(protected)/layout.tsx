@@ -25,6 +25,7 @@ export const dynamic = "force-dynamic";
 const NAV: AdminNavItem[] = [
   { href: "/admin", label: "Dashboard", icon: "fas fa-gauge-high", exact: true },
   { href: "/admin/properties", label: "Properties", icon: "fas fa-building" },
+  { href: "/admin/developers", label: "Developers", icon: "fas fa-helmet-safety" },
   { href: "/admin/articles?kind=press", label: "PR & Media", icon: "fas fa-newspaper" },
   { href: "/admin/articles?kind=blog", label: "Insights & Blogs", icon: "fas fa-pen-nib" },
   { href: "/admin/articles?kind=news", label: "News & Updates", icon: "fas fa-bullhorn" },

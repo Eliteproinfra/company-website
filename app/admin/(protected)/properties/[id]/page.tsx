@@ -2,12 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { categories } from "@/lib/data/categories";
 import { nearbyCategoryNames } from "@/lib/data/nearbyCategories";
-import { getPropertyById } from "@/lib/db/queries";
+import { getPropertyById, listDevelopers } from "@/lib/db/queries";
 import { savePropertyAction } from "../actions";
 import AdminNotice from "@/components/admin/AdminNotice";
 import AmenityField from "@/components/admin/AmenityField";
 import EditorForm from "@/components/admin/EditorForm";
-import { ImageField, ImageListField } from "@/components/admin/ImageField";
+import { ImageListField } from "@/components/admin/ImageField";
 import RepeaterField from "@/components/admin/RepeaterField";
 import {
   CheckboxField,
@@ -29,8 +29,21 @@ export default async function PropertyEditorPage({
   const { error } = await searchParams;
   const isNew = id === "new";
 
-  const property = isNew ? null : await getPropertyById(Number(id));
+  const [property, developers] = await Promise.all([
+    isNew ? null : getPropertyById(Number(id)),
+    listDevelopers(),
+  ]);
   if (!isNew && !property) notFound();
+
+  // Linked listings know their developer id. One saved before developers had
+  // their own table (and before the migration linked it) falls back to a match
+  // on the name it carries.
+  const currentName = property?.developer?.name?.trim().toLowerCase();
+  const selectedDeveloperId = String(
+    (property?.developer_id && developers.some((d) => d.id === property.developer_id)
+      ? property.developer_id
+      : developers.find((d) => d.name.trim().toLowerCase() === currentName)?.id) ?? ""
+  );
 
   return (
     <div className="space-y-6">
@@ -384,57 +397,33 @@ export default async function PropertyEditorPage({
         <section className="rounded-xl border border-neutral-200 bg-white p-6">
           <h2 className="font-bold text-dark-black">Developer</h2>
           <p className="mb-4 mt-1 text-xs text-neutral-500">
-            Fills the “About Developer” box on the detail page. This box always shows, so
-            fill the name in even if the rest is unknown.
+            Fills the “About Developer” box on the detail page with the logo, stats and
+            paragraph saved for that developer.{" "}
+            <Link
+              href="/admin/developers"
+              target="_blank"
+              className="font-semibold text-primary-gold hover:underline"
+            >
+              Manage developers ↗
+            </Link>
           </p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <TextField
-              name="developerName"
-              label="Developer name"
-              defaultValue={property?.developer?.name ?? ""}
-              placeholder="M3M"
-              hint="The builder’s name. Leaving this blank throws the logo and the text below away too."
-            />
-            <ImageField
-              name="developerLogo"
-              label="Developer logo"
-              defaultValue={property?.developer?.logo ?? ""}
-              hint="Upload, or type a path to an existing /images/partners/... logo. Shown about 128×80, fitted whole — a wide logo on a transparent background works best."
-            />
-          </div>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <TextField
-              name="developerExperience"
-              label="Years of experience"
-              defaultValue={property?.developer?.experience ?? ""}
-              placeholder="12"
-              hint="Printed as “12 Years”, so type the number alone."
-            />
-            <TextField
-              name="developerProjects"
-              label="Total projects"
-              defaultValue={property?.developer?.projects ?? ""}
-              placeholder="65"
-            />
-            <TextField
-              name="developerDelivered"
-              label="Projects delivered"
-              defaultValue={property?.developer?.delivered ?? ""}
-              placeholder="11"
-            />
-          </div>
-          <p className="mt-1 text-xs text-neutral-500">
-            The three stat tiles beside the logo. A tile is left out when its box is blank.
-          </p>
-          <div className="mt-4">
-            <TextAreaField
-              name="developerAbout"
-              label="About the developer"
-              defaultValue={property?.developer?.about ?? ""}
-              placeholder="Developer details will be updated soon."
-              hint="A short paragraph under the logo. Plain text — tags and blank lines will not show."
-            />
-          </div>
+          <SelectField
+            name="developerId"
+            label="Developer"
+            defaultValue={selectedDeveloperId}
+            options={[
+              { value: "", label: "— No developer —" },
+              ...developers.map((developer) => ({
+                value: String(developer.id),
+                label: developer.name,
+              })),
+            ]}
+            hint={
+              developers.length
+                ? "Not in the list? Add it under Developers (opens in a new tab), then reload this page — save your work here first. “No developer” hides the box."
+                : "No developers yet. Add them under Developers first (opens in a new tab), then reload this page."
+            }
+          />
         </section>
 
         <section className="rounded-xl border border-neutral-200 bg-white p-6">

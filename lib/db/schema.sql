@@ -59,7 +59,11 @@ CREATE TABLE IF NOT EXISTS properties (
   faqs          JSON         NULL,
   experts       JSON         NULL,
   related_ids   JSON         NULL,
+  -- `developer` is a COPY of the chosen row in `developers`, kept so the public
+  -- resolver reads one table. developer_id says which row it was copied from;
+  -- saving a developer rewrites the copy on every listing that points at it.
   developer     JSON         NULL,
+  developer_id  INT UNSIGNED NULL,
   -- The detail-page sections modelled on how the big portals lay a listing out.
   -- Same reasoning as the block above: read and written with the whole listing,
   -- never queried across, order is the author's. Each is hidden on the public
@@ -79,7 +83,25 @@ CREATE TABLE IF NOT EXISTS properties (
   updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
                              ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_properties_listing (is_published, sort_order),
-  INDEX idx_properties_category (category)
+  INDEX idx_properties_category (category),
+  INDEX idx_properties_developer (developer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Builders, managed once at /admin/developers and picked from a drop-down on
+-- each listing instead of being retyped per property. Stats are free text for
+-- the same reason as team_members.experience.
+CREATE TABLE IF NOT EXISTS developers (
+  id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name         VARCHAR(190) NOT NULL,
+  logo         VARCHAR(500) NOT NULL DEFAULT '',
+  about        TEXT         NULL,
+  experience   VARCHAR(40)  NOT NULL DEFAULT '',
+  projects     VARCHAR(40)  NOT NULL DEFAULT '',
+  delivered    VARCHAR(40)  NOT NULL DEFAULT '',
+  created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+                            ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_developers_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- PR & Media, Insights & Blogs and News & Updates share one shape on the public
@@ -314,3 +336,47 @@ SET @m := IF((SELECT COUNT(*) FROM information_schema.STATISTICS
 PREPARE stmt FROM @m;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+-- Developers became their own table (see `developers` above). Existing
+-- deployments need the link column on properties...
+SET @m := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'properties' AND COLUMN_NAME = 'developer_id') = 0,
+  'ALTER TABLE properties ADD COLUMN developer_id INT UNSIGNED NULL AFTER developer,
+     ADD INDEX idx_properties_developer (developer_id)', 'DO 0');
+PREPARE stmt FROM @m;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- ...and the builders already typed into listings, so the drop-down is not
+-- empty on day one. Any listing with a developer name but no developer_id gets
+-- a `developers` row for that name (created if missing) and is linked to it.
+-- That also picks up listings written by `npm run db:seed`, which knows nothing
+-- about developer_id. Where several listings carry the same builder, MAX() keeps
+-- a non-blank value for each field. Re-running finds nothing unlinked.
+--
+-- The admin refuses to delete a developer that a listing still uses, so this
+-- cannot resurrect one somebody deleted on purpose.
+INSERT IGNORE INTO developers (name, logo, about, experience, projects, delivered)
+SELECT src.name, MAX(src.logo), MAX(src.about), MAX(src.experience),
+       MAX(src.projects), MAX(src.delivered)
+  FROM (SELECT TRIM(JSON_UNQUOTE(JSON_EXTRACT(developer, '$.name')))                 AS name,
+               COALESCE(JSON_UNQUOTE(JSON_EXTRACT(developer, '$.logo')), '')        AS logo,
+               COALESCE(JSON_UNQUOTE(JSON_EXTRACT(developer, '$.about')), '')       AS about,
+               COALESCE(JSON_UNQUOTE(JSON_EXTRACT(developer, '$.experience')), '')  AS experience,
+               COALESCE(JSON_UNQUOTE(JSON_EXTRACT(developer, '$.projects')), '')    AS projects,
+               COALESCE(JSON_UNQUOTE(JSON_EXTRACT(developer, '$.delivered')), '')   AS delivered
+          FROM properties
+         WHERE developer_id IS NULL
+           AND JSON_TYPE(developer) = 'OBJECT') AS src
+ WHERE src.name <> ''
+   AND CONVERT(src.name USING utf8mb4) COLLATE utf8mb4_unicode_ci
+       NOT IN (SELECT name FROM developers)
+ GROUP BY src.name;
+
+UPDATE properties p
+  JOIN developers d
+    ON d.name = CONVERT(TRIM(JSON_UNQUOTE(JSON_EXTRACT(p.developer, '$.name'))) USING utf8mb4)
+                COLLATE utf8mb4_unicode_ci
+   SET p.developer_id = d.id
+ WHERE p.developer_id IS NULL
+   AND JSON_TYPE(p.developer) = 'OBJECT';

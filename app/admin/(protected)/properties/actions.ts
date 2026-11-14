@@ -8,6 +8,8 @@ import { categories } from "@/lib/data/categories";
 import {
   createProperty,
   deleteProperty,
+  developerSnapshot,
+  getDeveloperById,
   getPropertyById,
   updateProperty,
   type PropertyInput,
@@ -80,8 +82,6 @@ function readPropertyInput(form: FormData): PropertyInput {
   const rawVariant = str(form, "badgeVariant") as PropertyBadgeVariant;
   const badgeVariant = BADGE_VARIANTS.includes(rawVariant) ? rawVariant : "residential";
 
-  const developerName = str(form, "developerName");
-
   const projectStatus = str(form, "projectStatus");
   const projectSize = str(form, "projectSize");
   const projectConfigurations = str(form, "projectConfigurations");
@@ -140,16 +140,10 @@ function readPropertyInput(form: FormData): PropertyInput {
       .split(",")
       .map((part) => Number(part.trim()))
       .filter((n) => Number.isInteger(n) && n > 0),
-    developer: developerName
-      ? {
-          name: developerName,
-          logo: str(form, "developerLogo"),
-          about: str(form, "developerAbout"),
-          experience: str(form, "developerExperience"),
-          projects: str(form, "developerProjects"),
-          delivered: str(form, "developerDelivered"),
-        }
-      : null,
+    // Filled in by savePropertyAction from the chosen `developers` row — the
+    // form only posts its id.
+    developer: null,
+    developerId: null,
     isFeatured: form.get("isFeatured") === "on",
     isPublished: form.get("isPublished") === "on",
     sortOrder: Number(str(form, "sortOrder")) || 0,
@@ -213,6 +207,21 @@ export async function savePropertyAction(
 
   if (!input.title) {
     return { error: "Title is required." };
+  }
+
+  // The listing stores a copy of the chosen developer (the public page reads
+  // only the properties table); updateDeveloper keeps that copy current.
+  const developerIdValue = str(formData, "developerId");
+  if (developerIdValue) {
+    const developer = await getDeveloperById(Number(developerIdValue));
+    if (!developer) {
+      return {
+        error:
+          "The developer you picked no longer exists — it may have just been deleted. Choose another and save again.",
+      };
+    }
+    input.developer = developerSnapshot(developer);
+    input.developerId = developer.id;
   }
 
   let written: string;
