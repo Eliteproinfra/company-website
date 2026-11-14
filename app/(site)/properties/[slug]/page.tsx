@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import Faq from "@/components/home/Faq";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyEnquiryForm from "@/components/properties/PropertyEnquiryForm";
@@ -8,6 +9,8 @@ import PropertyFloorPlans from "@/components/properties/PropertyFloorPlans";
 import PropertyGallery from "@/components/properties/PropertyGallery";
 import PropertyNearby from "@/components/properties/PropertyNearby";
 import PropertyReviews from "@/components/properties/PropertyReviews";
+import PropertySectionNav from "@/components/properties/PropertySectionNav";
+import ReadMore from "@/components/properties/ReadMore";
 import Button from "@/components/ui/Button";
 import Separator from "@/components/ui/Separator";
 import {
@@ -57,22 +60,51 @@ export async function generateMetadata({
   };
 }
 
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+const CARD =
+  "rounded-2xl border border-black/[0.06] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.04)]";
+
+/**
+ * One numbered block of the page. The number comes from the block's position
+ * among the blocks this listing actually has, so the sequence never skips
+ * (a listing with no floor plans goes 01 Overview, 02 Amenities, ...).
+ * `scroll-mt` keeps the heading clear of the fixed navbar and the sticky tabs
+ * when a tab jumps here.
+ */
+function Section({
+  id,
+  index,
+  title,
+  subtitle,
+  children,
+}: {
+  id: string;
+  index: number;
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}) {
   return (
-    <div
-      className={`rounded-[14px] border border-black/[0.06] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.04)] ${className}`}
-    >
-      {children}
-    </div>
+    <section id={id} className={`${CARD} mb-6 scroll-mt-36 overflow-hidden`}>
+      <header className="flex items-center gap-4 border-b border-black/[0.06] bg-linear-to-r from-gold-tint/70 to-white px-5 py-4 sm:px-6">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-dark-black text-sm font-extrabold text-primary-gold">
+          {String(index).padStart(2, "0")}
+        </span>
+        <div>
+          <h2 className="text-[1.15rem] font-extrabold text-dark-black">{title}</h2>
+          <p className="text-[0.88rem] text-muted">{subtitle}</p>
+        </div>
+      </header>
+      <div className="p-5 sm:p-6">{children}</div>
+    </section>
   );
 }
 
-function CardHeader({ title, subtitle }: { title: string; subtitle: string }) {
+function SubHeading({ children }: { children: ReactNode }) {
   return (
-    <div className="border-b border-black/[0.06] px-[18px] py-4">
-      <h2 className="text-[1.05rem] font-extrabold text-dark-black">{title}</h2>
-      <p className="mt-1 text-[0.92rem] text-muted">{subtitle}</p>
-    </div>
+    <h3 className="mb-3 flex items-center gap-2 text-[0.78rem] font-bold uppercase tracking-[0.12em] text-muted">
+      <span className="h-[2px] w-5 bg-primary-gold" />
+      {children}
+    </h3>
   );
 }
 
@@ -119,44 +151,429 @@ function groupAmenities(amenities: PropertyAmenity[]) {
 function DeveloperStats({ developer }: { developer: PropertyDeveloper }) {
   const stats = (
     [
-      ["Experience", developer.experience, "Years"],
-      ["Total projects", developer.projects, ""],
-      ["Delivered", developer.delivered, ""],
+      ["Experience", developer.experience, "Years", "fas fa-award"],
+      ["Total projects", developer.projects, "", "fas fa-city"],
+      ["Delivered", developer.delivered, "", "fas fa-key"],
     ] as const
   ).filter(([, value]) => Boolean(value));
 
   if (!stats.length) return null;
 
   return (
-    <dl className="mt-4 grid grid-cols-3 gap-3">
-      {stats.map(([label, value, unit]) => (
-        <div key={label} className="rounded-xl border border-black/[0.06] p-3 text-center">
-          <dd className="text-[1.3rem] font-extrabold text-ink">
-            {value}
-            {unit ? <span className="ml-1 text-[0.8rem]">{unit}</span> : null}
-          </dd>
-          <dt className="mt-0.5 text-[0.78rem] text-muted">{label}</dt>
+    <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      {stats.map(([label, value, unit, icon]) => (
+        <div
+          key={label}
+          className="flex items-center gap-3 rounded-xl bg-dark-black p-4 text-white"
+        >
+          <i className={`${icon} text-xl text-primary-gold`} aria-hidden="true" />
+          <div>
+            <dd className="text-[1.3rem] font-extrabold leading-none">
+              {value}
+              {unit ? <span className="ml-1 text-[0.8rem] font-semibold">{unit}</span> : null}
+            </dd>
+            <dt className="mt-1 text-[0.75rem] uppercase tracking-wide text-text-gray">{label}</dt>
+          </div>
         </div>
       ))}
     </dl>
   );
 }
 
-function Badges({ property }: { property: PropertyDetail }) {
-  return (
-    <div className="mb-2 flex flex-wrap gap-2">
-      {property.category ? (
-        <span className="rounded bg-dark-black px-2.5 py-1 text-xs font-semibold text-white">
-          {property.category}
-        </span>
-      ) : null}
-      {property.location ? (
-        <span className="rounded border border-border-pill bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-dark-black">
-          {property.location}
-        </span>
-      ) : null}
-    </div>
-  );
+type Block = { id: string; label: string; title: string; subtitle: string; body: ReactNode };
+
+/**
+ * The page's sections in the order a buyer reads a listing: what it is, what
+ * you get, where it is, what it costs over time, who builds it, what others
+ * say, and who to talk to. Blocks with nothing on record are dropped before
+ * numbering.
+ */
+function buildBlocks(property: PropertyDetail): Block[] {
+  const blocks: (Block | null)[] = [];
+  const info = property.projectInfo;
+  const snapshot = info
+    ? (
+        [
+          ["Status", info.status, "fas fa-hard-hat"],
+          ["Project size", info.size, "fas fa-vector-square"],
+          ["Configurations", info.configurations, "fas fa-th-large"],
+          ["Price range", info.priceRange, "fas fa-rupee-sign"],
+          ["RERA No.", info.rera, "fas fa-certificate"],
+        ] as const
+      ).filter(([, value]) => Boolean(value))
+    : [];
+
+  // 1. Overview — description, the record, and the project snapshot together.
+  if (property.description || property.specs.length || snapshot.length || info?.highlights.length) {
+    blocks.push({
+      id: "overview",
+      label: "Overview",
+      title: "Overview",
+      subtitle: `About ${property.title}`,
+      body: (
+        <div className="space-y-7">
+          {property.description ? <ReadMore text={property.description} /> : null}
+
+          {property.specs.length ? (
+            <div>
+              <SubHeading>Property Information</SubHeading>
+              <dl className="grid grid-cols-1 overflow-hidden rounded-xl border border-black/[0.06] sm:grid-cols-2">
+                {property.specs.map((spec, index) => (
+                  <div
+                    key={`${spec.label}-${index}`}
+                    className="flex items-baseline justify-between gap-4 border-b border-black/[0.06] px-4 py-3 odd:bg-neutral-50 sm:border-r sm:even:border-r-0"
+                  >
+                    <dt className="text-[0.88rem] text-muted">{spec.label}</dt>
+                    <dd className="text-right text-[0.92rem] font-bold text-ink">{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          ) : null}
+
+          {snapshot.length ? (
+            <div>
+              <SubHeading>Project Snapshot</SubHeading>
+              <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {snapshot.map(([label, value, icon]) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-3 rounded-xl border border-black/[0.06] p-3.5 transition hover:border-primary-gold/50 hover:shadow-md"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold-tint text-secondary-gold">
+                      <i className={icon} aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <dt className="text-[0.75rem] font-bold uppercase tracking-wide text-muted">
+                        {label}
+                      </dt>
+                      <dd className="break-words text-[0.95rem] font-extrabold text-ink">{value}</dd>
+                    </div>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          ) : null}
+
+          {info?.highlights.length ? (
+            <div>
+              <SubHeading>Highlights</SubHeading>
+              <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {info.highlights.map((highlight, index) => (
+                  <li key={`${highlight}-${index}`} className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-gold text-[0.6rem] text-white">
+                      <i className="fas fa-check" aria-hidden="true" />
+                    </span>
+                    <span className="text-[0.92rem] text-muted-2">{highlight}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ),
+    });
+  }
+
+  // 2. Floor plans
+  if (property.floorPlans?.length) {
+    blocks.push({
+      id: "floor-plans",
+      label: "Floor Plans",
+      title: "Floor Plans",
+      subtitle: "Layouts and pricing per configuration",
+      body: <PropertyFloorPlans plans={property.floorPlans} />,
+    });
+  }
+
+  // 3. Amenities + furnishing
+  if (property.amenities.length || property.furnishings?.length) {
+    blocks.push({
+      id: "amenities",
+      label: "Amenities",
+      title: "Amenities",
+      subtitle: "Facilities available in this project",
+      body: (
+        <div className="space-y-7">
+          {groupAmenities(property.amenities).map((group) => (
+            <div key={group.title}>
+              <SubHeading>{group.title}</SubHeading>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                {group.items.map((amenity) => (
+                  <div
+                    key={amenity.name}
+                    className="group flex items-center gap-3 rounded-xl border border-black/[0.06] bg-white px-3 py-3 transition hover:-translate-y-0.5 hover:border-primary-gold/50 hover:shadow-md"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold-tint text-secondary-gold transition group-hover:bg-primary-gold group-hover:text-white">
+                      <i className={amenity.icon} aria-hidden="true" />
+                    </span>
+                    <span className="text-sm font-semibold text-dark-black">{amenity.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {property.furnishings?.length ? (
+            <div>
+              <SubHeading>Furnishing Details</SubHeading>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                {property.furnishings.map((furnishing, index) => (
+                  <div
+                    key={`${furnishing.item}-${index}`}
+                    className="rounded-xl border border-black/[0.06] bg-neutral-50 p-3 text-center"
+                  >
+                    <div className="text-[1.3rem] font-extrabold text-ink">
+                      {furnishing.count || "—"}
+                    </div>
+                    <div className="mt-0.5 text-[0.82rem] text-muted">{furnishing.item}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ),
+    });
+  }
+
+  // 4. Location — map first, then what's around.
+  if (property.mapUrl || property.nearby?.length) {
+    blocks.push({
+      id: "location",
+      label: "Location",
+      title: "Location & Commute",
+      subtitle: "Map and what is around the project",
+      body: (
+        <div className="space-y-6">
+          {property.mapUrl ? (
+            // Google share links (maps.app.goo.gl) refuse to be framed — only
+            // real /maps/embed URLs can render inline.
+            property.mapUrl.includes("/maps/embed") ? (
+              <div className="aspect-[16/9] overflow-hidden rounded-xl border border-black/[0.06]">
+                <iframe
+                  src={property.mapUrl}
+                  title="Location Map"
+                  loading="lazy"
+                  className="h-full w-full border-0"
+                />
+              </div>
+            ) : (
+              <Button href={property.mapUrl} variant="outline" iconLeft="fas fa-map-marker-alt">
+                View on Google Maps
+              </Button>
+            )
+          ) : null}
+          {property.nearby?.length ? <PropertyNearby items={property.nearby} /> : null}
+        </div>
+      ),
+    });
+  }
+
+  // 5. Price trends
+  if (property.priceTrends?.length) {
+    blocks.push({
+      id: "price-trends",
+      label: "Price Trends",
+      title: "Price Trends",
+      subtitle: "Rates recorded for this project",
+      body: (
+        <>
+          <div className="overflow-hidden rounded-xl border border-black/[0.06]">
+            <table className="w-full text-left text-[0.92rem]">
+              <thead className="bg-dark-black text-[0.75rem] uppercase tracking-wide text-white">
+                <tr>
+                  <th className="px-4 py-3 font-bold">Period</th>
+                  <th className="px-4 py-3 font-bold">Rate</th>
+                  <th className="px-4 py-3 text-right font-bold">Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                {property.priceTrends.map((trend, index) => {
+                  const down = trend.change.trim().startsWith("-");
+                  return (
+                    <tr
+                      key={`${trend.period}-${index}`}
+                      className="border-b border-black/[0.06] last:border-0 even:bg-neutral-50"
+                    >
+                      <td className="px-4 py-3 text-muted">{trend.period}</td>
+                      <td className="px-4 py-3 font-bold text-ink">{trend.rate}</td>
+                      <td
+                        className={`px-4 py-3 text-right font-bold ${down ? "text-red-600" : "text-green-600"}`}
+                      >
+                        <i
+                          className={`fas fa-arrow-${down ? "down" : "up"} mr-1 text-xs`}
+                          aria-hidden="true"
+                        />
+                        {trend.change}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-xs text-muted">
+            Figures are indicative and maintained by ElitePro Infra. They are not a valuation.
+          </p>
+        </>
+      ),
+    });
+  }
+
+  // 6. Videos
+  if (property.videos?.length) {
+    blocks.push({
+      id: "videos",
+      label: "Videos",
+      title: "Videos",
+      subtitle: "Walkthroughs and project films",
+      body: (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {property.videos.map((video, index) => {
+            const embed = videoEmbedUrl(video.url);
+            return (
+              <div key={`${video.url}-${index}`}>
+                {embed ? (
+                  <div className="aspect-video overflow-hidden rounded-xl bg-neutral-100">
+                    <iframe
+                      src={embed}
+                      title={video.title || `Video ${index + 1}`}
+                      loading="lazy"
+                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="h-full w-full border-0"
+                    />
+                  </div>
+                ) : (
+                  /* Not a YouTube or Vimeo address, so it cannot be framed —
+                     see lib/video.ts. */
+                  <Button href={video.url} variant="outline" iconLeft="fas fa-play">
+                    {video.title || "Watch the video"}
+                  </Button>
+                )}
+                {video.title && embed ? (
+                  <p className="mt-2 text-sm font-semibold text-dark-black">{video.title}</p>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      ),
+    });
+  }
+
+  // 7. Developer — hidden outright when the listing has none (the admin
+  //    stores none at all when the name is left blank).
+  if (property.developer) {
+    const developer = property.developer;
+    blocks.push({
+      id: "developer",
+      label: "Developer",
+      title: "About Developer",
+      subtitle: "Developer and compliance information",
+      body: (
+        <>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+            {developer.logo ? (
+              <div className="relative h-24 w-36 shrink-0 overflow-hidden rounded-xl border border-black/[0.06] bg-white">
+                <Image
+                  src={developer.logo}
+                  alt={`${developer.name} logo`}
+                  fill
+                  sizes="144px"
+                  className="object-contain p-3"
+                />
+              </div>
+            ) : null}
+            <div>
+              <h3 className="text-lg font-bold text-dark-black">{developer.name}</h3>
+              <p className="mt-2 leading-[1.9] text-muted-2">{developer.about}</p>
+            </div>
+          </div>
+          <DeveloperStats developer={developer} />
+        </>
+      ),
+    });
+  }
+
+  // 8. Reviews
+  if (property.reviews?.length) {
+    blocks.push({
+      id: "reviews",
+      label: "Reviews",
+      title: "Reviews & Ratings",
+      subtitle: "What buyers tell us",
+      body: <PropertyReviews reviews={property.reviews} />,
+    });
+  }
+
+  // 9. FAQs
+  if (property.faqs.length) {
+    blocks.push({
+      id: "faqs",
+      label: "FAQs",
+      title: "FAQs",
+      subtitle: "Common questions",
+      body: <Faq items={property.faqs} className="w-full" />,
+    });
+  }
+
+  // 10. Experts
+  if (property.experts.length) {
+    blocks.push({
+      id: "experts",
+      label: "Experts",
+      title: "Top Experts",
+      subtitle: "Talk to our property specialists",
+      body: (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {property.experts.map((expert) => (
+            <div
+              key={expert.email || expert.name}
+              className="rounded-xl border border-black/[0.06] p-4 text-center transition hover:border-primary-gold/50 hover:shadow-md"
+            >
+              {expert.image ? (
+                <Image
+                  src={expert.image}
+                  alt={expert.name}
+                  width={72}
+                  height={72}
+                  className="mx-auto h-[72px] w-[72px] rounded-full object-cover ring-2 ring-primary-gold ring-offset-2"
+                />
+              ) : (
+                <span className="mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full bg-dark-black text-xl font-bold text-primary-gold">
+                  {expert.name.replace(/^(Mr|Ms|Mrs)\.?\s*/i, "").charAt(0)}
+                </span>
+              )}
+              <div className="mt-3 font-bold text-dark-black">{expert.name}</div>
+              <div className="text-sm text-muted">{expert.role}</div>
+              <div className="mt-4 flex gap-2">
+                {expert.phone ? (
+                  <a
+                    href={`tel:${expert.phone}`}
+                    className="flex-1 rounded-lg border-2 border-primary-gold/85 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-primary-gold transition-colors hover:bg-primary-gold hover:text-dark-black"
+                  >
+                    Call
+                  </a>
+                ) : null}
+                {expert.email ? (
+                  <a
+                    href={`mailto:${expert.email}`}
+                    className="flex-1 rounded-lg border border-dark-black px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-dark-black transition-colors hover:bg-dark-black hover:text-white"
+                  >
+                    Email
+                  </a>
+                ) : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      ),
+    });
+  }
+
+  return blocks.filter((block): block is Block => Boolean(block));
 }
 
 export default async function PropertyDetailPage({
@@ -172,442 +589,154 @@ export default async function PropertyDetailPage({
     await Promise.all(property.relatedIds.map((id) => getPropertyById(id)))
   ).filter((item): item is PropertyDetail => Boolean(item));
 
+  const blocks = buildBlocks(property);
+
   return (
-    <section className="bg-white pb-16 pt-28 lg:pt-32">
+    <section className="bg-neutral-50 pb-16 pt-24 lg:pt-28">
       <div className="mx-auto w-full max-w-[1600px] px-4 lg:px-10">
-        <Card className="mb-4 p-[18px]">
+        {/* Header: title, location and price first, so the page opens on what
+            the listing is before any photos. */}
+        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 flex flex-wrap gap-2">
+              {property.category ? (
+                <span className="rounded-full bg-dark-black px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-gold">
+                  {property.category}
+                </span>
+              ) : null}
+              {property.projectInfo?.status ? (
+                <span className="rounded-full bg-badge-ready/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-badge-ready">
+                  {property.projectInfo.status}
+                </span>
+              ) : null}
+              {property.projectInfo?.rera ? (
+                <span className="rounded-full border border-border-pill bg-white px-3 py-1 text-xs font-semibold text-dark-black">
+                  <i className="fas fa-shield-alt mr-1.5 text-primary-gold" aria-hidden="true" />
+                  RERA Registered
+                </span>
+              ) : null}
+            </div>
+            <h1 className="font-serif text-3xl font-bold text-dark-black md:text-[2.6rem] md:leading-tight">
+              {property.title}
+            </h1>
+            <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.95rem] text-muted">
+              {property.location ? (
+                <span>
+                  <i className="fas fa-map-marker-alt mr-1.5 text-primary-gold" aria-hidden="true" />
+                  {property.location}
+                </span>
+              ) : null}
+              {property.developer?.name ? (
+                <span>
+                  <i className="fas fa-building mr-1.5 text-primary-gold" aria-hidden="true" />
+                  by <strong className="text-dark-black">{property.developer.name}</strong>
+                </span>
+              ) : null}
+            </p>
+          </div>
+          <div className="lg:text-right">
+            <div className="text-[0.75rem] font-bold uppercase tracking-[0.15em] text-muted">
+              Starting from
+            </div>
+            <div className="bg-gold-gradient bg-clip-text text-3xl font-extrabold text-transparent md:text-[2.2rem]">
+              {property.price}
+            </div>
+            {property.priceNote ? (
+              <div className="text-sm text-muted">{property.priceNote}</div>
+            ) : null}
+          </div>
+        </div>
+
+        <div className={`${CARD} mb-5 p-3 sm:p-4`}>
           <PropertyGallery images={property.images} title={property.title} />
-        </Card>
+        </div>
+
+        {property.keyFacts?.length ? (
+          <div className="mb-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-3 lg:grid-cols-6 [&>*]:bg-dark-black">
+            {property.keyFacts.map((fact, index) => (
+              <div key={`${fact.label}-${index}`} className="flex items-center gap-3 px-4 py-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-gold/15 text-primary-gold">
+                  <i className={keyFactIcon(fact.label)} aria-hidden="true" />
+                </span>
+                {/* No truncation: "Ready To Move" and "North East" wrap instead. */}
+                <div className="min-w-0">
+                  <div className="text-[0.98rem] font-extrabold leading-tight text-white">
+                    {fact.value}
+                  </div>
+                  <div className="text-[0.75rem] leading-tight text-text-gray">{fact.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <Card className="mb-4 p-[18px]">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <Badges property={property} />
-                  <h1 className="text-xl font-bold text-dark-black">{property.title}</h1>
-                </div>
-                <div className="text-right">
-                  <div className="text-[1.4rem] font-bold text-dark-black">{property.price}</div>
-                  {property.priceNote ? (
-                    <div className="text-sm text-muted">{property.priceNote}</div>
-                  ) : null}
-                </div>
-              </div>
-
-              {property.keyFacts?.length ? (
-                <div className="mt-4 grid grid-cols-2 gap-3 border-t border-black/[0.06] pt-4 sm:grid-cols-3 lg:grid-cols-4">
-                  {property.keyFacts.map((fact, index) => (
-                    <div key={`${fact.label}-${index}`} className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-gold/10 text-primary-gold">
-                        <i className={keyFactIcon(fact.label)} aria-hidden="true" />
-                      </span>
-                      {/* No truncation: "Ready To Move" and "North East" have
-                          to survive a four-column row, so these wrap instead. */}
-                      <div className="min-w-0">
-                        <div className="text-[0.98rem] font-extrabold leading-tight text-ink">
-                          {fact.value}
-                        </div>
-                        <div className="text-[0.78rem] leading-tight text-muted">{fact.label}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </Card>
-
-            {property.specs.length ? (
-              <Card className="mb-4">
-                <CardHeader
-                  title="Property Information"
-                  subtitle="Everything on record for this listing"
-                />
-                <div className="p-[18px]">
-                  <dl className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
-                    {property.specs.map((spec, index) => (
-                      <div
-                        key={`${spec.label}-${index}`}
-                        className="flex items-baseline justify-between gap-4 border-b border-black/[0.06] py-2.5"
-                      >
-                        <dt className="text-[0.88rem] text-muted">{spec.label}</dt>
-                        <dd className="text-right text-[0.92rem] font-bold text-ink">
-                          {spec.value}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              </Card>
-            ) : null}
-
-            {property.description ? (
-              <Card className="mb-4">
-                <CardHeader title="Property Description" subtitle="About the project" />
-                <div className="p-[18px]">
-                  <p className="leading-[1.9] text-muted">{property.description}</p>
-                </div>
-              </Card>
-            ) : null}
-
-            {property.floorPlans?.length ? (
-              <Card className="mb-4">
-                <CardHeader title="Floor Plans" subtitle="Layouts and pricing per configuration" />
-                <div className="p-[18px]">
-                  <PropertyFloorPlans plans={property.floorPlans} />
-                </div>
-              </Card>
-            ) : null}
-
-            {property.amenities.length ? (
-              <Card className="mb-4">
-                <CardHeader title="Amenities" subtitle="Facilities available in this project" />
-                <div className="space-y-5 p-[18px]">
-                  {groupAmenities(property.amenities).map((group) => (
-                    <div key={group.title}>
-                      <h3 className="mb-2.5 text-[0.78rem] font-bold uppercase tracking-wide text-muted">
-                        {group.title}
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                        {group.items.map((amenity) => (
-                          <div
-                            key={amenity.name}
-                            className="flex items-center gap-3 rounded-xl border border-black/[0.06] bg-white px-3 py-3"
-                          >
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-gold/10 text-primary-gold">
-                              <i className={amenity.icon} aria-hidden="true" />
-                            </span>
-                            <span className="text-sm font-semibold text-dark-black">
-                              {amenity.name}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            ) : null}
-
-            {property.furnishings?.length ? (
-              <Card className="mb-4">
-                <CardHeader title="Furnishing Details" subtitle="What the unit comes with" />
-                <div className="p-[18px]">
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                    {property.furnishings.map((furnishing, index) => (
-                      <div
-                        key={`${furnishing.item}-${index}`}
-                        className="rounded-xl border border-black/[0.06] p-3 text-center"
-                      >
-                        <div className="text-[1.3rem] font-extrabold text-ink">
-                          {furnishing.count || "—"}
-                        </div>
-                        <div className="mt-0.5 text-[0.82rem] text-muted">{furnishing.item}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            ) : null}
-
-            {property.nearby?.length ? (
-              <Card className="mb-4">
-                <CardHeader title="Locality & Commute" subtitle="What is around the project" />
-                <div className="p-[18px]">
-                  <PropertyNearby items={property.nearby} />
-                </div>
-              </Card>
-            ) : null}
-
-            {property.mapUrl ? (
-              <Card className="mb-4">
-                <CardHeader title="Location & Landmark" subtitle="Map and nearby highlights" />
-                <div className="p-[18px]">
-                  {/* Google share links (maps.app.goo.gl) refuse to be framed —
-                      only real /maps/embed URLs can render inline. */}
-                  {property.mapUrl.includes("/maps/embed") ? (
-                    <div className="aspect-[4/3] overflow-hidden rounded-xl">
-                      <iframe
-                        src={property.mapUrl}
-                        title="Location Map"
-                        loading="lazy"
-                        className="h-full w-full border-0"
-                      />
-                    </div>
-                  ) : (
-                    <Button
-                      href={property.mapUrl}
-                      variant="outline"
-                      iconLeft="fas fa-map-marker-alt"
-                    >
-                      View on Google Maps
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            ) : null}
-
-            {property.projectInfo ? (
-              <Card className="mb-4">
-                <CardHeader
-                  title={`About ${property.title}`}
-                  subtitle="Project snapshot"
-                />
-                <div className="p-[18px]">
-                  <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {(
-                      [
-                        ["Status", property.projectInfo.status],
-                        ["Project size", property.projectInfo.size],
-                        ["Configurations", property.projectInfo.configurations],
-                        ["Price range", property.projectInfo.priceRange],
-                        ["RERA No.", property.projectInfo.rera],
-                      ] as const
-                    )
-                      .filter(([, value]) => Boolean(value))
-                      .map(([label, value]) => (
-                        <div key={label} className="rounded-xl border border-black/[0.06] p-3">
-                          <dt className="text-[0.78rem] font-bold text-muted">{label}</dt>
-                          <dd className="mt-0.5 text-[0.98rem] font-extrabold text-ink">{value}</dd>
-                        </div>
-                      ))}
-                  </dl>
-
-                  {property.projectInfo.highlights.length ? (
-                    <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      {property.projectInfo.highlights.map((highlight, index) => (
-                        <li key={`${highlight}-${index}`} className="flex items-start gap-2.5">
-                          <i
-                            className="fas fa-check mt-1 text-sm text-primary-gold"
-                            aria-hidden="true"
-                          />
-                          <span className="text-[0.92rem] text-muted">{highlight}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-              </Card>
-            ) : null}
-
-            {/* Hidden outright when the listing has no developer — the admin stores
-                none at all when the name is left blank. */}
-            {property.developer ? (
-              <Card className="mb-4">
-                <CardHeader title="About Developer" subtitle="Developer and compliance information" />
-                <div className="p-[18px]">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                    {property.developer.logo ? (
-                      <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-xl border border-black/[0.06] bg-white">
-                        <Image
-                          src={property.developer.logo}
-                          alt={`${property.developer.name} logo`}
-                          fill
-                          sizes="128px"
-                          className="object-contain p-2"
-                        />
-                      </div>
-                    ) : null}
-                    <div>
-                      <h3 className="text-lg font-bold text-dark-black">{property.developer.name}</h3>
-                      <p className="mt-2 leading-[1.9] text-muted">{property.developer.about}</p>
-                    </div>
-                  </div>
-
-                  <DeveloperStats developer={property.developer} />
-                </div>
-              </Card>
-            ) : null}
-
-            {property.videos?.length ? (
-              <Card className="mb-4">
-                <CardHeader title="Videos" subtitle="Walkthroughs and project films" />
-                <div className="grid grid-cols-1 gap-4 p-[18px] md:grid-cols-2">
-                  {property.videos.map((video, index) => {
-                    const embed = videoEmbedUrl(video.url);
-                    return (
-                      <div key={`${video.url}-${index}`}>
-                        {embed ? (
-                          <div className="aspect-video overflow-hidden rounded-xl bg-neutral-100">
-                            <iframe
-                              src={embed}
-                              title={video.title || `Video ${index + 1}`}
-                              loading="lazy"
-                              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                              className="h-full w-full border-0"
-                            />
-                          </div>
-                        ) : (
-                          /* Not a YouTube or Vimeo address, so it cannot be framed —
-                             see lib/video.ts. */
-                          <Button href={video.url} variant="outline" iconLeft="fas fa-play">
-                            {video.title || "Watch the video"}
-                          </Button>
-                        )}
-                        {video.title && embed ? (
-                          <p className="mt-2 text-sm font-semibold text-dark-black">
-                            {video.title}
-                          </p>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            ) : null}
-
-            {property.priceTrends?.length ? (
-              <Card className="mb-4">
-                <CardHeader title="Price Trends" subtitle="Rates recorded for this project" />
-                <div className="p-[18px]">
-                  <table className="w-full text-left text-[0.92rem]">
-                    <thead>
-                      <tr className="border-b border-black/[0.06] text-[0.78rem] uppercase tracking-wide text-muted">
-                        <th className="py-2 font-bold">Period</th>
-                        <th className="py-2 font-bold">Rate</th>
-                        <th className="py-2 text-right font-bold">Change</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {property.priceTrends.map((trend, index) => (
-                        <tr
-                          key={`${trend.period}-${index}`}
-                          className="border-b border-black/[0.06] last:border-0"
-                        >
-                          <td className="py-2.5 text-muted">{trend.period}</td>
-                          <td className="py-2.5 font-bold text-ink">{trend.rate}</td>
-                          <td
-                            className={`py-2.5 text-right font-bold ${
-                              trend.change.trim().startsWith("-") ? "text-red-600" : "text-green-600"
-                            }`}
-                          >
-                            {trend.change}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <p className="mt-3 text-xs text-muted">
-                    Figures are indicative and maintained by ElitePro Infra. They are not
-                    a valuation.
-                  </p>
-                </div>
-              </Card>
-            ) : null}
-
-            {property.reviews?.length ? (
-              <Card className="mb-4">
-                <CardHeader title="Reviews & Ratings" subtitle="What buyers tell us" />
-                <div className="p-[18px]">
-                  <PropertyReviews reviews={property.reviews} />
-                </div>
-              </Card>
-            ) : null}
-
-            {property.faqs.length ? (
-              <Card className="mb-4">
-                <CardHeader title="FAQs" subtitle="Common questions" />
-                <div className="p-[18px]">
-                  <Faq items={property.faqs} className="w-full" />
-                </div>
-              </Card>
-            ) : null}
-
-            {property.experts.length ? (
-              <Card className="mb-4">
-                <CardHeader title="Top Experts" subtitle="Talk to our property specialists" />
-                <div className="p-[18px]">
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    {property.experts.map((expert) => (
-                      <div key={expert.email || expert.name} className="rounded-xl border border-border-pill p-3">
-                        <div className="flex items-center gap-3">
-                          {expert.image ? (
-                            <Image
-                              src={expert.image}
-                              alt={expert.name}
-                              width={56}
-                              height={56}
-                              className="h-14 w-14 shrink-0 rounded-full object-cover"
-                            />
-                          ) : (
-                            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-neutral-100 font-bold text-dark-black">
-                              {expert.name.replace(/^(Mr|Ms|Mrs)\.?\s*/i, "").charAt(0)}
-                            </span>
-                          )}
-                          <div>
-                            <div className="font-bold text-dark-black">{expert.name}</div>
-                            <div className="text-sm text-muted">{expert.role}</div>
-                          </div>
-                        </div>
-                        <div className="mt-3 flex gap-2">
-                          {expert.phone ? (
-                            <a
-                              href={`tel:${expert.phone}`}
-                              className="flex-1 rounded-lg border-2 border-primary-gold/85 px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-primary-gold transition-colors hover:bg-primary-gold hover:text-dark-black"
-                            >
-                              Call
-                            </a>
-                          ) : null}
-                          {expert.email ? (
-                            <a
-                              href={`mailto:${expert.email}`}
-                              className="flex-1 rounded-lg border border-dark-black px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-dark-black transition-colors hover:bg-dark-black hover:text-white"
-                            >
-                              Email
-                            </a>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            ) : null}
-
-            {related.length ? (
-              <div className="py-2">
-                <div className="mb-6 flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="mb-2 text-2xl font-bold text-dark-black">Related Properties</h2>
-                    <Separator align="left" width={80} />
-                  </div>
-                  <Button href="/properties" variant="outline" size="sm">
-                    View All
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {related.map((item) => (
-                    <PropertyCard key={item.id} {...toPropertyItem(item)} detailsLabel="View" />
-                  ))}
-                </div>
-              </div>
-            ) : null}
+          <div className="min-w-0 lg:col-span-2">
+            <PropertySectionNav sections={blocks.map(({ id, label }) => ({ id, label }))} />
+            {blocks.map((block, index) => (
+              <Section
+                key={block.id}
+                id={block.id}
+                index={index + 1}
+                title={block.title}
+                subtitle={block.subtitle}
+              >
+                {block.body}
+              </Section>
+            ))}
           </div>
 
           <aside className="lg:col-span-1">
-            <div className="lg:sticky lg:top-28">
-              <Card className="mb-4 p-6">
-                <Badges property={property} />
-                <div className="text-2xl font-bold text-dark-black">{property.price}</div>
-                {property.priceNote ? (
-                  <div className="mb-4 mt-1 text-muted">{property.priceNote}</div>
-                ) : null}
-                <div className="grid gap-2">
-                  <Button href="tel:+919968686868" variant="outline">
+            <div className="space-y-4 lg:sticky lg:top-24">
+              <div className={`${CARD} overflow-hidden`}>
+                <div className="bg-dark-black px-6 py-5 text-white">
+                  <div className="text-[0.75rem] font-bold uppercase tracking-[0.15em] text-text-gray">
+                    Price
+                  </div>
+                  <div className="mt-1 text-2xl font-extrabold text-primary-gold">
+                    {property.price}
+                  </div>
+                  {property.priceNote ? (
+                    <div className="mt-1 text-sm text-text-gray">{property.priceNote}</div>
+                  ) : null}
+                </div>
+                <div className="grid gap-2.5 p-5">
+                  <Button href="tel:+919968686868" variant="solid" iconLeft="fas fa-phone-alt">
                     Call Now
                   </Button>
-                  <Button href="mailto:info@eliteproinfra.com" variant="dark">
-                    Email
+                  <Button href="mailto:info@eliteproinfra.com" variant="dark" iconLeft="fas fa-envelope">
+                    Email Us
                   </Button>
                 </div>
-              </Card>
+              </div>
 
-              <div className="rounded-[14px] bg-dark-black p-6 text-white">
+              <div className="rounded-2xl bg-dark-black p-6 text-white shadow-[0_20px_40px_rgba(0,0,0,0.15)]">
                 <PropertyEnquiryForm propertyTitle={property.title} />
               </div>
             </div>
           </aside>
         </div>
+
+        {related.length ? (
+          <div className="mt-10">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="mb-2 font-serif text-3xl font-bold text-dark-black">
+                  Related Properties
+                </h2>
+                <Separator align="left" width={80} />
+              </div>
+              <Button href="/properties" variant="outline" size="sm">
+                View All
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+              {related.map((item) => (
+                <PropertyCard key={item.id} {...toPropertyItem(item)} detailsLabel="View" />
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
