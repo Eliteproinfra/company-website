@@ -7,21 +7,21 @@ import type { CategoryItem, PropertyStage } from "@/lib/types";
  *  how the business wants them read rather than by spelling. */
 export const categories: CategoryItem[] = [
   {
-    image: "/images/property-categories/cat_1773829112_69ba7bf8e0155.jpg",
+    image: "/images/properties/gallery_1777363429_69f069e5787db.webp",
     badge: "Category",
     title: "Residential",
     subtitle: "Explore properties",
     variant: "residential",
   },
   {
-    image: "/images/property-categories/cat_1773829073_69ba7bd16f4e4.jpg",
+    image: "/images/properties/prop_1784286795_6a5a0e4ba6f05.jpeg",
     badge: "Category",
     title: "Commercial",
     subtitle: "Explore properties",
     variant: "commercial",
   },
   {
-    image: "/images/property-categories/cat_1773829129_69ba7c0908559.jpg",
+    image: "/images/properties/prop_1779782420_6a155314a6343.webp",
     badge: "Category",
     title: "SCO Plots",
     subtitle: "Explore properties",
@@ -35,7 +35,7 @@ export const categories: CategoryItem[] = [
     variant: "industrial",
   },
   {
-    image: "/images/property-categories/cat_1773828639_69ba7a1f2c5ab.jpg",
+    image: "/images/property-categories/residential-plots-layout.webp",
     badge: "Category",
     title: "Residential Plots",
     subtitle: "Explore properties",

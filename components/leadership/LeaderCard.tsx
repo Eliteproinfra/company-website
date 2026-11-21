@@ -11,8 +11,9 @@ export default function LeaderCard({
   photo,
   name,
   title,
-  leadershipTitle,
+  tagline,
   bio,
+  quote,
   reverse = false,
 }: Leader & { reverse?: boolean }) {
   return (
@@ -36,9 +37,19 @@ export default function LeaderCard({
       <div className="flex flex-col justify-center p-8 md:p-12">
         <h3 className="font-serif text-3xl font-bold text-light-black lg:text-[2.5rem]">{name}</h3>
         <p className="mt-2 w-fit border-b-2 border-leader-gold pb-[5px] text-sm font-semibold uppercase tracking-[2px] text-leader-gold">
-          {leadershipTitle ?? title}
+          {title}
         </p>
-        <p className="mt-6 text-[1.05rem] leading-[1.8] text-muted-2">{bio}</p>
+        <p className="mt-6 font-serif text-xl italic text-light-black">{tagline}</p>
+        <div className="mt-4 space-y-4 text-[1.05rem] leading-[1.8] text-muted-2">
+          {bio.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+        {quote && (
+          <blockquote className="mt-6 border-l-2 border-leader-gold pl-4 font-serif text-lg italic text-light-black">
+            {quote}
+          </blockquote>
+        )}
       </div>
     </div>
   );
